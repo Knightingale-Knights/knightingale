@@ -3,7 +3,7 @@
 -- references and join tables for those rows. When a backlog spans several
 -- batches, a repair sweep re-links every row once the backlog is clear,
 -- so references to rows that arrived in later batches are filled in.
-drop function if exists sync.apply_bubble();
+-- The old no-argument sync.apply_bubble() stays in place but unused.
 
 create or replace function sync.link_rows(p_ids text[]) returns void
 language plpgsql security definer set search_path = '' as $$
@@ -126,6 +126,6 @@ end $$;
 revoke all on function sync.apply_bubble(int) from public;
 revoke all on function sync.link_rows(text[]) from public;
 
-select cron.unschedule('bubble-sync-apply');
+-- Scheduling under an existing job name replaces that job.
 select cron.schedule('bubble-sync-apply', '5-59/10 * * * *',
   $job$ set statement_timeout = '9min'; select sync.apply_bubble(5000) $job$);
