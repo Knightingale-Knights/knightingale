@@ -400,7 +400,7 @@
       }
     },
     "calls": {
-      "table": "calls",
+      "table": "shift_calls",
       "fields": {
         "date_text": {
           "column": "date",
@@ -429,7 +429,7 @@
       }
     },
     "care_culture": {
-      "table": "care_culture",
+      "table": "care_culture_checklists",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -498,7 +498,7 @@
       }
     },
     "client": {
-      "table": "client",
+      "table": "billing_clients",
       "fields": {
         "billing_email_text": {
           "column": "billing_email",
@@ -515,7 +515,7 @@
       }
     },
     "comms_book": {
-      "table": "comms_book",
+      "table": "group_chats",
       "fields": {
         "participant_user": {
           "column": "participant",
@@ -524,7 +524,7 @@
       }
     },
     "consent": {
-      "table": "consent",
+      "table": "consents",
       "fields": {
         "10_sharing_boolean": {
           "column": "f_10_sharing",
@@ -593,7 +593,7 @@
       }
     },
     "cpr1": {
-      "table": "cpr1",
+      "table": "cpr_certificates",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -699,7 +699,7 @@
       }
     },
     "document": {
-      "table": "document",
+      "table": "participant_documents",
       "fields": {
         "audit_boolean": {
           "column": "audit",
@@ -720,7 +720,7 @@
       }
     },
     "emergency_plan": {
-      "table": "emergency_plan",
+      "table": "emergency_plans",
       "fields": {
         "backup_power_text": {
           "column": "backup_power",
@@ -781,7 +781,7 @@
       }
     },
     "esw": {
-      "table": "esw",
+      "table": "esw_logs",
       "fields": {
         "activity_code_option_activity": {
           "column": "activity_code",
@@ -822,7 +822,7 @@
       }
     },
     "event": {
-      "table": "event",
+      "table": "events",
       "fields": {
         "address_geographic_address": {
           "column": "address",
@@ -924,7 +924,7 @@
       }
     },
     "first_aid": {
-      "table": "first_aid",
+      "table": "first_aid_certificates",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -941,7 +941,7 @@
       }
     },
     "food_fluid": {
-      "table": "food_fluid",
+      "table": "food_fluid_logs",
       "fields": {
         "comment_text": {
           "column": "comment",
@@ -966,7 +966,7 @@
       }
     },
     "handbook": {
-      "table": "handbook",
+      "table": "handbook_acknowledgements",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -1035,7 +1035,7 @@
       }
     },
     "health_profile": {
-      "table": "health_profile",
+      "table": "health_profiles",
       "fields": {
         "allergies_text": {
           "column": "allergies",
@@ -1333,7 +1333,7 @@
       }
     },
     "id1": {
-      "table": "id1",
+      "table": "identity_documents",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -1358,7 +1358,7 @@
       }
     },
     "incident": {
-      "table": "incident",
+      "table": "incidents",
       "fields": {
         "agencies_reported_text": {
           "column": "agencies_reported",
@@ -1463,7 +1463,7 @@
       }
     },
     "info_book": {
-      "table": "info_book",
+      "table": "info_book_signoffs",
       "fields": {
         "participant_signature_image": {
           "column": "participant_signature",
@@ -1488,7 +1488,7 @@
       }
     },
     "intake_form": {
-      "table": "intake_form",
+      "table": "intakes",
       "fields": {
         "aboriginal_text": {
           "column": "aboriginal",
@@ -1777,7 +1777,7 @@
       }
     },
     "interests": {
-      "table": "interests",
+      "table": "carer_interests",
       "fields": {
         "animal_text": {
           "column": "animal",
@@ -1842,7 +1842,7 @@
       }
     },
     "invoice": {
-      "table": "invoice",
+      "table": "invoices",
       "fields": {
         "amount_number": {
           "column": "amount",
@@ -1883,7 +1883,7 @@
       }
     },
     "location1": {
-      "table": "location1",
+      "table": "locations",
       "fields": {
         "address_geographic_address": {
           "column": "address",
@@ -1924,7 +1924,7 @@
       }
     },
     "login": {
-      "table": "login",
+      "table": "location_logins",
       "fields": {
         "location_custom_location1": {
           "column": "location",
@@ -1941,7 +1941,7 @@
       }
     },
     "medication_chart": {
-      "table": "medication_chart",
+      "table": "medication_charts",
       "fields": {
         "date_list_date": {
           "column": "date",
@@ -1958,7 +1958,7 @@
       }
     },
     "message": {
-      "table": "message",
+      "table": "messages",
       "fields": {
         "attachment_file": {
           "column": "attachment",
@@ -1987,7 +1987,7 @@
       }
     },
     "metrics": {
-      "table": "metrics",
+      "table": "marketing_metrics",
       "fields": {
         "acu_join_bottom_number": {
           "column": "acu_join_bottom",
@@ -2044,7 +2044,7 @@
       }
     },
     "ndis": {
-      "table": "ndis",
+      "table": "ndis_screening_checks",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -2061,7 +2061,7 @@
       }
     },
     "ndis_pricing": {
-      "table": "ndis_pricing",
+      "table": "ndis_price_items",
       "fields": {
         "carer_pay_name_text": {
           "column": "carer_pay_name",
@@ -2090,7 +2090,7 @@
       }
     },
     "ndis_quarter": {
-      "table": "ndis_quarter",
+      "table": "ndis_quarters",
       "fields": {
         "amount_number": {
           "column": "amount",
@@ -2147,7 +2147,7 @@
       }
     },
     "payslip": {
-      "table": "payslip",
+      "table": "payslips",
       "fields": {
         "address_geographic_address": {
           "column": "address",
@@ -2212,7 +2212,7 @@
       }
     },
     "plan_manager": {
-      "table": "plan_manager",
+      "table": "plan_managers",
       "fields": {
         "address1_geographic_address": {
           "column": "address",
@@ -2233,7 +2233,7 @@
       }
     },
     "police_check": {
-      "table": "police_check",
+      "table": "police_checks",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -2388,7 +2388,7 @@
       }
     },
     "questionnaire_session": {
-      "table": "questionnaire_session",
+      "table": "questionnaire_sessions",
       "fields": {
         "call_sid_text": {
           "column": "call_sid",
@@ -2441,7 +2441,7 @@
       }
     },
     "quote": {
-      "table": "quote",
+      "table": "quotes",
       "fields": {
         "quote_text": {
           "column": "quote",
@@ -2450,7 +2450,7 @@
       }
     },
     "recurring": {
-      "table": "recurring",
+      "table": "recurring_shifts",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -2487,7 +2487,7 @@
       }
     },
     "reporting": {
-      "table": "reporting",
+      "table": "wintringham_reports",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -2540,7 +2540,7 @@
       }
     },
     "residential_pricings": {
-      "table": "residential_pricings",
+      "table": "residential_prices",
       "fields": {
         "carer_pay_number": {
           "column": "carer_pay",
@@ -2561,7 +2561,7 @@
       }
     },
     "review": {
-      "table": "review",
+      "table": "reviews",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -2610,7 +2610,7 @@
       }
     },
     "risk_assessment": {
-      "table": "risk_assessment",
+      "table": "risk_assessments",
       "fields": {
         "accidental_movement_list_option_accidental_movement": {
           "column": "accidental_movement",
@@ -2975,7 +2975,7 @@
       }
     },
     "risk_management_plan": {
-      "table": "risk_management_plan",
+      "table": "risk_management_plans",
       "fields": {
         "others_text": {
           "column": "others",
@@ -3008,7 +3008,7 @@
       }
     },
     "service_agreement": {
-      "table": "service_agreement",
+      "table": "service_agreements",
       "fields": {
         "participant_signature_image": {
           "column": "participant_signature",
@@ -3053,7 +3053,7 @@
       }
     },
     "shift": {
-      "table": "shift",
+      "table": "shifts",
       "fields": {
         "abn_text": {
           "column": "abn",
@@ -3316,7 +3316,7 @@
       }
     },
     "shifts_missed": {
-      "table": "shifts_missed",
+      "table": "missed_shifts",
       "fields": {
         "date_date": {
           "column": "date",
@@ -3394,7 +3394,7 @@
       }
     },
     "support_arrangement": {
-      "table": "support_arrangement",
+      "table": "support_arrangements",
       "fields": {
         "hours_number": {
           "column": "hours",
@@ -3423,7 +3423,7 @@
       }
     },
     "support_plan": {
-      "table": "support_plan",
+      "table": "support_plans",
       "fields": {
         "emerging_health_text": {
           "column": "emerging_health",
@@ -3452,7 +3452,7 @@
       }
     },
     "survey": {
-      "table": "survey",
+      "table": "participant_surveys",
       "fields": {
         "additional_questions_text": {
           "column": "additional_questions",
@@ -3545,7 +3545,7 @@
       }
     },
     "swann": {
-      "table": "swann",
+      "table": "swann_bookings",
       "fields": {
         "date_date": {
           "column": "date",
@@ -3582,7 +3582,7 @@
       }
     },
     "tags": {
-      "table": "tags",
+      "table": "review_tags",
       "fields": {
         "tag_name_text": {
           "column": "tag_name",
@@ -3591,7 +3591,7 @@
       }
     },
     "tax_file_number_declaration": {
-      "table": "tax_file_number_declaration",
+      "table": "tfn_declarations",
       "fields": {
         "carer_user": {
           "column": "carer",
@@ -3620,7 +3620,7 @@
       }
     },
     "thread": {
-      "table": "thread",
+      "table": "threads",
       "fields": {
         "name_text": {
           "column": "name",
@@ -3629,7 +3629,7 @@
       }
     },
     "unanswered": {
-      "table": "unanswered",
+      "table": "unanswered_questions",
       "fields": {
         "answered_boolean": {
           "column": "answered",
@@ -3671,7 +3671,7 @@
       }
     },
     "video": {
-      "table": "video",
+      "table": "videos",
       "fields": {
         "video_file": {
           "column": "video",
@@ -3680,7 +3680,7 @@
       }
     },
     "working_with_children_check": {
-      "table": "working_with_children_check",
+      "table": "wwcc_checks",
       "fields": {
         "approved_boolean": {
           "column": "approved",
@@ -3739,40 +3739,40 @@
       "bubble_field": "document_list_custom_document",
       "table": "users_document",
       "owner_col": "users_id",
-      "target_col": "document_id",
-      "target_table": "document"
+      "target_col": "participant_documents_id",
+      "target_table": "participant_documents"
     },
     {
       "bubble_type": "user",
       "bubble_field": "events_list_custom_event",
       "table": "users_events",
       "owner_col": "users_id",
-      "target_col": "event_id",
-      "target_table": "event"
+      "target_col": "events_id",
+      "target_table": "events"
     },
     {
       "bubble_type": "user",
       "bubble_field": "incident_rerports_list_custom_incident",
       "table": "users_incident_reports",
       "owner_col": "users_id",
-      "target_col": "incident_id",
-      "target_table": "incident"
+      "target_col": "incidents_id",
+      "target_table": "incidents"
     },
     {
       "bubble_type": "user",
       "bubble_field": "locations_list_custom_location1",
       "table": "users_locations",
       "owner_col": "users_id",
-      "target_col": "location1_id",
-      "target_table": "location1"
+      "target_col": "locations_id",
+      "target_table": "locations"
     },
     {
       "bubble_type": "user",
       "bubble_field": "payslips_list_custom_payslip",
       "table": "users_payslips",
       "owner_col": "users_id",
-      "target_col": "payslip_id",
-      "target_table": "payslip"
+      "target_col": "payslips_id",
+      "target_table": "payslips"
     },
     {
       "bubble_type": "user",
@@ -3787,16 +3787,16 @@
       "bubble_field": "reviews_list_custom_review",
       "table": "users_reviews",
       "owner_col": "users_id",
-      "target_col": "review_id",
-      "target_table": "review"
+      "target_col": "reviews_id",
+      "target_table": "reviews"
     },
     {
       "bubble_type": "user",
       "bubble_field": "risk_management_plans_list_custom_risk_management_plan",
       "table": "users_risk_management_plans",
       "owner_col": "users_id",
-      "target_col": "risk_management_plan_id",
-      "target_table": "risk_management_plan"
+      "target_col": "risk_management_plans_id",
+      "target_table": "risk_management_plans"
     },
     {
       "bubble_type": "user",
@@ -3811,158 +3811,158 @@
       "bubble_field": "shifts_list_custom_shift",
       "table": "users_shifts_accepted",
       "owner_col": "users_id",
-      "target_col": "shift_id",
-      "target_table": "shift"
+      "target_col": "shifts_id",
+      "target_table": "shifts"
     },
     {
       "bubble_type": "user",
       "bubble_field": "shifts_missed_list_custom_shifts_missed",
       "table": "users_shifts_missed",
       "owner_col": "users_id",
-      "target_col": "shifts_missed_id",
-      "target_table": "shifts_missed"
+      "target_col": "missed_shifts_id",
+      "target_table": "missed_shifts"
     },
     {
       "bubble_type": "user",
       "bubble_field": "shifts_requested_list_custom_shift",
       "table": "users_shifts_requested",
       "owner_col": "users_id",
-      "target_col": "shift_id",
-      "target_table": "shift"
+      "target_col": "shifts_id",
+      "target_table": "shifts"
     },
     {
       "bubble_type": "user",
       "bubble_field": "unread_messages_list_custom_message",
       "table": "users_unread_messages",
       "owner_col": "users_id",
-      "target_col": "message_id",
-      "target_table": "message"
+      "target_col": "messages_id",
+      "target_table": "messages"
     },
     {
       "bubble_type": "calls",
       "bubble_field": "availability_list_custom_availability",
-      "table": "calls_availability",
-      "owner_col": "calls_id",
+      "table": "shift_calls_availability",
+      "owner_col": "shift_calls_id",
       "target_col": "availability_id",
       "target_table": "availability"
     },
     {
       "bubble_type": "client",
       "bubble_field": "invoices_list_custom_invoice",
-      "table": "client_invoices",
-      "owner_col": "client_id",
-      "target_col": "invoice_id",
-      "target_table": "invoice"
+      "table": "billing_clients_invoices",
+      "owner_col": "billing_clients_id",
+      "target_col": "invoices_id",
+      "target_table": "invoices"
     },
     {
       "bubble_type": "client",
       "bubble_field": "shifts_list_custom_shift",
-      "table": "client_shifts",
-      "owner_col": "client_id",
-      "target_col": "shift_id",
-      "target_table": "shift"
+      "table": "billing_clients_shifts",
+      "owner_col": "billing_clients_id",
+      "target_col": "shifts_id",
+      "target_table": "shifts"
     },
     {
       "bubble_type": "comms_book",
       "bubble_field": "unread_messages_list_custom_message",
-      "table": "comms_book_unread_messages",
-      "owner_col": "comms_book_id",
-      "target_col": "message_id",
-      "target_table": "message"
+      "table": "group_chats_unread_messages",
+      "owner_col": "group_chats_id",
+      "target_col": "messages_id",
+      "target_table": "messages"
     },
     {
       "bubble_type": "location1",
       "bubble_field": "carers_list_user",
-      "table": "location1_carers",
-      "owner_col": "location1_id",
+      "table": "locations_carers",
+      "owner_col": "locations_id",
       "target_col": "users_id",
       "target_table": "users"
     },
     {
       "bubble_type": "location1",
       "bubble_field": "clients_list_user",
-      "table": "location1_clients",
-      "owner_col": "location1_id",
+      "table": "locations_clients",
+      "owner_col": "locations_id",
       "target_col": "users_id",
       "target_table": "users"
     },
     {
       "bubble_type": "location1",
       "bubble_field": "residents_list_user",
-      "table": "location1_residents",
-      "owner_col": "location1_id",
+      "table": "locations_residents",
+      "owner_col": "locations_id",
       "target_col": "users_id",
       "target_table": "users"
     },
     {
       "bubble_type": "plan_manager",
       "bubble_field": "coordinator_list_user",
-      "table": "plan_manager_coordinator",
-      "owner_col": "plan_manager_id",
+      "table": "plan_managers_coordinator",
+      "owner_col": "plan_managers_id",
       "target_col": "users_id",
       "target_table": "users"
     },
     {
       "bubble_type": "plan_manager",
       "bubble_field": "participants_list_user",
-      "table": "plan_manager_participants",
-      "owner_col": "plan_manager_id",
+      "table": "plan_managers_participants",
+      "owner_col": "plan_managers_id",
       "target_col": "users_id",
       "target_table": "users"
     },
     {
       "bubble_type": "review",
       "bubble_field": "tags_list_custom_tags",
-      "table": "review_tags",
-      "owner_col": "review_id",
-      "target_col": "tags_id",
-      "target_table": "tags"
+      "table": "reviews_tags",
+      "owner_col": "reviews_id",
+      "target_col": "review_tags_id",
+      "target_table": "review_tags"
     },
     {
       "bubble_type": "risk_assessment",
       "bubble_field": "risk_management_plan_list_custom_risk_management_plan",
-      "table": "risk_assessment_risk_management_plan",
-      "owner_col": "risk_assessment_id",
-      "target_col": "risk_management_plan_id",
-      "target_table": "risk_management_plan"
+      "table": "risk_assessments_risk_management_plan",
+      "owner_col": "risk_assessments_id",
+      "target_col": "risk_management_plans_id",
+      "target_table": "risk_management_plans"
     },
     {
       "bubble_type": "shift",
       "bubble_field": "coordinator__list_user",
-      "table": "shift_coordinator",
-      "owner_col": "shift_id",
+      "table": "shifts_coordinator",
+      "owner_col": "shifts_id",
       "target_col": "users_id",
       "target_table": "users"
     },
     {
       "bubble_type": "shift",
       "bubble_field": "events_list_custom_event",
-      "table": "shift_events",
-      "owner_col": "shift_id",
-      "target_col": "event_id",
-      "target_table": "event"
+      "table": "shifts_events",
+      "owner_col": "shifts_id",
+      "target_col": "events_id",
+      "target_table": "events"
     },
     {
       "bubble_type": "shift",
       "bubble_field": "travel_list_custom_shift_logs",
-      "table": "shift_travel",
-      "owner_col": "shift_id",
+      "table": "shifts_travel",
+      "owner_col": "shifts_id",
       "target_col": "shift_logs_id",
       "target_table": "shift_logs"
     },
     {
       "bubble_type": "shifts_missed",
       "bubble_field": "carers_list_user",
-      "table": "shifts_missed_carers",
-      "owner_col": "shifts_missed_id",
+      "table": "missed_shifts_carers",
+      "owner_col": "missed_shifts_id",
       "target_col": "users_id",
       "target_table": "users"
     },
     {
       "bubble_type": "thread",
       "bubble_field": "members_list_user",
-      "table": "thread_members",
-      "owner_col": "thread_id",
+      "table": "threads_members",
+      "owner_col": "threads_id",
       "target_col": "users_id",
       "target_table": "users"
     }
