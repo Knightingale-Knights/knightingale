@@ -1,0 +1,3970 @@
+{
+  "tables": {
+    "user": {
+      "table": "users",
+      "fields": {
+        "account_status_boolean": {
+          "column": "account_status",
+          "type": "boolean"
+        },
+        "active_boolean": {
+          "column": "active",
+          "type": "boolean"
+        },
+        "address_geographic_address": {
+          "column": "address",
+          "type": "geographic_address"
+        },
+        "audit_boolean": {
+          "column": "audit",
+          "type": "boolean"
+        },
+        "bank_details_custom_bank_details": {
+          "column": "bank_details",
+          "type": "custom.bank_details"
+        },
+        "bday_text_text": {
+          "column": "bday_text",
+          "type": "text"
+        },
+        "bsp_user": {
+          "column": "bsp",
+          "type": "user"
+        },
+        "can_drive_boolean": {
+          "column": "can_drive",
+          "type": "boolean"
+        },
+        "care_culture_custom_care_culture": {
+          "column": "care_culture",
+          "type": "custom.care_culture"
+        },
+        "client_care_date_date": {
+          "column": "client_care_date",
+          "type": "date"
+        },
+        "comms_book_custom_comms_book": {
+          "column": "group_chat",
+          "type": "custom.comms_book"
+        },
+        "consent_custom_consent": {
+          "column": "consent",
+          "type": "custom.consent"
+        },
+        "contract_date_date": {
+          "column": "contract_date",
+          "type": "date"
+        },
+        "contract_signature_image": {
+          "column": "contract_signature",
+          "type": "image"
+        },
+        "coordinator__user": {
+          "column": "coordinator",
+          "type": "user"
+        },
+        "coordinator_user": {
+          "column": "coordinator_2",
+          "type": "user"
+        },
+        "cpr_custom_cpr1": {
+          "column": "cpr",
+          "type": "custom.cpr1"
+        },
+        "current_location_geographic_address": {
+          "column": "current_location",
+          "type": "geographic_address"
+        },
+        "daily_living_custom_daily_living": {
+          "column": "daily_living",
+          "type": "custom.daily_living"
+        },
+        "date_of_birth_date": {
+          "column": "date_of_birth",
+          "type": "date"
+        },
+        "description_text": {
+          "column": "description",
+          "type": "text"
+        },
+        "earnings_number": {
+          "column": "gross_pay",
+          "type": "number"
+        },
+        "emergency_plan_custom_emergency_plan": {
+          "column": "emergency_plan",
+          "type": "custom.emergency_plan"
+        },
+        "first_aid_custom_first_aid": {
+          "column": "first_aid",
+          "type": "custom.first_aid"
+        },
+        "first_name_text": {
+          "column": "first_name",
+          "type": "text"
+        },
+        "gps_latitude_number": {
+          "column": "gps_latitude",
+          "type": "number"
+        },
+        "gps_longtitude_number": {
+          "column": "gps_longtitude",
+          "type": "number"
+        },
+        "handbook_custom_handbook": {
+          "column": "handbook",
+          "type": "custom.handbook"
+        },
+        "health_profile_custom_health_profile": {
+          "column": "health_profile",
+          "type": "custom.health_profile"
+        },
+        "home_safety_custom_home_safety": {
+          "column": "home_safety",
+          "type": "custom.home_safety"
+        },
+        "hours_number": {
+          "column": "hours",
+          "type": "number"
+        },
+        "id_custom_id1": {
+          "column": "id_document",
+          "type": "custom.id1"
+        },
+        "info_book_custom_info_book": {
+          "column": "info_book",
+          "type": "custom.info_book"
+        },
+        "intake_form_custom_intake_form": {
+          "column": "intake_form",
+          "type": "custom.intake_form"
+        },
+        "interests_custom_interests": {
+          "column": "interests",
+          "type": "custom.interests"
+        },
+        "knowledge_base_custom_thread": {
+          "column": "knowledge_base",
+          "type": "custom.thread"
+        },
+        "last_name_text": {
+          "column": "last_name",
+          "type": "text"
+        },
+        "medication_chart_custom_medication_chart": {
+          "column": "medication_chart",
+          "type": "custom.medication_chart"
+        },
+        "middle_name_text": {
+          "column": "middle_name",
+          "type": "text"
+        },
+        "ndis_custom_ndis": {
+          "column": "ndis",
+          "type": "custom.ndis"
+        },
+        "ndis_induction_file": {
+          "column": "ndis_induction",
+          "type": "file"
+        },
+        "ndis_number_text": {
+          "column": "ndis_number",
+          "type": "text"
+        },
+        "net_earnings_number": {
+          "column": "net_pay",
+          "type": "number"
+        },
+        "notification_boolean": {
+          "column": "notification",
+          "type": "boolean"
+        },
+        "phone_number_text": {
+          "column": "phone_number",
+          "type": "text"
+        },
+        "photo_image": {
+          "column": "profile_photo",
+          "type": "image"
+        },
+        "plan_end_date": {
+          "column": "plan_end",
+          "type": "date"
+        },
+        "plan_manager_custom_plan_manager": {
+          "column": "plan_manager",
+          "type": "custom.plan_manager"
+        },
+        "plan_start_date": {
+          "column": "plan_start",
+          "type": "date"
+        },
+        "police_check_custom_police_check": {
+          "column": "police_check",
+          "type": "custom.police_check"
+        },
+        "priority_number": {
+          "column": "priority",
+          "type": "number"
+        },
+        "profile_option_profile": {
+          "column": "account_type",
+          "type": "option.profile"
+        },
+        "progress_note1_boolean": {
+          "column": "progress_note",
+          "type": "boolean"
+        },
+        "rating_number": {
+          "column": "rating",
+          "type": "number"
+        },
+        "resume_file": {
+          "column": "resume",
+          "type": "file"
+        },
+        "risk_assessment_custom_risk_assessment": {
+          "column": "risk_assessment",
+          "type": "custom.risk_assessment"
+        },
+        "roles_list_option_roles": {
+          "column": "roles",
+          "type": "list.option.roles"
+        },
+        "room_no___text": {
+          "column": "room_no",
+          "type": "text"
+        },
+        "service_agreement_custom_service_agreement": {
+          "column": "service_agreement",
+          "type": "custom.service_agreement"
+        },
+        "sex_option_sex": {
+          "column": "sex",
+          "type": "option.sex"
+        },
+        "shift_time_list_option_shift_time": {
+          "column": "shift_time",
+          "type": "list.option.shift_time"
+        },
+        "super_number": {
+          "column": "super",
+          "type": "number"
+        },
+        "superannuation_custom_superannuation": {
+          "column": "superannuation",
+          "type": "custom.superannuation"
+        },
+        "support_plan_custom_support_plan": {
+          "column": "support_plan",
+          "type": "custom.support_plan"
+        },
+        "survey_boolean": {
+          "column": "survey",
+          "type": "boolean"
+        },
+        "tax_file_number_custom_tax_file_number_declaration": {
+          "column": "tax_file_number",
+          "type": "custom.tax_file_number_declaration"
+        },
+        "tax_number": {
+          "column": "tax",
+          "type": "number"
+        },
+        "thread_custom_thread": {
+          "column": "thread",
+          "type": "custom.thread"
+        },
+        "vaccinations_custom_vaccinations": {
+          "column": "vaccinations",
+          "type": "custom.vaccinations"
+        },
+        "website_text": {
+          "column": "website",
+          "type": "text"
+        },
+        "work_locations_list_text": {
+          "column": "work_locations",
+          "type": "list.text"
+        },
+        "wwcc_custom_working_with_children_check": {
+          "column": "wwcc",
+          "type": "custom.working_with_children_check"
+        },
+        "ytd_gross_number": {
+          "column": "ytd_gross",
+          "type": "number"
+        },
+        "ytd_net_number": {
+          "column": "ytd_net",
+          "type": "number"
+        },
+        "ytd_tax_number": {
+          "column": "ytd_tax",
+          "type": "number"
+        }
+      }
+    },
+    "availability": {
+      "table": "availability",
+      "fields": {
+        "accepted_text": {
+          "column": "accepted",
+          "type": "text"
+        },
+        "active_boolean": {
+          "column": "active",
+          "type": "boolean"
+        },
+        "available_boolean": {
+          "column": "available",
+          "type": "boolean"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "date_date": {
+          "column": "date",
+          "type": "date"
+        },
+        "date_text_text": {
+          "column": "date_text",
+          "type": "text"
+        },
+        "locations_list_text": {
+          "column": "locations",
+          "type": "list.text"
+        },
+        "nurse_name_text": {
+          "column": "nurse_name",
+          "type": "text"
+        },
+        "nurse_phone_text": {
+          "column": "nurse_phone",
+          "type": "text"
+        },
+        "priority_number": {
+          "column": "priority",
+          "type": "number"
+        },
+        "role1_option_roles": {
+          "column": "role",
+          "type": "option.roles"
+        },
+        "role_text_text": {
+          "column": "role_text",
+          "type": "text"
+        },
+        "shift1_option_shift_time": {
+          "column": "shift",
+          "type": "option.shift_time"
+        },
+        "shift_text_text": {
+          "column": "shift_text",
+          "type": "text"
+        },
+        "timeslot_text": {
+          "column": "timeslot",
+          "type": "text"
+        },
+        "weekday_text": {
+          "column": "weekday",
+          "type": "text"
+        }
+      }
+    },
+    "bank_details": {
+      "table": "bank_details",
+      "fields": {
+        "acc__name_text": {
+          "column": "acc_name",
+          "type": "text"
+        },
+        "acc__text": {
+          "column": "acc_no",
+          "type": "text"
+        },
+        "bsb_text": {
+          "column": "bsb_no",
+          "type": "text"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "secure_boolean": {
+          "column": "secure",
+          "type": "boolean"
+        }
+      }
+    },
+    "calls": {
+      "table": "calls",
+      "fields": {
+        "date_text": {
+          "column": "date",
+          "type": "text"
+        },
+        "location_text": {
+          "column": "location",
+          "type": "text"
+        },
+        "nurses_list_text": {
+          "column": "nurses",
+          "type": "list.text"
+        },
+        "shift_text": {
+          "column": "shift",
+          "type": "text"
+        },
+        "status_text": {
+          "column": "status",
+          "type": "text"
+        },
+        "thread_custom_thread": {
+          "column": "thread",
+          "type": "custom.thread"
+        }
+      }
+    },
+    "care_culture": {
+      "table": "care_culture",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "compassion_boolean": {
+          "column": "compassion",
+          "type": "boolean"
+        },
+        "future_boolean": {
+          "column": "future",
+          "type": "boolean"
+        },
+        "hospitality_boolean": {
+          "column": "hospitality",
+          "type": "boolean"
+        },
+        "intro_boolean": {
+          "column": "intro",
+          "type": "boolean"
+        },
+        "lifer_boolean": {
+          "column": "lifer",
+          "type": "boolean"
+        },
+        "listen_boolean": {
+          "column": "listen",
+          "type": "boolean"
+        },
+        "number_one_boolean": {
+          "column": "one",
+          "type": "boolean"
+        },
+        "paid_boolean": {
+          "column": "paid",
+          "type": "boolean"
+        },
+        "philosophy_boolean": {
+          "column": "philosophy",
+          "type": "boolean"
+        },
+        "proactive_boolean": {
+          "column": "proactive",
+          "type": "boolean"
+        },
+        "refusals_boolean": {
+          "column": "refusals",
+          "type": "boolean"
+        },
+        "to_do_list_boolean": {
+          "column": "to_do_list",
+          "type": "boolean"
+        },
+        "trust_boolean": {
+          "column": "trust",
+          "type": "boolean"
+        },
+        "trust_video_text_text": {
+          "column": "trust_video",
+          "type": "text"
+        },
+        "vision_boolean": {
+          "column": "vision",
+          "type": "boolean"
+        }
+      }
+    },
+    "client": {
+      "table": "client",
+      "fields": {
+        "billing_email_text": {
+          "column": "billing_email",
+          "type": "text"
+        },
+        "billing_user": {
+          "column": "billing",
+          "type": "user"
+        },
+        "client_user": {
+          "column": "client",
+          "type": "user"
+        }
+      }
+    },
+    "comms_book": {
+      "table": "comms_book",
+      "fields": {
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        }
+      }
+    },
+    "consent": {
+      "table": "consent",
+      "fields": {
+        "10_sharing_boolean": {
+          "column": "f_10_sharing",
+          "type": "boolean"
+        },
+        "11_allied_boolean": {
+          "column": "f_11_allied",
+          "type": "boolean"
+        },
+        "1_audits_boolean": {
+          "column": "f_1_audits",
+          "type": "boolean"
+        },
+        "2_surveys_boolean": {
+          "column": "f_2_surveys",
+          "type": "boolean"
+        },
+        "3__ads_boolean": {
+          "column": "f_3_ads",
+          "type": "boolean"
+        },
+        "4_recruitment_boolean": {
+          "column": "f_4_recruitment",
+          "type": "boolean"
+        },
+        "5_reporting_boolean": {
+          "column": "f_5_reporting",
+          "type": "boolean"
+        },
+        "6_training_boolean": {
+          "column": "f_6_training",
+          "type": "boolean"
+        },
+        "7_marketing_boolean": {
+          "column": "f_7_marketing",
+          "type": "boolean"
+        },
+        "8_audiovisual_boolean": {
+          "column": "f_8_audiovisual",
+          "type": "boolean"
+        },
+        "9_photos_boolean": {
+          "column": "f_9_photos",
+          "type": "boolean"
+        },
+        "consent_no_text": {
+          "column": "consent_no",
+          "type": "text"
+        },
+        "consent_yes_text": {
+          "column": "consent_yes",
+          "type": "text"
+        },
+        "participant_signature_image": {
+          "column": "participant_signature",
+          "type": "image"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "signed_date_date": {
+          "column": "signed_date",
+          "type": "date"
+        }
+      }
+    },
+    "cpr1": {
+      "table": "cpr1",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "cpr_certificate_file": {
+          "column": "cpr_certificate",
+          "type": "file"
+        },
+        "expiry_date": {
+          "column": "expiry",
+          "type": "date"
+        }
+      }
+    },
+    "daily_living": {
+      "table": "daily_living",
+      "fields": {
+        "carer_pref_age_text": {
+          "column": "carer_pref_age",
+          "type": "text"
+        },
+        "carer_pref_culture_religion_text": {
+          "column": "carer_pref_culture_religion",
+          "type": "text"
+        },
+        "carer_pref_gender_text": {
+          "column": "carer_pref_gender",
+          "type": "text"
+        },
+        "carer_pref_language_text": {
+          "column": "carer_pref_language",
+          "type": "text"
+        },
+        "carer_pref_personality_text": {
+          "column": "carer_pref_personality",
+          "type": "text"
+        },
+        "carer_training_required_text": {
+          "column": "carer_training_required",
+          "type": "text"
+        },
+        "carer_unique_skills_text": {
+          "column": "carer_unique_skills",
+          "type": "text"
+        },
+        "daily_tasks_assistance_text": {
+          "column": "daily_tasks_assistance",
+          "type": "text"
+        },
+        "dietary_requirements_text": {
+          "column": "dietary_requirements",
+          "type": "text"
+        },
+        "foods_disliked_text": {
+          "column": "foods_disliked",
+          "type": "text"
+        },
+        "foods_liked_text": {
+          "column": "foods_liked",
+          "type": "text"
+        },
+        "goals_long_term_text": {
+          "column": "goals_long_term",
+          "type": "text"
+        },
+        "goals_short_term_text": {
+          "column": "goals_short_term",
+          "type": "text"
+        },
+        "hobbies_text": {
+          "column": "hobbies",
+          "type": "text"
+        },
+        "living_situation_text": {
+          "column": "living_situation",
+          "type": "text"
+        },
+        "mobility_aids_text": {
+          "column": "mobility_aids",
+          "type": "text"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "personal_care_list_option_personal_care": {
+          "column": "personal_care",
+          "type": "list.option.personal_care"
+        },
+        "personal_care_other_text": {
+          "column": "personal_care_other",
+          "type": "text"
+        },
+        "supports_needed_text": {
+          "column": "supports_needed",
+          "type": "text"
+        },
+        "unmet_needs_text": {
+          "column": "unmet_needs",
+          "type": "text"
+        }
+      }
+    },
+    "document": {
+      "table": "document",
+      "fields": {
+        "audit_boolean": {
+          "column": "audit",
+          "type": "boolean"
+        },
+        "doc_file": {
+          "column": "doc",
+          "type": "file"
+        },
+        "name_text": {
+          "column": "name",
+          "type": "text"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        }
+      }
+    },
+    "emergency_plan": {
+      "table": "emergency_plan",
+      "fields": {
+        "backup_power_text": {
+          "column": "backup_power",
+          "type": "text"
+        },
+        "fire_evacuation_text": {
+          "column": "fire_evacuation",
+          "type": "text"
+        },
+        "fire_steps_text": {
+          "column": "fire_steps",
+          "type": "text"
+        },
+        "hospital_steps_text": {
+          "column": "hospital_steps",
+          "type": "text"
+        },
+        "hospital_text": {
+          "column": "hospital",
+          "type": "text"
+        },
+        "infectious_steps_text": {
+          "column": "infectious_steps",
+          "type": "text"
+        },
+        "infectious_text": {
+          "column": "infectious",
+          "type": "text"
+        },
+        "natural_disaster_steps_text": {
+          "column": "natural_disaster_steps",
+          "type": "text"
+        },
+        "natural_disaster_text": {
+          "column": "natural_disaster",
+          "type": "text"
+        },
+        "participant_signature_image": {
+          "column": "participant_signature",
+          "type": "image"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "power_outage_text": {
+          "column": "power_outage",
+          "type": "text"
+        },
+        "signed_date_date": {
+          "column": "signed_date",
+          "type": "date"
+        },
+        "supplies_text": {
+          "column": "supplies",
+          "type": "text"
+        }
+      }
+    },
+    "esw": {
+      "table": "esw",
+      "fields": {
+        "activity_code_option_activity": {
+          "column": "activity_code",
+          "type": "option.activity"
+        },
+        "date_date": {
+          "column": "date",
+          "type": "date"
+        },
+        "duration_number": {
+          "column": "duration",
+          "type": "number"
+        },
+        "feedback_text": {
+          "column": "feedback",
+          "type": "text"
+        },
+        "offsite_boolean": {
+          "column": "offsite",
+          "type": "boolean"
+        },
+        "onsite_boolean": {
+          "column": "onsite",
+          "type": "boolean"
+        },
+        "refusal_boolean": {
+          "column": "refusal",
+          "type": "boolean"
+        },
+        "resident_user": {
+          "column": "resident",
+          "type": "user"
+        },
+        "support_level_number": {
+          "column": "support_level",
+          "type": "number"
+        }
+      }
+    },
+    "event": {
+      "table": "event",
+      "fields": {
+        "address_geographic_address": {
+          "column": "address",
+          "type": "geographic_address"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "coordinator_user": {
+          "column": "coordinator",
+          "type": "user"
+        },
+        "date_date": {
+          "column": "date",
+          "type": "date"
+        },
+        "details_text": {
+          "column": "details",
+          "type": "text"
+        },
+        "done_boolean": {
+          "column": "done",
+          "type": "boolean"
+        },
+        "notes_text": {
+          "column": "notes",
+          "type": "text"
+        },
+        "refused_boolean": {
+          "column": "refused",
+          "type": "boolean"
+        },
+        "resident_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "shift_custom_shift": {
+          "column": "shift",
+          "type": "custom.shift"
+        },
+        "time_text": {
+          "column": "time",
+          "type": "text"
+        },
+        "to_do_boolean": {
+          "column": "to_do",
+          "type": "boolean"
+        }
+      }
+    },
+    "feedback": {
+      "table": "feedback",
+      "fields": {
+        "behalf_text": {
+          "column": "behalf",
+          "type": "text"
+        },
+        "date_signed_date": {
+          "column": "date_signed",
+          "type": "date"
+        },
+        "email_text": {
+          "column": "email",
+          "type": "text"
+        },
+        "feedback_text": {
+          "column": "feedback",
+          "type": "text"
+        },
+        "help_details_text": {
+          "column": "help_details",
+          "type": "text"
+        },
+        "help_text": {
+          "column": "comms",
+          "type": "text"
+        },
+        "name_text": {
+          "column": "name",
+          "type": "text"
+        },
+        "outcome_text": {
+          "column": "outcome",
+          "type": "text"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "phone_text": {
+          "column": "phone",
+          "type": "text"
+        },
+        "signature_image": {
+          "column": "signature",
+          "type": "image"
+        }
+      }
+    },
+    "first_aid": {
+      "table": "first_aid",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "expiry_date": {
+          "column": "expiry",
+          "type": "date"
+        },
+        "first_aid_certificate_file": {
+          "column": "first_aid_certificate",
+          "type": "file"
+        }
+      }
+    },
+    "food_fluid": {
+      "table": "food_fluid",
+      "fields": {
+        "comment_text": {
+          "column": "comment",
+          "type": "text"
+        },
+        "food_fluid_option_food_fluid": {
+          "column": "food_fluid",
+          "type": "option.food_fluid"
+        },
+        "meal_option_meal": {
+          "column": "meal",
+          "type": "option.meal"
+        },
+        "name_text": {
+          "column": "name",
+          "type": "text"
+        },
+        "quantity_option_quantity": {
+          "column": "quantity",
+          "type": "option.quantity"
+        }
+      }
+    },
+    "handbook": {
+      "table": "handbook",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "hg10_boolean": {
+          "column": "hg10",
+          "type": "boolean"
+        },
+        "hg11_boolean": {
+          "column": "hg11",
+          "type": "boolean"
+        },
+        "hg12_boolean": {
+          "column": "hg12",
+          "type": "boolean"
+        },
+        "hg13_boolean": {
+          "column": "hg13",
+          "type": "boolean"
+        },
+        "hg14_boolean": {
+          "column": "hg14",
+          "type": "boolean"
+        },
+        "hg15_boolean": {
+          "column": "hg15",
+          "type": "boolean"
+        },
+        "hg1_boolean": {
+          "column": "hg1",
+          "type": "boolean"
+        },
+        "hg2_boolean": {
+          "column": "hg2",
+          "type": "boolean"
+        },
+        "hg3_boolean": {
+          "column": "hg3",
+          "type": "boolean"
+        },
+        "hg4_boolean": {
+          "column": "hg4",
+          "type": "boolean"
+        },
+        "hg5_boolean": {
+          "column": "hg5",
+          "type": "boolean"
+        },
+        "hg6_boolean": {
+          "column": "hg6",
+          "type": "boolean"
+        },
+        "hg7_boolean": {
+          "column": "hg7",
+          "type": "boolean"
+        },
+        "hg8_boolean": {
+          "column": "hg8",
+          "type": "boolean"
+        },
+        "hg9_boolean": {
+          "column": "hg9",
+          "type": "boolean"
+        }
+      }
+    },
+    "health_profile": {
+      "table": "health_profile",
+      "fields": {
+        "allergies_text": {
+          "column": "allergies",
+          "type": "text"
+        },
+        "behaviour_support_plan_option_answer": {
+          "column": "behaviour_support_plan",
+          "type": "option.answer"
+        },
+        "doctor_address_geographic_address": {
+          "column": "doctor_address",
+          "type": "geographic_address"
+        },
+        "doctor_clinic_text": {
+          "column": "doctor_clinic",
+          "type": "text"
+        },
+        "doctor_name_text": {
+          "column": "doctor_name",
+          "type": "text"
+        },
+        "doctor_phone_text": {
+          "column": "doctor_phone",
+          "type": "text"
+        },
+        "emergency_contact_name_one_text": {
+          "column": "emergency_contact_name_one",
+          "type": "text"
+        },
+        "emergency_contact_name_two_text": {
+          "column": "emergency_contact_name_two",
+          "type": "text"
+        },
+        "emergency_contact_phone_one_text": {
+          "column": "emergency_contact_phone_one",
+          "type": "text"
+        },
+        "emergency_contact_phone_two_text": {
+          "column": "emergency_contact_phone_two",
+          "type": "text"
+        },
+        "emergency_contact_relationship_one_text": {
+          "column": "emergency_contact_relationship_one",
+          "type": "text"
+        },
+        "emergency_contact_relationship_two_text": {
+          "column": "emergency_contact_relationship_two",
+          "type": "text"
+        },
+        "hospital_admissions_text": {
+          "column": "hospital_admissions",
+          "type": "text"
+        },
+        "last_hospital_stay_length_text": {
+          "column": "last_hospital_stay_length",
+          "type": "text"
+        },
+        "medications_text": {
+          "column": "medications",
+          "type": "text"
+        },
+        "mental_health_list_option_mental_health": {
+          "column": "mental_health",
+          "type": "list.option.mental_health"
+        },
+        "mental_health_other_text": {
+          "column": "mental_health_other",
+          "type": "text"
+        },
+        "ndis_primary_diagnosis_text": {
+          "column": "ndis_primary_diagnosis",
+          "type": "text"
+        },
+        "ndis_secondary_diagnosis_text": {
+          "column": "ndis_secondary_diagnosis",
+          "type": "text"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "pharmacist_name_text": {
+          "column": "pharmacist_name",
+          "type": "text"
+        },
+        "pharmacist_phone_text": {
+          "column": "pharmacist_phone",
+          "type": "text"
+        },
+        "pharmacy_address_geographic_address": {
+          "column": "pharmacy_address",
+          "type": "geographic_address"
+        },
+        "physical_health_list_option_physical_health": {
+          "column": "physical_health",
+          "type": "list.option.physical_health"
+        },
+        "physical_health_other_text": {
+          "column": "physical_health_other",
+          "type": "text"
+        }
+      }
+    },
+    "home_safety": {
+      "table": "home_safety",
+      "fields": {
+        "bathroom_access_option_safety_check": {
+          "column": "bathroom_access",
+          "type": "option.safety_check"
+        },
+        "bathroom_drainage_option_safety_check": {
+          "column": "bathroom_drainage",
+          "type": "option.safety_check"
+        },
+        "bathroom_ventilation_option_safety_check": {
+          "column": "bathroom_ventilation",
+          "type": "option.safety_check"
+        },
+        "bed_height_option_safety_check": {
+          "column": "bed_height",
+          "type": "option.safety_check"
+        },
+        "bed_space_option_safety_check": {
+          "column": "bed_space",
+          "type": "option.safety_check"
+        },
+        "cleaning_products_option_safety_check": {
+          "column": "cleaning_products",
+          "type": "option.safety_check"
+        },
+        "cleaning_products_storage_option_safety_check": {
+          "column": "cleaning_products_storage",
+          "type": "option.safety_check"
+        },
+        "clothesline_option_safety_check": {
+          "column": "clothesline",
+          "type": "option.safety_check"
+        },
+        "dangerous_visitors_option_answer": {
+          "column": "dangerous_visitors",
+          "type": "option.answer"
+        },
+        "door_access_option_safety_check": {
+          "column": "door_access",
+          "type": "option.safety_check"
+        },
+        "doors_locked_option_answer": {
+          "column": "doors_locked",
+          "type": "option.answer"
+        },
+        "electrical_equipment_option_safety_check": {
+          "column": "electrical_equipment",
+          "type": "option.safety_check"
+        },
+        "electrical_leads_option_safety_check": {
+          "column": "electrical_leads",
+          "type": "option.safety_check"
+        },
+        "exposed_gas_cylinders_option_answer": {
+          "column": "exposed_gas_cylinders",
+          "type": "option.answer"
+        },
+        "faulty_smoke_detectors_option_answer": {
+          "column": "faulty_smoke_detectors",
+          "type": "option.answer"
+        },
+        "floor_surfaces_option_safety_check": {
+          "column": "floor_surfaces",
+          "type": "option.safety_check"
+        },
+        "food_prep_equipment_option_safety_check": {
+          "column": "food_prep_equipment",
+          "type": "option.safety_check"
+        },
+        "fridge_freezer_option_safety_check": {
+          "column": "fridge_freezer",
+          "type": "option.safety_check"
+        },
+        "furniture_placement_option_safety_check": {
+          "column": "furniture_placement",
+          "type": "option.safety_check"
+        },
+        "gates_option_safety_check": {
+          "column": "gates",
+          "type": "option.safety_check"
+        },
+        "hoarding_option_answer": {
+          "column": "hoarding",
+          "type": "option.answer"
+        },
+        "home_safety_notes_text": {
+          "column": "home_safety_notes",
+          "type": "text"
+        },
+        "infectious_disease_option_answer": {
+          "column": "infectious_disease",
+          "type": "option.answer"
+        },
+        "laundry_drainage_option_safety_check": {
+          "column": "laundry_drainage",
+          "type": "option.safety_check"
+        },
+        "laundry_ventilation_option_safety_check": {
+          "column": "laundry_ventilation",
+          "type": "option.safety_check"
+        },
+        "lighting_option_safety_check": {
+          "column": "lighting",
+          "type": "option.safety_check"
+        },
+        "manual_handling_option_safety_check": {
+          "column": "manual_handling",
+          "type": "option.safety_check"
+        },
+        "parking_option_safety_check": {
+          "column": "parking",
+          "type": "option.safety_check"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "pathway_garden_option_safety_check": {
+          "column": "pathway_garden",
+          "type": "option.safety_check"
+        },
+        "pests_option_answer": {
+          "column": "pests",
+          "type": "option.answer"
+        },
+        "pets_option_answer": {
+          "column": "pets",
+          "type": "option.answer"
+        },
+        "portable_heaters_option_safety_check": {
+          "column": "portable_heaters",
+          "type": "option.safety_check"
+        },
+        "power_points_near_water_option_answer": {
+          "column": "power_points_near_water",
+          "type": "option.answer"
+        },
+        "power_points_option_safety_check": {
+          "column": "power_points",
+          "type": "option.safety_check"
+        },
+        "restraint_used_option_answer": {
+          "column": "restraint_used",
+          "type": "option.answer"
+        },
+        "room_to_move_option_safety_check": {
+          "column": "room_to_move",
+          "type": "option.safety_check"
+        },
+        "smoker_in_home_option_answer": {
+          "column": "smoker_in_home",
+          "type": "option.answer"
+        },
+        "stairs_option_safety_check": {
+          "column": "stairs",
+          "type": "option.safety_check"
+        },
+        "stove_option_safety_check": {
+          "column": "stove",
+          "type": "option.safety_check"
+        },
+        "switches_plugs_option_safety_check": {
+          "column": "switches_plugs",
+          "type": "option.safety_check"
+        },
+        "tables_chairs_option_safety_check": {
+          "column": "tables_chairs",
+          "type": "option.safety_check"
+        },
+        "vacuum_option_safety_check": {
+          "column": "vacuum",
+          "type": "option.safety_check"
+        },
+        "verandah_option_safety_check": {
+          "column": "verandah",
+          "type": "option.safety_check"
+        },
+        "walking_aid_access_option_safety_check": {
+          "column": "walking_aid_access",
+          "type": "option.safety_check"
+        },
+        "washer_dryer_option_safety_check": {
+          "column": "washer_dryer",
+          "type": "option.safety_check"
+        },
+        "weapons_option_answer": {
+          "column": "weapons",
+          "type": "option.answer"
+        }
+      }
+    },
+    "id1": {
+      "table": "id1",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "citizenship_file": {
+          "column": "citizenship",
+          "type": "file"
+        },
+        "insurance_file": {
+          "column": "insurance",
+          "type": "file"
+        },
+        "license_file": {
+          "column": "license",
+          "type": "file"
+        },
+        "passport_file": {
+          "column": "passport",
+          "type": "file"
+        }
+      }
+    },
+    "incident": {
+      "table": "incident",
+      "fields": {
+        "agencies_reported_text": {
+          "column": "agencies_reported",
+          "type": "text"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "future_prevention_text": {
+          "column": "future_prevention",
+          "type": "text"
+        },
+        "incident_date_date": {
+          "column": "incident_date",
+          "type": "date"
+        },
+        "incident_description_text": {
+          "column": "incident_description",
+          "type": "text"
+        },
+        "incident_harm_text": {
+          "column": "incident_harm",
+          "type": "text"
+        },
+        "incident_location_text": {
+          "column": "incident_location",
+          "type": "text"
+        },
+        "incident_management_text": {
+          "column": "incident_management",
+          "type": "text"
+        },
+        "incident_resolution_text": {
+          "column": "incident_resolution",
+          "type": "text"
+        },
+        "incident_type_text": {
+          "column": "incident_type",
+          "type": "text"
+        },
+        "injury_location_text": {
+          "column": "injury_location",
+          "type": "text"
+        },
+        "injury_nature_text": {
+          "column": "injury_nature",
+          "type": "text"
+        },
+        "investigation_outcome_text": {
+          "column": "investigation_outcome",
+          "type": "text"
+        },
+        "ndis_reported_date_date": {
+          "column": "ndis_reported_date",
+          "type": "date"
+        },
+        "ndis_reported_text": {
+          "column": "ndis_reported",
+          "type": "text"
+        },
+        "not_ndis_text": {
+          "column": "not_ndis",
+          "type": "text"
+        },
+        "participant_feedback_text": {
+          "column": "participant_feedback",
+          "type": "text"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "preventable_incident_text": {
+          "column": "preventable_incident",
+          "type": "text"
+        },
+        "reportable__type__text": {
+          "column": "reportable_type",
+          "type": "text"
+        },
+        "reportable__yes_no__text": {
+          "column": "reportable_yes_no",
+          "type": "text"
+        },
+        "safety_actions1_text": {
+          "column": "safety_actions",
+          "type": "text"
+        },
+        "team_informed1_text": {
+          "column": "team_informed",
+          "type": "text"
+        },
+        "team_informed_date_date": {
+          "column": "team_informed_date",
+          "type": "date"
+        },
+        "witnesses_text": {
+          "column": "witnesses",
+          "type": "text"
+        }
+      }
+    },
+    "info_book": {
+      "table": "info_book",
+      "fields": {
+        "participant_signature_image": {
+          "column": "participant_signature",
+          "type": "image"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "representative_signature_image": {
+          "column": "representative_signature",
+          "type": "image"
+        },
+        "representative_text": {
+          "column": "representative",
+          "type": "text"
+        },
+        "signed_date_date": {
+          "column": "signed_date",
+          "type": "date"
+        }
+      }
+    },
+    "intake_form": {
+      "table": "intake_form",
+      "fields": {
+        "aboriginal_text": {
+          "column": "aboriginal",
+          "type": "text"
+        },
+        "allergies_text": {
+          "column": "allergies",
+          "type": "text"
+        },
+        "assist_by_text": {
+          "column": "assist_by",
+          "type": "text"
+        },
+        "bsp_text": {
+          "column": "bsp",
+          "type": "text"
+        },
+        "carer_language_text": {
+          "column": "carer_language",
+          "type": "text"
+        },
+        "carer_personality_text": {
+          "column": "carer_personality",
+          "type": "text"
+        },
+        "carer_skills_text": {
+          "column": "carer_skills",
+          "type": "text"
+        },
+        "carer_training_text": {
+          "column": "carer_training",
+          "type": "text"
+        },
+        "communication_type_option_communication_type": {
+          "column": "communication_type",
+          "type": "option.communication_type"
+        },
+        "consent_list_option_participation_consent": {
+          "column": "consent",
+          "type": "list.option.participation_consent"
+        },
+        "contact1address_geographic_address": {
+          "column": "contact1address",
+          "type": "geographic_address"
+        },
+        "contact1advocacyform_text": {
+          "column": "contact1advocacyform",
+          "type": "text"
+        },
+        "contact1email_text": {
+          "column": "contact1email",
+          "type": "text"
+        },
+        "contact1phone_text": {
+          "column": "contact1phone",
+          "type": "text"
+        },
+        "contact1relation_text": {
+          "column": "contact1relation",
+          "type": "text"
+        },
+        "contact2address_geographic_address": {
+          "column": "contact2address",
+          "type": "geographic_address"
+        },
+        "contact2advocacyform_text": {
+          "column": "contact2advocacyform",
+          "type": "text"
+        },
+        "contact2email_text": {
+          "column": "contact2email",
+          "type": "text"
+        },
+        "contact2phone_text": {
+          "column": "contact2phone",
+          "type": "text"
+        },
+        "contact2relation_text": {
+          "column": "contact2relation",
+          "type": "text"
+        },
+        "contact_one_1_text": {
+          "column": "contact1name",
+          "type": "text"
+        },
+        "contact_one_option_contact": {
+          "column": "contact1",
+          "type": "option.contact"
+        },
+        "contact_two_2_text": {
+          "column": "contact2name",
+          "type": "text"
+        },
+        "contact_two_option_contact": {
+          "column": "contact2",
+          "type": "option.contact"
+        },
+        "cultural_values_text": {
+          "column": "cultural_values",
+          "type": "text"
+        },
+        "culture_text": {
+          "column": "carer_culture",
+          "type": "text"
+        },
+        "dairy_text": {
+          "column": "dairy",
+          "type": "text"
+        },
+        "diagnosis_text": {
+          "column": "diagnosis",
+          "type": "text"
+        },
+        "diet_requirements_text": {
+          "column": "diet_requirements",
+          "type": "text"
+        },
+        "dont_eat_text": {
+          "column": "dont_eat",
+          "type": "text"
+        },
+        "favourite_food_text": {
+          "column": "favourite_food",
+          "type": "text"
+        },
+        "gender_text": {
+          "column": "gender",
+          "type": "text"
+        },
+        "gluten_text": {
+          "column": "gluten",
+          "type": "text"
+        },
+        "goals_text": {
+          "column": "goals",
+          "type": "text"
+        },
+        "hobbies_text": {
+          "column": "hobbies",
+          "type": "text"
+        },
+        "hospital_admission_assistance_text": {
+          "column": "hospital_admission_assistance",
+          "type": "text"
+        },
+        "hospital_admission_history_text": {
+          "column": "hospital_admission_history",
+          "type": "text"
+        },
+        "interpreter_text": {
+          "column": "interpreter",
+          "type": "text"
+        },
+        "knightingale_signature_image": {
+          "column": "knightingale_signature",
+          "type": "image"
+        },
+        "language_text": {
+          "column": "language",
+          "type": "text"
+        },
+        "legal_issues_text": {
+          "column": "legal_issues",
+          "type": "text"
+        },
+        "living_situation_option_living_situation": {
+          "column": "living_situation",
+          "type": "option.living_situation"
+        },
+        "manual_handling_list_option_manual_handling": {
+          "column": "manual_handling",
+          "type": "list.option.manual_handling"
+        },
+        "medication_assistance_text": {
+          "column": "medication_assistance",
+          "type": "text"
+        },
+        "medications_text": {
+          "column": "medications",
+          "type": "text"
+        },
+        "mental_health_list_option_mental_health": {
+          "column": "mental_health",
+          "type": "list.option.mental_health"
+        },
+        "mental_medications_text": {
+          "column": "mental_medications",
+          "type": "text"
+        },
+        "mobility_list_option_mobility": {
+          "column": "mobility",
+          "type": "list.option.mobility"
+        },
+        "ndis_funding_option_ndis_funding": {
+          "column": "ndis_funding",
+          "type": "option.ndis_funding"
+        },
+        "other_info_text": {
+          "column": "other_info",
+          "type": "text"
+        },
+        "outcomes_text": {
+          "column": "outcomes",
+          "type": "text"
+        },
+        "participant_signature_image": {
+          "column": "participant_signature",
+          "type": "image"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "personal_care_list_option_personal_care": {
+          "column": "personal_care",
+          "type": "list.option.personal_care"
+        },
+        "physical_health_list_option_physical_health": {
+          "column": "physical_health",
+          "type": "list.option.physical_health"
+        },
+        "physical_medications_text": {
+          "column": "physical_medications",
+          "type": "text"
+        },
+        "plan_manager_custom_plan_manager": {
+          "column": "plan_manager",
+          "type": "custom.plan_manager"
+        },
+        "preferred_communication_option_communication_method": {
+          "column": "communication_method",
+          "type": "option.communication_method"
+        },
+        "primary_diagnosis_text": {
+          "column": "primary_diagnosis",
+          "type": "text"
+        },
+        "religion_text": {
+          "column": "religion",
+          "type": "text"
+        },
+        "representative_signature_image": {
+          "column": "representative_signature",
+          "type": "image"
+        },
+        "secondary_diagnosis_text": {
+          "column": "secondary_diagnosis",
+          "type": "text"
+        },
+        "services_list_option_service_required": {
+          "column": "services",
+          "type": "list.option.service_required"
+        },
+        "signature_date_date": {
+          "column": "signature_date",
+          "type": "date"
+        },
+        "staff_age_text": {
+          "column": "carer_age",
+          "type": "text"
+        },
+        "staff_gender_option_sex": {
+          "column": "carer_gender",
+          "type": "option.sex"
+        },
+        "support_needs_text": {
+          "column": "support_needs",
+          "type": "text"
+        },
+        "twelve_month_goals_text": {
+          "column": "twelve_month_goals",
+          "type": "text"
+        },
+        "unique_you_text": {
+          "column": "unique_you",
+          "type": "text"
+        },
+        "vegan_text": {
+          "column": "vegan",
+          "type": "text"
+        },
+        "vegetarian_text": {
+          "column": "vegetarian",
+          "type": "text"
+        }
+      }
+    },
+    "interests": {
+      "table": "interests",
+      "fields": {
+        "animal_text": {
+          "column": "animal",
+          "type": "text"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "education_text": {
+          "column": "education",
+          "type": "text"
+        },
+        "fav_foods_text": {
+          "column": "fav_foods",
+          "type": "text"
+        },
+        "film_text": {
+          "column": "film",
+          "type": "text"
+        },
+        "hobbies_text": {
+          "column": "hobbies",
+          "type": "text"
+        },
+        "music_text": {
+          "column": "music",
+          "type": "text"
+        },
+        "musical_genre_text": {
+          "column": "musical_genre",
+          "type": "text"
+        },
+        "past_story_text": {
+          "column": "past_story",
+          "type": "text"
+        },
+        "pets_text": {
+          "column": "pets",
+          "type": "text"
+        },
+        "skills_text": {
+          "column": "skills",
+          "type": "text"
+        },
+        "sport_text": {
+          "column": "sport",
+          "type": "text"
+        },
+        "team_text": {
+          "column": "team",
+          "type": "text"
+        },
+        "tv_film_text": {
+          "column": "tv_film",
+          "type": "text"
+        },
+        "why_care_text": {
+          "column": "why_care",
+          "type": "text"
+        }
+      }
+    },
+    "invoice": {
+      "table": "invoice",
+      "fields": {
+        "amount_number": {
+          "column": "amount",
+          "type": "number"
+        },
+        "date_date": {
+          "column": "period_ending",
+          "type": "date"
+        },
+        "invoice_file_file": {
+          "column": "invoice_file",
+          "type": "file"
+        },
+        "invoice_image_file": {
+          "column": "invoice_image",
+          "type": "file"
+        },
+        "invoice_name_user": {
+          "column": "invoice_name",
+          "type": "user"
+        },
+        "invoice_number_text": {
+          "column": "invoice_number",
+          "type": "text"
+        },
+        "location_custom_location1": {
+          "column": "location",
+          "type": "custom.location1"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "status_boolean": {
+          "column": "status",
+          "type": "boolean"
+        }
+      }
+    },
+    "location1": {
+      "table": "location1",
+      "fields": {
+        "address_geographic_address": {
+          "column": "address",
+          "type": "geographic_address"
+        },
+        "details_text": {
+          "column": "details",
+          "type": "text"
+        },
+        "email_text": {
+          "column": "email",
+          "type": "text"
+        },
+        "handbook_file": {
+          "column": "handbook",
+          "type": "file"
+        },
+        "invoiced_through_date_date": {
+          "column": "invoiced_through_date",
+          "type": "date"
+        },
+        "location_option_location0": {
+          "column": "location",
+          "type": "option.location0"
+        },
+        "name_text": {
+          "column": "name",
+          "type": "text"
+        },
+        "ndis__text": {
+          "column": "ndis",
+          "type": "text"
+        },
+        "no_of_residents_number": {
+          "column": "beds",
+          "type": "number"
+        }
+      }
+    },
+    "login": {
+      "table": "login",
+      "fields": {
+        "location_custom_location1": {
+          "column": "location",
+          "type": "custom.location1"
+        },
+        "password_text": {
+          "column": "password",
+          "type": "text"
+        },
+        "username_text": {
+          "column": "username",
+          "type": "text"
+        }
+      }
+    },
+    "medication_chart": {
+      "table": "medication_chart",
+      "fields": {
+        "date_list_date": {
+          "column": "date",
+          "type": "list.date"
+        },
+        "meds_text": {
+          "column": "meds",
+          "type": "text"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        }
+      }
+    },
+    "message": {
+      "table": "message",
+      "fields": {
+        "attachment_file": {
+          "column": "attachment",
+          "type": "file"
+        },
+        "comms_book_custom_comms_book": {
+          "column": "comms_book",
+          "type": "custom.comms_book"
+        },
+        "content_text": {
+          "column": "content",
+          "type": "text"
+        },
+        "knowledge_base_boolean": {
+          "column": "knowledge_base",
+          "type": "boolean"
+        },
+        "sender_text": {
+          "column": "sender",
+          "type": "text"
+        },
+        "thread_custom_thread": {
+          "column": "thread",
+          "type": "custom.thread"
+        }
+      }
+    },
+    "metrics": {
+      "table": "metrics",
+      "fields": {
+        "acu_join_bottom_number": {
+          "column": "acu_join_bottom",
+          "type": "number"
+        },
+        "acu_join_top_number": {
+          "column": "acu_join_top",
+          "type": "number"
+        },
+        "acu_landings_number": {
+          "column": "acu_landings",
+          "type": "number"
+        },
+        "acu_sign_up_number": {
+          "column": "acu_sign_up",
+          "type": "number"
+        },
+        "graduate_join_bottom_number": {
+          "column": "graduate_join_bottom",
+          "type": "number"
+        },
+        "graduate_join_top_number": {
+          "column": "graduate_join_top",
+          "type": "number"
+        },
+        "graduate_landings_number": {
+          "column": "graduate_landings",
+          "type": "number"
+        },
+        "graduate_sign_up_text": {
+          "column": "graduate_sign_up",
+          "type": "text"
+        },
+        "join_bottom_number": {
+          "column": "join_bottom",
+          "type": "number"
+        },
+        "join_number": {
+          "column": "join_top",
+          "type": "number"
+        },
+        "landings_number": {
+          "column": "landings",
+          "type": "number"
+        },
+        "sign_up_number": {
+          "column": "sign_up",
+          "type": "number"
+        },
+        "user_user": {
+          "column": "user_value",
+          "type": "user"
+        }
+      }
+    },
+    "ndis": {
+      "table": "ndis",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "expiry_date_date": {
+          "column": "expiry_date",
+          "type": "date"
+        },
+        "id_number_text": {
+          "column": "id_number",
+          "type": "text"
+        }
+      }
+    },
+    "ndis_pricing": {
+      "table": "ndis_pricing",
+      "fields": {
+        "carer_pay_name_text": {
+          "column": "carer_pay_name",
+          "type": "text"
+        },
+        "carer_pay_number": {
+          "column": "carer_pay",
+          "type": "number"
+        },
+        "hourly_revenue_number": {
+          "column": "hourly_revenue",
+          "type": "number"
+        },
+        "item_name_text": {
+          "column": "item_name",
+          "type": "text"
+        },
+        "item_no_text": {
+          "column": "item_no",
+          "type": "text"
+        },
+        "item_price_number": {
+          "column": "item_price",
+          "type": "number"
+        }
+      }
+    },
+    "ndis_quarter": {
+      "table": "ndis_quarter",
+      "fields": {
+        "amount_number": {
+          "column": "amount",
+          "type": "number"
+        },
+        "days_remaining_number": {
+          "column": "remaining_days",
+          "type": "number"
+        },
+        "days_to_quarter_end_number": {
+          "column": "days_to_quarter_end",
+          "type": "number"
+        },
+        "end_date": {
+          "column": "end_value",
+          "type": "date"
+        },
+        "end_days_number": {
+          "column": "end_days",
+          "type": "number"
+        },
+        "hours_per_shift_number": {
+          "column": "hours_per_week",
+          "type": "number"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "quarter_days_number": {
+          "column": "quarter_days",
+          "type": "number"
+        },
+        "quarter_number": {
+          "column": "quarter",
+          "type": "number"
+        },
+        "rate_number": {
+          "column": "rate",
+          "type": "number"
+        },
+        "remaining_number": {
+          "column": "remaining_budget",
+          "type": "number"
+        },
+        "spent_number": {
+          "column": "spent",
+          "type": "number"
+        },
+        "start_date": {
+          "column": "start",
+          "type": "date"
+        }
+      }
+    },
+    "payslip": {
+      "table": "payslip",
+      "fields": {
+        "address_geographic_address": {
+          "column": "address",
+          "type": "geographic_address"
+        },
+        "amount_number": {
+          "column": "gross_pay",
+          "type": "number"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "hours_worked_number": {
+          "column": "hours_worked",
+          "type": "number"
+        },
+        "net_amount_number": {
+          "column": "net_pay",
+          "type": "number"
+        },
+        "pat_period_start_date": {
+          "column": "pay_period_start",
+          "type": "date"
+        },
+        "pay_period_ending_date": {
+          "column": "pay_period_ending",
+          "type": "date"
+        },
+        "period_ending_date": {
+          "column": "payment_date",
+          "type": "date"
+        },
+        "role_option_roles": {
+          "column": "role",
+          "type": "option.roles"
+        },
+        "super_number": {
+          "column": "super",
+          "type": "number"
+        },
+        "tax_number": {
+          "column": "tax",
+          "type": "number"
+        },
+        "travel_number": {
+          "column": "travel",
+          "type": "number"
+        },
+        "ytd_gross_number": {
+          "column": "ytd_gross",
+          "type": "number"
+        },
+        "ytd_net_number": {
+          "column": "ytd_net",
+          "type": "number"
+        },
+        "ytd_tax_number": {
+          "column": "ytd_tax",
+          "type": "number"
+        }
+      }
+    },
+    "plan_manager": {
+      "table": "plan_manager",
+      "fields": {
+        "address1_geographic_address": {
+          "column": "address",
+          "type": "geographic_address"
+        },
+        "email_text": {
+          "column": "email",
+          "type": "text"
+        },
+        "name_text": {
+          "column": "name",
+          "type": "text"
+        },
+        "phone_text": {
+          "column": "phone",
+          "type": "text"
+        }
+      }
+    },
+    "police_check": {
+      "table": "police_check",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "expiry_date_date": {
+          "column": "expiry_date",
+          "type": "date"
+        },
+        "image_file": {
+          "column": "image",
+          "type": "file"
+        },
+        "passed_boolean": {
+          "column": "passed",
+          "type": "boolean"
+        },
+        "reference_number_text": {
+          "column": "reference_number",
+          "type": "text"
+        }
+      }
+    },
+    "progress_notes": {
+      "table": "progress_notes",
+      "fields": {
+        "activities_of_daily_living_text": {
+          "column": "activities_of_daily_living",
+          "type": "text"
+        },
+        "ai_analysed_boolean": {
+          "column": "ai_analysed",
+          "type": "boolean"
+        },
+        "ai_status_option_ai_status": {
+          "column": "ai_status",
+          "type": "option.ai_status"
+        },
+        "ai_summary_text": {
+          "column": "ai_summary",
+          "type": "text"
+        },
+        "allied_health_text": {
+          "column": "allied_health",
+          "type": "text"
+        },
+        "best_day_text": {
+          "column": "best_day",
+          "type": "text"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "comms_text": {
+          "column": "comms",
+          "type": "text"
+        },
+        "coordinator_user": {
+          "column": "coordinator",
+          "type": "user"
+        },
+        "date_date": {
+          "column": "date",
+          "type": "date"
+        },
+        "fluid_intake_text": {
+          "column": "fluid_intake",
+          "type": "text"
+        },
+        "food_intake_text": {
+          "column": "food_intake",
+          "type": "text"
+        },
+        "general_mood_text": {
+          "column": "general_mood",
+          "type": "text"
+        },
+        "housework_text": {
+          "column": "housework",
+          "type": "text"
+        },
+        "maintenance_text": {
+          "column": "maintenance",
+          "type": "text"
+        },
+        "medical_appointments_text": {
+          "column": "medical_appointments",
+          "type": "text"
+        },
+        "outings_text": {
+          "column": "outings",
+          "type": "text"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "pics_list_image": {
+          "column": "pics",
+          "type": "list.image"
+        },
+        "progress_note_text": {
+          "column": "progress_note",
+          "type": "text"
+        },
+        "shift_custom_shift": {
+          "column": "shift",
+          "type": "custom.shift"
+        },
+        "submit_boolean": {
+          "column": "submit",
+          "type": "boolean"
+        },
+        "summary_text": {
+          "column": "summary",
+          "type": "text"
+        }
+      }
+    },
+    "qualifications": {
+      "table": "qualifications",
+      "fields": {
+        "ahpra_list_file": {
+          "column": "ahpra",
+          "type": "list.file"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "expiry_date_date": {
+          "column": "expiry",
+          "type": "date"
+        },
+        "qualifications_list_option_skills": {
+          "column": "qualifications",
+          "type": "list.option.skills"
+        },
+        "registration_number_text": {
+          "column": "registration_number",
+          "type": "text"
+        },
+        "role1_list_option_roles": {
+          "column": "role",
+          "type": "list.option.roles"
+        },
+        "transcript_list_file": {
+          "column": "transcript",
+          "type": "list.file"
+        }
+      }
+    },
+    "questionnaire_session": {
+      "table": "questionnaire_session",
+      "fields": {
+        "call_sid_text": {
+          "column": "call_sid",
+          "type": "text"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "completed_date": {
+          "column": "completed",
+          "type": "date"
+        },
+        "heads_up_sent_date": {
+          "column": "heads_up_sent",
+          "type": "date"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "scheduled_call_date": {
+          "column": "scheduled_call",
+          "type": "date"
+        },
+        "section_option_questionnaire_section": {
+          "column": "section",
+          "type": "option.questionnaire_section"
+        },
+        "shift_custom_shift": {
+          "column": "shift",
+          "type": "custom.shift"
+        },
+        "skipped_fields_text": {
+          "column": "skipped_fields",
+          "type": "text"
+        },
+        "started_date": {
+          "column": "started",
+          "type": "date"
+        },
+        "status_option_questionnaire_status": {
+          "column": "status",
+          "type": "option.questionnaire_status"
+        },
+        "transcript_text": {
+          "column": "transcript",
+          "type": "text"
+        }
+      }
+    },
+    "quote": {
+      "table": "quote",
+      "fields": {
+        "quote_text": {
+          "column": "quote",
+          "type": "text"
+        }
+      }
+    },
+    "recurring": {
+      "table": "recurring",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "coordinator_user": {
+          "column": "coordinator",
+          "type": "user"
+        },
+        "day_text": {
+          "column": "day",
+          "type": "text"
+        },
+        "end_text": {
+          "column": "end_value",
+          "type": "text"
+        },
+        "hours_number": {
+          "column": "hours",
+          "type": "number"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "shift_custom_shift": {
+          "column": "shift",
+          "type": "custom.shift"
+        },
+        "start_text": {
+          "column": "start",
+          "type": "text"
+        }
+      }
+    },
+    "reporting": {
+      "table": "reporting",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "invoice_amount_number": {
+          "column": "invoice_amount",
+          "type": "number"
+        },
+        "invoice_date_date": {
+          "column": "invoice_date",
+          "type": "date"
+        },
+        "invoice_number_text": {
+          "column": "invoice_number",
+          "type": "text"
+        },
+        "qualification_option_roles": {
+          "column": "qualification",
+          "type": "option.roles"
+        },
+        "rate_per_hour_number": {
+          "column": "rate_per_hour",
+          "type": "number"
+        },
+        "shift_custom_shift": {
+          "column": "shift",
+          "type": "custom.shift"
+        },
+        "shift_date_date": {
+          "column": "shift_date",
+          "type": "date"
+        },
+        "shift_end_time_text": {
+          "column": "end_time",
+          "type": "text"
+        },
+        "shift_hours_number": {
+          "column": "shift_hours",
+          "type": "number"
+        },
+        "shift_start_time_text": {
+          "column": "start_time",
+          "type": "text"
+        },
+        "site_text": {
+          "column": "wintringham_site",
+          "type": "text"
+        }
+      }
+    },
+    "residential_pricings": {
+      "table": "residential_pricings",
+      "fields": {
+        "carer_pay_number": {
+          "column": "carer_pay",
+          "type": "number"
+        },
+        "hourly_revenue_number": {
+          "column": "hourly_revenue",
+          "type": "number"
+        },
+        "name_text": {
+          "column": "name",
+          "type": "text"
+        },
+        "rate_number": {
+          "column": "rate",
+          "type": "number"
+        }
+      }
+    },
+    "review": {
+      "table": "review",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "client_user": {
+          "column": "client",
+          "type": "user"
+        },
+        "comment_text": {
+          "column": "private",
+          "type": "text"
+        },
+        "conduct_to_residents_text": {
+          "column": "public",
+          "type": "text"
+        },
+        "descriptors_list_text": {
+          "column": "descriptors",
+          "type": "list.text"
+        },
+        "late_time_number": {
+          "column": "late_time",
+          "type": "number"
+        },
+        "location_custom_location1": {
+          "column": "location",
+          "type": "custom.location1"
+        },
+        "on_time_boolean": {
+          "column": "on_time",
+          "type": "boolean"
+        },
+        "rating_number": {
+          "column": "rating",
+          "type": "number"
+        },
+        "shift_custom_shift": {
+          "column": "shift",
+          "type": "custom.shift"
+        },
+        "welcome_boolean": {
+          "column": "welcome",
+          "type": "boolean"
+        }
+      }
+    },
+    "risk_assessment": {
+      "table": "risk_assessment",
+      "fields": {
+        "accidental_movement_list_option_accidental_movement": {
+          "column": "accidental_movement",
+          "type": "list.option.accidental_movement"
+        },
+        "accidental_movement_other_text": {
+          "column": "accidental_movement_other",
+          "type": "text"
+        },
+        "communication_text": {
+          "column": "communication",
+          "type": "text"
+        },
+        "environmental_risks_list_option_environmental": {
+          "column": "environmental_risks",
+          "type": "list.option.environmental"
+        },
+        "environmental_risks_other_text": {
+          "column": "environmental_risks_other",
+          "type": "text"
+        },
+        "financial_risks_list_option_financial_risks": {
+          "column": "financial_risks",
+          "type": "list.option.financial_risks"
+        },
+        "financial_risks_other_text": {
+          "column": "financial_risks_other",
+          "type": "text"
+        },
+        "health_safety_impact_text": {
+          "column": "health_safety_impact",
+          "type": "text"
+        },
+        "hr10_boolean": {
+          "column": "hr10",
+          "type": "boolean"
+        },
+        "hr11_boolean": {
+          "column": "hr11",
+          "type": "boolean"
+        },
+        "hr12_boolean": {
+          "column": "hr12",
+          "type": "boolean"
+        },
+        "hr13_boolean": {
+          "column": "hr13",
+          "type": "boolean"
+        },
+        "hr14_boolean": {
+          "column": "hr14",
+          "type": "boolean"
+        },
+        "hr15_boolean": {
+          "column": "hr15",
+          "type": "boolean"
+        },
+        "hr16_boolean": {
+          "column": "hr16",
+          "type": "boolean"
+        },
+        "hr17_boolean": {
+          "column": "hr17",
+          "type": "boolean"
+        },
+        "hr18_boolean": {
+          "column": "hr18",
+          "type": "boolean"
+        },
+        "hr19_boolean": {
+          "column": "hr19",
+          "type": "boolean"
+        },
+        "hr1_boolean": {
+          "column": "dangerous_visitors",
+          "type": "boolean"
+        },
+        "hr20_boolean": {
+          "column": "hr20",
+          "type": "boolean"
+        },
+        "hr21_boolean": {
+          "column": "hr21",
+          "type": "boolean"
+        },
+        "hr22_boolean": {
+          "column": "hr22",
+          "type": "boolean"
+        },
+        "hr23_boolean": {
+          "column": "hr23",
+          "type": "boolean"
+        },
+        "hr24_boolean": {
+          "column": "hr24",
+          "type": "boolean"
+        },
+        "hr25_boolean": {
+          "column": "hr25",
+          "type": "boolean"
+        },
+        "hr26_boolean": {
+          "column": "hr26",
+          "type": "boolean"
+        },
+        "hr27_boolean": {
+          "column": "hr27",
+          "type": "boolean"
+        },
+        "hr28_boolean": {
+          "column": "hr28",
+          "type": "boolean"
+        },
+        "hr29_boolean": {
+          "column": "hr29",
+          "type": "boolean"
+        },
+        "hr2_boolean": {
+          "column": "hr2",
+          "type": "boolean"
+        },
+        "hr30_boolean": {
+          "column": "hr30",
+          "type": "boolean"
+        },
+        "hr31_boolean": {
+          "column": "hr31",
+          "type": "boolean"
+        },
+        "hr32_boolean": {
+          "column": "hr32",
+          "type": "boolean"
+        },
+        "hr33_boolean": {
+          "column": "hr33",
+          "type": "boolean"
+        },
+        "hr34_boolean": {
+          "column": "hr34",
+          "type": "boolean"
+        },
+        "hr35_boolean": {
+          "column": "hr35",
+          "type": "boolean"
+        },
+        "hr36_boolean": {
+          "column": "hr36",
+          "type": "boolean"
+        },
+        "hr37_boolean": {
+          "column": "hr37",
+          "type": "boolean"
+        },
+        "hr38_boolean": {
+          "column": "hr38",
+          "type": "boolean"
+        },
+        "hr39_boolean": {
+          "column": "hr39",
+          "type": "boolean"
+        },
+        "hr3_boolean": {
+          "column": "hr3",
+          "type": "boolean"
+        },
+        "hr40_boolean": {
+          "column": "hr40",
+          "type": "boolean"
+        },
+        "hr41_boolean": {
+          "column": "hr41",
+          "type": "boolean"
+        },
+        "hr42_boolean": {
+          "column": "hr42",
+          "type": "boolean"
+        },
+        "hr43_boolean": {
+          "column": "hr43",
+          "type": "boolean"
+        },
+        "hr44_boolean": {
+          "column": "hr44",
+          "type": "boolean"
+        },
+        "hr45_boolean": {
+          "column": "hr45",
+          "type": "boolean"
+        },
+        "hr46_boolean": {
+          "column": "hr46",
+          "type": "boolean"
+        },
+        "hr47_boolean": {
+          "column": "hr47",
+          "type": "boolean"
+        },
+        "hr48_boolean": {
+          "column": "hr48",
+          "type": "boolean"
+        },
+        "hr49_boolean": {
+          "column": "hr49",
+          "type": "boolean"
+        },
+        "hr4_boolean": {
+          "column": "hr4",
+          "type": "boolean"
+        },
+        "hr50_boolean": {
+          "column": "hr50",
+          "type": "boolean"
+        },
+        "hr51_boolean": {
+          "column": "hr51",
+          "type": "boolean"
+        },
+        "hr52_boolean": {
+          "column": "hr52",
+          "type": "boolean"
+        },
+        "hr53_boolean": {
+          "column": "hr53",
+          "type": "boolean"
+        },
+        "hr54_boolean": {
+          "column": "hr54",
+          "type": "boolean"
+        },
+        "hr55_boolean": {
+          "column": "hr55",
+          "type": "boolean"
+        },
+        "hr56_boolean": {
+          "column": "hr56",
+          "type": "boolean"
+        },
+        "hr57_boolean": {
+          "column": "hr57",
+          "type": "boolean"
+        },
+        "hr58_boolean": {
+          "column": "hr58",
+          "type": "boolean"
+        },
+        "hr59_boolean": {
+          "column": "hr59",
+          "type": "boolean"
+        },
+        "hr5_boolean": {
+          "column": "hr5",
+          "type": "boolean"
+        },
+        "hr6_boolean": {
+          "column": "hr6",
+          "type": "boolean"
+        },
+        "hr7_boolean": {
+          "column": "hr7",
+          "type": "boolean"
+        },
+        "hr8_boolean": {
+          "column": "hr8",
+          "type": "boolean"
+        },
+        "hr9_boolean": {
+          "column": "hr9",
+          "type": "boolean"
+        },
+        "intake_custom_intake_form": {
+          "column": "intake",
+          "type": "custom.intake_form"
+        },
+        "manual_handling_list_option_manual_handling": {
+          "column": "manual_handling",
+          "type": "list.option.manual_handling"
+        },
+        "manual_handling_other_text": {
+          "column": "manual_handling_other",
+          "type": "text"
+        },
+        "mental_health_list_option_mental_health": {
+          "column": "mental_health",
+          "type": "list.option.mental_health"
+        },
+        "nutrition_list_option_nutrition": {
+          "column": "nutrition",
+          "type": "list.option.nutrition"
+        },
+        "nutrition_other_text": {
+          "column": "nutrition_other",
+          "type": "text"
+        },
+        "other_risks_text": {
+          "column": "other_risks",
+          "type": "text"
+        },
+        "participant_signature_image": {
+          "column": "participant_signature",
+          "type": "image"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "personal_care_list_option_personal_care": {
+          "column": "personal_care",
+          "type": "list.option.personal_care"
+        },
+        "personal_contact_text": {
+          "column": "personal_contact",
+          "type": "text"
+        },
+        "persons_involved_text": {
+          "column": "persons_involved",
+          "type": "text"
+        },
+        "physical_health_list_option_physical_health": {
+          "column": "physical_health",
+          "type": "list.option.physical_health"
+        },
+        "physical_mobility_text": {
+          "column": "physical_mobility",
+          "type": "text"
+        },
+        "provider_timing_text": {
+          "column": "provider_timing",
+          "type": "text"
+        },
+        "reliance_text": {
+          "column": "reliance",
+          "type": "text"
+        },
+        "signature_date_date": {
+          "column": "signature_date",
+          "type": "date"
+        },
+        "social_risks_list_option_social_risks": {
+          "column": "social_risks",
+          "type": "list.option.social_risks"
+        },
+        "social_risks_other_text": {
+          "column": "social_risks_other",
+          "type": "text"
+        },
+        "sole_worker_text": {
+          "column": "sole_worker",
+          "type": "text"
+        },
+        "substance_use_list_option_substance_use": {
+          "column": "substance_use",
+          "type": "list.option.substance_use"
+        },
+        "substance_use_other_text": {
+          "column": "substance_use_other",
+          "type": "text"
+        },
+        "supervision_timing_text": {
+          "column": "supervision_timing",
+          "type": "text"
+        }
+      }
+    },
+    "risk_management_plan": {
+      "table": "risk_management_plan",
+      "fields": {
+        "others_text": {
+          "column": "others",
+          "type": "text"
+        },
+        "participant1_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "participant_impact_text": {
+          "column": "participant_impact",
+          "type": "text"
+        },
+        "person_responsible_text": {
+          "column": "person_responsible",
+          "type": "text"
+        },
+        "review_date_date": {
+          "column": "review_date",
+          "type": "date"
+        },
+        "risk_text": {
+          "column": "risk",
+          "type": "text"
+        },
+        "treatment_text": {
+          "column": "treatment",
+          "type": "text"
+        }
+      }
+    },
+    "service_agreement": {
+      "table": "service_agreement",
+      "fields": {
+        "participant_signature_image": {
+          "column": "participant_signature",
+          "type": "image"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "representative_signature_image": {
+          "column": "representative_signature",
+          "type": "image"
+        },
+        "representative_text": {
+          "column": "representative",
+          "type": "text"
+        },
+        "signed_date_date": {
+          "column": "signed_date",
+          "type": "date"
+        },
+        "support_1_custom_support_arrangement": {
+          "column": "support_1",
+          "type": "custom.support_arrangement"
+        },
+        "support_2_custom_support_arrangement": {
+          "column": "support_2",
+          "type": "custom.support_arrangement"
+        },
+        "support_3_custom_support_arrangement": {
+          "column": "support_3",
+          "type": "custom.support_arrangement"
+        },
+        "support_4_custom_support_arrangement": {
+          "column": "support_4",
+          "type": "custom.support_arrangement"
+        },
+        "support_5_custom_support_arrangement": {
+          "column": "support_5",
+          "type": "custom.support_arrangement"
+        }
+      }
+    },
+    "shift": {
+      "table": "shift",
+      "fields": {
+        "abn_text": {
+          "column": "abn",
+          "type": "text"
+        },
+        "accepted_boolean": {
+          "column": "accepted",
+          "type": "boolean"
+        },
+        "address_geographic_address": {
+          "column": "address",
+          "type": "geographic_address"
+        },
+        "attend_end_date": {
+          "column": "attend_end",
+          "type": "date"
+        },
+        "attended_time_date": {
+          "column": "attend_start",
+          "type": "date"
+        },
+        "booked_by_text": {
+          "column": "booked_by",
+          "type": "text"
+        },
+        "cancelled_boolean": {
+          "column": "cancelled",
+          "type": "boolean"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "check_in_time_date": {
+          "column": "check_in_time",
+          "type": "date"
+        },
+        "check_out_time_date": {
+          "column": "check_out_time",
+          "type": "date"
+        },
+        "coordinator_user": {
+          "column": "coordinator",
+          "type": "user"
+        },
+        "csv_boolean": {
+          "column": "csv",
+          "type": "boolean"
+        },
+        "date_date": {
+          "column": "date",
+          "type": "date"
+        },
+        "duties_custom_shift_duties": {
+          "column": "duties",
+          "type": "custom.shift_duties"
+        },
+        "end_time_number": {
+          "column": "end_time",
+          "type": "number"
+        },
+        "expired_boolean": {
+          "column": "attended",
+          "type": "boolean"
+        },
+        "fee_number": {
+          "column": "fee",
+          "type": "number"
+        },
+        "gst_code_text": {
+          "column": "gst_code",
+          "type": "text"
+        },
+        "hours_number": {
+          "column": "hours",
+          "type": "number"
+        },
+        "incident_custom_incident": {
+          "column": "incident",
+          "type": "custom.incident"
+        },
+        "invoice_custom_invoice": {
+          "column": "invoice",
+          "type": "custom.invoice"
+        },
+        "invoiced_boolean": {
+          "column": "invoiced",
+          "type": "boolean"
+        },
+        "location_custom_location1": {
+          "column": "location",
+          "type": "custom.location1"
+        },
+        "ndis_custom_ndis_pricing": {
+          "column": "ndis_pricing",
+          "type": "custom.ndis_pricing"
+        },
+        "needs_invoice_boolean": {
+          "column": "needs_invoice",
+          "type": "boolean"
+        },
+        "notes_text": {
+          "column": "notes",
+          "type": "text"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "progress_note_custom_progress_notes": {
+          "column": "progress_note",
+          "type": "custom.progress_notes"
+        },
+        "rate_number": {
+          "column": "rate",
+          "type": "number"
+        },
+        "receipts_list_file": {
+          "column": "receipts",
+          "type": "list.file"
+        },
+        "receipts_total_number": {
+          "column": "receipts_total",
+          "type": "number"
+        },
+        "recurring_text": {
+          "column": "recurring",
+          "type": "text"
+        },
+        "registration_text": {
+          "column": "registration",
+          "type": "text"
+        },
+        "reporting_custom_reporting": {
+          "column": "reporting",
+          "type": "custom.reporting"
+        },
+        "res_pricing__custom_residential_pricings": {
+          "column": "res_pricing",
+          "type": "custom.residential_pricings"
+        },
+        "revenue_number": {
+          "column": "revenue",
+          "type": "number"
+        },
+        "roles_list_option_roles": {
+          "column": "roles",
+          "type": "list.option.roles"
+        },
+        "start_time_number": {
+          "column": "start_time",
+          "type": "number"
+        },
+        "supervisor_text": {
+          "column": "supervisor",
+          "type": "text"
+        },
+        "time_option_shift_time": {
+          "column": "time",
+          "type": "option.shift_time"
+        },
+        "wage_number": {
+          "column": "wage",
+          "type": "number"
+        }
+      }
+    },
+    "shift_duties": {
+      "table": "shift_duties",
+      "fields": {
+        "done_boolean": {
+          "column": "done",
+          "type": "boolean"
+        },
+        "duty1_text": {
+          "column": "duty",
+          "type": "text"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        }
+      }
+    },
+    "shift_logs": {
+      "table": "shift_logs",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "comments_text": {
+          "column": "comments",
+          "type": "text"
+        },
+        "date_date": {
+          "column": "date",
+          "type": "date"
+        },
+        "distance_number": {
+          "column": "distance",
+          "type": "number"
+        },
+        "done_boolean": {
+          "column": "done",
+          "type": "boolean"
+        },
+        "end_location_geographic_address": {
+          "column": "end_location",
+          "type": "geographic_address"
+        },
+        "food_intake_text": {
+          "column": "food_intake",
+          "type": "text"
+        },
+        "image_after_file": {
+          "column": "image_after",
+          "type": "file"
+        },
+        "image_before_file": {
+          "column": "image_before",
+          "type": "file"
+        },
+        "invoiced_boolean": {
+          "column": "invoiced",
+          "type": "boolean"
+        },
+        "log_type_option_log_type": {
+          "column": "log_type",
+          "type": "option.log_type"
+        },
+        "medication_type_text": {
+          "column": "medication_type",
+          "type": "text"
+        },
+        "odometer_end_number": {
+          "column": "odometer_end",
+          "type": "number"
+        },
+        "odometer_start_number": {
+          "column": "odometer_start",
+          "type": "number"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "shift_custom_shift": {
+          "column": "shift",
+          "type": "custom.shift"
+        },
+        "start_location_geographic_address": {
+          "column": "start_location",
+          "type": "geographic_address"
+        },
+        "time_text": {
+          "column": "time",
+          "type": "text"
+        }
+      }
+    },
+    "shifts_missed": {
+      "table": "shifts_missed",
+      "fields": {
+        "date_date": {
+          "column": "date",
+          "type": "date"
+        },
+        "location_custom_location1": {
+          "column": "location",
+          "type": "custom.location1"
+        },
+        "rate_custom_residential_pricings": {
+          "column": "rate",
+          "type": "custom.residential_pricings"
+        },
+        "reason_text": {
+          "column": "reason",
+          "type": "text"
+        },
+        "shift_option_shift_time": {
+          "column": "shift",
+          "type": "option.shift_time"
+        }
+      }
+    },
+    "superannuation": {
+      "table": "superannuation",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "fund_acc_name_text": {
+          "column": "fund_acc_name",
+          "type": "text"
+        },
+        "fund_address_geographic_address": {
+          "column": "fund_address",
+          "type": "geographic_address"
+        },
+        "fund_bsb_text": {
+          "column": "fund_abn",
+          "type": "text"
+        },
+        "fund_esa_text": {
+          "column": "fund_esa",
+          "type": "text"
+        },
+        "fund_name_text": {
+          "column": "fund_name",
+          "type": "text"
+        },
+        "member_no__text": {
+          "column": "member_no",
+          "type": "text"
+        },
+        "signature_image": {
+          "column": "signature",
+          "type": "image"
+        },
+        "smsf_doc_file": {
+          "column": "smsf_doc",
+          "type": "file"
+        },
+        "super_choice_text": {
+          "column": "super_choice",
+          "type": "text"
+        },
+        "tfn_custom_tax_file_number_declaration": {
+          "column": "tfn",
+          "type": "custom.tax_file_number_declaration"
+        },
+        "usi_text": {
+          "column": "fund_usi",
+          "type": "text"
+        }
+      }
+    },
+    "support_arrangement": {
+      "table": "support_arrangement",
+      "fields": {
+        "hours_number": {
+          "column": "hours",
+          "type": "number"
+        },
+        "ndis_pricing_custom_ndis_pricing": {
+          "column": "ndis_pricing",
+          "type": "custom.ndis_pricing"
+        },
+        "no___number": {
+          "column": "no",
+          "type": "number"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "service_agreement_custom_service_agreement": {
+          "column": "service_agreement",
+          "type": "custom.service_agreement"
+        },
+        "total_number": {
+          "column": "total",
+          "type": "number"
+        }
+      }
+    },
+    "support_plan": {
+      "table": "support_plan",
+      "fields": {
+        "emerging_health_text": {
+          "column": "emerging_health",
+          "type": "text"
+        },
+        "gp_text": {
+          "column": "gp",
+          "type": "text"
+        },
+        "participant_signature_image": {
+          "column": "participant_signature",
+          "type": "image"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "signed_date_date": {
+          "column": "signed_date",
+          "type": "date"
+        },
+        "urgent_health_text": {
+          "column": "urgent_health",
+          "type": "text"
+        }
+      }
+    },
+    "survey": {
+      "table": "survey",
+      "fields": {
+        "additional_questions_text": {
+          "column": "additional_questions",
+          "type": "text"
+        },
+        "age_text": {
+          "column": "age",
+          "type": "text"
+        },
+        "comments_text": {
+          "column": "comments",
+          "type": "text"
+        },
+        "complaints_text": {
+          "column": "complaints",
+          "type": "text"
+        },
+        "completing_survey_text": {
+          "column": "completing_survey",
+          "type": "text"
+        },
+        "gender_text": {
+          "column": "gender",
+          "type": "text"
+        },
+        "identity_list_text": {
+          "column": "identity",
+          "type": "list.text"
+        },
+        "individual_treatment_text": {
+          "column": "individual_treatment",
+          "type": "text"
+        },
+        "location_text": {
+          "column": "location",
+          "type": "text"
+        },
+        "ndis_hours_weekly_text": {
+          "column": "ndis_hours_weekly",
+          "type": "text"
+        },
+        "ndis_plan_understanding_text": {
+          "column": "ndis_plan_understanding",
+          "type": "text"
+        },
+        "ndis_services_list_text": {
+          "column": "ndis_services",
+          "type": "list.text"
+        },
+        "opinion_rating_text": {
+          "column": "opinion_rating",
+          "type": "text"
+        },
+        "participant_user": {
+          "column": "participant",
+          "type": "user"
+        },
+        "privacy_respect_text": {
+          "column": "privacy_respect",
+          "type": "text"
+        },
+        "respect_of_rights_text": {
+          "column": "respect_of_rights",
+          "type": "text"
+        },
+        "satisfaction_text": {
+          "column": "satisfaction",
+          "type": "text"
+        },
+        "support_based_text": {
+          "column": "support_based",
+          "type": "text"
+        },
+        "three_bads_text": {
+          "column": "three_bads",
+          "type": "text"
+        },
+        "three_changes_text": {
+          "column": "three_changes",
+          "type": "text"
+        },
+        "three_goods_text": {
+          "column": "three_goods",
+          "type": "text"
+        },
+        "your_contact_text": {
+          "column": "your_contact",
+          "type": "text"
+        }
+      }
+    },
+    "swann": {
+      "table": "swann",
+      "fields": {
+        "date_date": {
+          "column": "date",
+          "type": "date"
+        },
+        "email_text": {
+          "column": "email",
+          "type": "text"
+        },
+        "end_time_text": {
+          "column": "end_time",
+          "type": "text"
+        },
+        "location_text": {
+          "column": "location",
+          "type": "text"
+        },
+        "name_text": {
+          "column": "name",
+          "type": "text"
+        },
+        "phone_number_text": {
+          "column": "phone_number",
+          "type": "text"
+        },
+        "platform_text": {
+          "column": "platform",
+          "type": "text"
+        },
+        "start_time_text": {
+          "column": "start_time",
+          "type": "text"
+        }
+      }
+    },
+    "tags": {
+      "table": "tags",
+      "fields": {
+        "tag_name_text": {
+          "column": "tag_name",
+          "type": "text"
+        }
+      }
+    },
+    "tax_file_number_declaration": {
+      "table": "tax_file_number_declaration",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "education_loan_debt_boolean": {
+          "column": "student_loan_debt",
+          "type": "boolean"
+        },
+        "signature1_image": {
+          "column": "signature",
+          "type": "image"
+        },
+        "tax_free_threshold_boolean": {
+          "column": "tax_free_threshold",
+          "type": "boolean"
+        },
+        "tfn_text": {
+          "column": "tax_file_number",
+          "type": "text"
+        },
+        "working_rights_text": {
+          "column": "working_rights",
+          "type": "text"
+        }
+      }
+    },
+    "thread": {
+      "table": "thread",
+      "fields": {
+        "name_text": {
+          "column": "name",
+          "type": "text"
+        }
+      }
+    },
+    "unanswered": {
+      "table": "unanswered",
+      "fields": {
+        "answered_boolean": {
+          "column": "answered",
+          "type": "boolean"
+        },
+        "question_text": {
+          "column": "question",
+          "type": "text"
+        },
+        "questioner_custom_thread": {
+          "column": "questioner",
+          "type": "custom.thread"
+        }
+      }
+    },
+    "vaccinations": {
+      "table": "vaccinations",
+      "fields": {
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "covid19_list_file": {
+          "column": "covid19",
+          "type": "list.file"
+        },
+        "expiry_date": {
+          "column": "expiry",
+          "type": "date"
+        },
+        "flu_file": {
+          "column": "flu",
+          "type": "file"
+        },
+        "influenza_list_file": {
+          "column": "influenza",
+          "type": "list.file"
+        }
+      }
+    },
+    "video": {
+      "table": "video",
+      "fields": {
+        "video_file": {
+          "column": "video",
+          "type": "file"
+        }
+      }
+    },
+    "working_with_children_check": {
+      "table": "working_with_children_check",
+      "fields": {
+        "approved_boolean": {
+          "column": "approved",
+          "type": "boolean"
+        },
+        "card_image_file": {
+          "column": "image",
+          "type": "file"
+        },
+        "card_number_text": {
+          "column": "card_number",
+          "type": "text"
+        },
+        "carer_user": {
+          "column": "carer",
+          "type": "user"
+        },
+        "expiry_date": {
+          "column": "expiry",
+          "type": "date"
+        },
+        "state_text": {
+          "column": "state",
+          "type": "text"
+        }
+      }
+    }
+  },
+  "joins": [
+    {
+      "bubble_type": "user",
+      "bubble_field": "availability_list_custom_availability",
+      "table": "users_availability",
+      "owner_col": "users_id",
+      "target_col": "availability_id",
+      "target_table": "availability"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "carers_list_user",
+      "table": "users_carers",
+      "owner_col": "owner_id",
+      "target_col": "users_id",
+      "target_table": "users"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "clients_list_user",
+      "table": "users_clients",
+      "owner_col": "owner_id",
+      "target_col": "users_id",
+      "target_table": "users"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "document_list_custom_document",
+      "table": "users_document",
+      "owner_col": "users_id",
+      "target_col": "document_id",
+      "target_table": "document"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "events_list_custom_event",
+      "table": "users_events",
+      "owner_col": "users_id",
+      "target_col": "event_id",
+      "target_table": "event"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "incident_rerports_list_custom_incident",
+      "table": "users_incident_reports",
+      "owner_col": "users_id",
+      "target_col": "incident_id",
+      "target_table": "incident"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "locations_list_custom_location1",
+      "table": "users_locations",
+      "owner_col": "users_id",
+      "target_col": "location1_id",
+      "target_table": "location1"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "payslips_list_custom_payslip",
+      "table": "users_payslips",
+      "owner_col": "users_id",
+      "target_col": "payslip_id",
+      "target_table": "payslip"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "qualifications_list_custom_qualifications",
+      "table": "users_qualifications",
+      "owner_col": "users_id",
+      "target_col": "qualifications_id",
+      "target_table": "qualifications"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "reviews_list_custom_review",
+      "table": "users_reviews",
+      "owner_col": "users_id",
+      "target_col": "review_id",
+      "target_table": "review"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "risk_management_plans_list_custom_risk_management_plan",
+      "table": "users_risk_management_plans",
+      "owner_col": "users_id",
+      "target_col": "risk_management_plan_id",
+      "target_table": "risk_management_plan"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "shift_duties_list_custom_shift_duties",
+      "table": "users_shift_duties",
+      "owner_col": "users_id",
+      "target_col": "shift_duties_id",
+      "target_table": "shift_duties"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "shifts_list_custom_shift",
+      "table": "users_shifts_accepted",
+      "owner_col": "users_id",
+      "target_col": "shift_id",
+      "target_table": "shift"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "shifts_missed_list_custom_shifts_missed",
+      "table": "users_shifts_missed",
+      "owner_col": "users_id",
+      "target_col": "shifts_missed_id",
+      "target_table": "shifts_missed"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "shifts_requested_list_custom_shift",
+      "table": "users_shifts_requested",
+      "owner_col": "users_id",
+      "target_col": "shift_id",
+      "target_table": "shift"
+    },
+    {
+      "bubble_type": "user",
+      "bubble_field": "unread_messages_list_custom_message",
+      "table": "users_unread_messages",
+      "owner_col": "users_id",
+      "target_col": "message_id",
+      "target_table": "message"
+    },
+    {
+      "bubble_type": "calls",
+      "bubble_field": "availability_list_custom_availability",
+      "table": "calls_availability",
+      "owner_col": "calls_id",
+      "target_col": "availability_id",
+      "target_table": "availability"
+    },
+    {
+      "bubble_type": "client",
+      "bubble_field": "invoices_list_custom_invoice",
+      "table": "client_invoices",
+      "owner_col": "client_id",
+      "target_col": "invoice_id",
+      "target_table": "invoice"
+    },
+    {
+      "bubble_type": "client",
+      "bubble_field": "shifts_list_custom_shift",
+      "table": "client_shifts",
+      "owner_col": "client_id",
+      "target_col": "shift_id",
+      "target_table": "shift"
+    },
+    {
+      "bubble_type": "comms_book",
+      "bubble_field": "unread_messages_list_custom_message",
+      "table": "comms_book_unread_messages",
+      "owner_col": "comms_book_id",
+      "target_col": "message_id",
+      "target_table": "message"
+    },
+    {
+      "bubble_type": "location1",
+      "bubble_field": "carers_list_user",
+      "table": "location1_carers",
+      "owner_col": "location1_id",
+      "target_col": "users_id",
+      "target_table": "users"
+    },
+    {
+      "bubble_type": "location1",
+      "bubble_field": "clients_list_user",
+      "table": "location1_clients",
+      "owner_col": "location1_id",
+      "target_col": "users_id",
+      "target_table": "users"
+    },
+    {
+      "bubble_type": "location1",
+      "bubble_field": "residents_list_user",
+      "table": "location1_residents",
+      "owner_col": "location1_id",
+      "target_col": "users_id",
+      "target_table": "users"
+    },
+    {
+      "bubble_type": "plan_manager",
+      "bubble_field": "coordinator_list_user",
+      "table": "plan_manager_coordinator",
+      "owner_col": "plan_manager_id",
+      "target_col": "users_id",
+      "target_table": "users"
+    },
+    {
+      "bubble_type": "plan_manager",
+      "bubble_field": "participants_list_user",
+      "table": "plan_manager_participants",
+      "owner_col": "plan_manager_id",
+      "target_col": "users_id",
+      "target_table": "users"
+    },
+    {
+      "bubble_type": "review",
+      "bubble_field": "tags_list_custom_tags",
+      "table": "review_tags",
+      "owner_col": "review_id",
+      "target_col": "tags_id",
+      "target_table": "tags"
+    },
+    {
+      "bubble_type": "risk_assessment",
+      "bubble_field": "risk_management_plan_list_custom_risk_management_plan",
+      "table": "risk_assessment_risk_management_plan",
+      "owner_col": "risk_assessment_id",
+      "target_col": "risk_management_plan_id",
+      "target_table": "risk_management_plan"
+    },
+    {
+      "bubble_type": "shift",
+      "bubble_field": "coordinator__list_user",
+      "table": "shift_coordinator",
+      "owner_col": "shift_id",
+      "target_col": "users_id",
+      "target_table": "users"
+    },
+    {
+      "bubble_type": "shift",
+      "bubble_field": "events_list_custom_event",
+      "table": "shift_events",
+      "owner_col": "shift_id",
+      "target_col": "event_id",
+      "target_table": "event"
+    },
+    {
+      "bubble_type": "shift",
+      "bubble_field": "travel_list_custom_shift_logs",
+      "table": "shift_travel",
+      "owner_col": "shift_id",
+      "target_col": "shift_logs_id",
+      "target_table": "shift_logs"
+    },
+    {
+      "bubble_type": "shifts_missed",
+      "bubble_field": "carers_list_user",
+      "table": "shifts_missed_carers",
+      "owner_col": "shifts_missed_id",
+      "target_col": "users_id",
+      "target_table": "users"
+    },
+    {
+      "bubble_type": "thread",
+      "bubble_field": "members_list_user",
+      "table": "thread_members",
+      "owner_col": "thread_id",
+      "target_col": "users_id",
+      "target_table": "users"
+    }
+  ]
+}
