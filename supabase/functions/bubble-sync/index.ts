@@ -2,14 +2,14 @@
 // Pulls objects changed since each type's watermark from the Bubble Data API
 // into sync.bubble_raw. sync.apply_bubble() (pg_cron) turns them into app rows.
 //
-// Secrets: BUBBLE_API_TOKEN (required), BUBBLE_BASE_URL (optional, defaults to
-// version-test). Callers must send x-sync-secret matching Vault's bubble_sync_secret.
+// Secrets: BUBBLE_API_TOKEN (required), BUBBLE_BASE_URL (optional, defaults to live;
+// set it to the version-test URL to rehearse). Callers must send x-sync-secret matching Vault's bubble_sync_secret.
 import postgres from "npm:postgres@3.4.5";
 
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!, { prepare: false, max: 1 });
 const TOKEN = Deno.env.get("BUBBLE_API_TOKEN");
 const BASE = (Deno.env.get("BUBBLE_BASE_URL") ??
-  "https://knightingale.com.au/version-test/api/1.1/obj").replace(/\/$/, "");
+  "https://knightingale.com.au/api/1.1/obj").replace(/\/$/, "");
 const BUDGET_MS = 110_000;
 const PAGE = 100;
 
