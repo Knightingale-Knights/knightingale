@@ -251,7 +251,7 @@ def main(export_path: str):
                "  for r in select tablename from pg_tables where schemaname = 'app' loop\n"
                "    execute format('alter table app.%I enable row level security', r.tablename);\n"
                "  end loop;\nend $$;\n")
-    out += comments
+    # Column-level Bubble mapping lives in supabase/bubble_map.json.
 
     MIG.mkdir(parents=True, exist_ok=True)
     (MIG / "20261114000000_app_schema.sql").write_text("\n".join(out) + "\n")
