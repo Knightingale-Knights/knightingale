@@ -199,7 +199,7 @@ def main(export_path: str):
                     f"  primary key ({tname if tname != ttarget else 'owner'}_id, {ttarget}_id)\n);\n"
                     f"comment on table app.{jname} is {q(f'Bubble list field {tkey}.{fkey} ({disp})')};"
                 )
-                bmap["joins"].append({"bubble_type": tkey, "bubble_field": fkey, "table": jname,
+                bmap["joins"].append({"bubble_type": tkey, "bubble_field": fkey, "display": disp, "table": jname,
                                       "owner_col": f"{tname if tname != ttarget else 'owner'}_id",
                                       "target_col": f"{ttarget}_id", "target_table": ttarget})
                 continue
@@ -221,14 +221,14 @@ def main(export_path: str):
                 pg += "[]"
             default = "" if is_list else (lambda L: f" default {L}" if L else "")(lit(f.get("default_val"), pg))
             cols.append(f"  {name} {pg}{default}")
-            fmap[fkey] = {"column": name, "type": v}
+            fmap[fkey] = {"column": name, "type": v, "display": disp}
             c = f"Bubble {tkey}.{fkey}" + (f" ({note})" if note else "")
             comments.append(f"comment on column app.{tname}.{name} is {q(c)};")
         out.append(f"create table app.{tname} (\n" + ",\n".join(cols) + "\n);")
         out.append(f"comment on table app.{tname} is {q('Bubble type ' + tkey + ' (' + t.get('display', tkey) + ')')};")
         out.append(f"create trigger {tname}_updated_at before update on app.{tname} "
                    f"for each row execute function app.set_updated_at();\n")
-        bmap["tables"][tkey] = {"table": tname, "fields": fmap}
+        bmap["tables"][tkey] = {"table": tname, "display": t.get("display", tkey), "fields": fmap}
 
     out.append("-- Foreign keys (added after all tables exist)")
     for tname in tables.values():
