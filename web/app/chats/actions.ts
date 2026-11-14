@@ -6,7 +6,7 @@ import { ChatError, postMessage } from "@/lib/chats/data";
 
 export async function postMessageAction(f: FormData) {
   const me = await currentUser();
-  if (!me) redirect("/login");
+  if (!me || me.role === "facility") redirect("/login");
   const participant = String(f.get("participant") ?? "");
   const base = me.role === "admin" ? `/chats/${participant}` : `/carer/chats/${participant}`;
   let dest = `${base}#end`;

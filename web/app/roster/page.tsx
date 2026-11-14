@@ -106,7 +106,7 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
 function ShiftCard({ s, href, active }: { s: RosterShift; href: string; active: boolean }) {
   const who = s.kind === "ndis" ? s.participant_name : s.location_name;
   return (
-    <Link href={href} className={`shift ${s.kind} ${s.cancelled ? "cancelled" : ""} ${!s.carer ? "open" : ""} ${active ? "active" : ""}`}>
+    <Link href={href} className={`shift ${s.kind} ${s.cancelled ? "cancelled" : ""} ${!s.carer ? "open" : ""} ${s.requested_by && !s.carer ? "requested" : ""} ${active ? "active" : ""}`}>
       <span className="time">{clockLabel(s.start_time)}–{clockLabel(s.end_time)}</span>
       <span className="who">{who || "—"}</span>
       <span className="carer">{s.carer_name || "No carer yet"}</span>
@@ -115,6 +115,7 @@ function ShiftCard({ s, href, active }: { s: RosterShift; href: string; active: 
         {s.attended && " · attended"}
         {s.invoiced && " · invoiced"}
         {s.cancelled && " · cancelled"}
+        {s.requested_by && ` · requested by ${s.requested_by}`}
       </span>
     </Link>
   );

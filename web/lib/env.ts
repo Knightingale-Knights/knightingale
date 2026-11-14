@@ -20,4 +20,6 @@ export const env = {
   get linkSecret() { return process.env.LINK_SECRET ?? ""; },
   get klarraSecret() { return process.env.KLARRA_SHARED_SECRET ?? ""; },
   get cronSecret() { return process.env.CRON_SECRET ?? ""; },
+  // Facility bookings text this number (the office), as Bubble did.
+  get bookingAlertTo() { return process.env.BOOKING_ALERT_TO ?? "0426512584"; },
 };

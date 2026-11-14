@@ -3,7 +3,8 @@ import { sql } from "@/lib/db";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export type Staff = { id: string; email: string; name: string };
-export type AppUser = Staff & { role: "admin" | "carer"; roles: string[] | null; phone: string | null };
+export type Role = "admin" | "carer" | "facility";
+export type AppUser = Staff & { role: Role; roles: string[] | null; phone: string | null };
 
 const extraAdmins = () =>
   (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
@@ -11,6 +12,7 @@ const extraAdmins = () =>
 /**
  * The signed-in person, matched to their app user by email.
  * Admin = account type "admin" or listed in ADMIN_EMAILS. Carer = active account type "carer".
+ * Facility = account type "location" (shown as Client in Bubble), unless made inactive.
  * Anyone else (participants, locations, inactive carers) gets no access yet.
  */
 export async function currentUser(): Promise<AppUser | null> {
@@ -24,7 +26,8 @@ export async function currentUser(): Promise<AppUser | null> {
   if (!u) return null;
   const role = u.account_type === "admin" || extraAdmins().includes(email)
     ? "admin"
-    : u.account_type === "carer" && u.active ? "carer" : null;
+    : u.account_type === "carer" && u.active ? "carer"
+    : u.account_type === "location" && u.active !== false ? "facility" : null;
   if (!role) return null;
   return { id: u.id, email: u.email, name: u.name, roles: u.roles, phone: u.phone, role };
 }
@@ -37,19 +40,28 @@ export async function currentStaff(): Promise<Staff | null> {
 export async function requireStaff(): Promise<Staff> {
   const u = await currentUser();
   if (!u) redirect("/login");
-  if (u.role !== "admin") redirect("/carer");
+  if (u.role !== "admin") redirect(homePath(u.role));
   return u;
 }
 
 export async function requireCarer(): Promise<AppUser> {
   const u = await currentUser();
   if (!u) redirect("/login");
-  if (u.role !== "carer") redirect("/roster");
+  if (u.role !== "carer") redirect(homePath(u.role));
   return u;
 }
+
+export async function requireFacility(): Promise<AppUser> {
+  const u = await currentUser();
+  if (!u) redirect("/login");
+  if (u.role !== "facility") redirect(homePath(u.role));
+  return u;
+}
+
+export const homePath = (role: Role) => (role === "carer" ? "/carer" : role === "facility" ? "/facility" : "/roster");
 
 /** Where someone lands after signing in. */
 export async function homeFor(): Promise<string> {
   const u = await currentUser();
-  return u?.role === "carer" ? "/carer" : u?.role === "admin" ? "/roster" : "/login?error=" + encodeURIComponent("This email doesn't have access yet.");
+  return u ? homePath(u.role) : "/login?error=" + encodeURIComponent("This email doesn't have access yet.");
 }

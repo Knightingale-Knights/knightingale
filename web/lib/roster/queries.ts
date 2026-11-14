@@ -10,6 +10,7 @@ export type RosterShift = {
   kind: "residential" | "ndis"; roles: string[] | null; cancelled: boolean; attended: boolean; invoiced: boolean;
   carer: string | null; carer_name: string | null; participant: string | null; participant_name: string | null;
   location: string | null; location_name: string | null; item_name: string | null; notes: string | null;
+  requested_by: string | null; // set when a facility booked it
 };
 
 export type RosterFilter = { participant?: string; location?: string; carer?: string };
@@ -28,7 +29,11 @@ export async function weekShifts(monday: string, f: RosterFilter): Promise<Roste
            (coalesce(s.invoiced, false) or exists (select 1 from app.invoice_shifts x where x.shift_id = s.id)) as invoiced,
            s.carer, trim(concat_ws(' ', c.first_name, c.last_name)) as carer_name,
            s.participant, trim(concat_ws(' ', p.first_name, p.last_name)) as participant_name,
-           s.location, l.name as location_name, coalesce(n.item_name, r.name) as item_name, s.notes
+           s.location, l.name as location_name, coalesce(n.item_name, r.name) as item_name, s.notes,
+           (select coalesce(nullif(trim(concat_ws(' ', fu.first_name, fu.last_name)), ''), 'facility') from app.users fu
+             where fu.account_type = 'location'
+               and (fu.id = s.created_by or exists (select 1 from app.users_shifts_requested q where q.shifts_id = s.id and q.users_id = fu.id))
+             limit 1) as requested_by
       from app.shifts s
       left join app.users c on c.id = s.carer
       left join app.users p on p.id = s.participant
@@ -53,7 +58,7 @@ export async function getShift(id: string): Promise<ShiftDetail | null> {
            (coalesce(s.invoiced, false) or exists (select 1 from app.invoice_shifts x where x.shift_id = s.id)) as invoiced,
            s.carer, trim(concat_ws(' ', c.first_name, c.last_name)) as carer_name,
            s.participant, trim(concat_ws(' ', p.first_name, p.last_name)) as participant_name,
-           s.location, l.name as location_name, null as item_name, s.notes,
+           s.location, l.name as location_name, null as item_name, s.notes, null as requested_by,
            s.ndis_pricing, s.res_pricing, s.rate, s.fee, s.wage, s.revenue, s.supervisor, s.recurring,
            s.attend_start, s.attend_end, s.bubble_id
       from app.shifts s
