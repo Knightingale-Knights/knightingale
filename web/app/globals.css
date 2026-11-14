@@ -168,3 +168,25 @@ button:disabled { opacity: 0.6; cursor: default; }
 .popup .banner { margin-top: 12px; }
 .popup-later { display: block; margin: 12px auto 0; }
 @media (min-width: 640px) { .popup-back { align-items: center; } }
+
+/* Chats */
+main.narrow { max-width: 720px; margin: 0 auto; padding: 24px 16px 60px; }
+.badge { display: inline-block; min-width: 18px; padding: 1px 6px; margin-left: 6px; border-radius: 999px; background: var(--cherry); color: white; font-size: 11px; font-weight: 700; text-align: center; line-height: 16px; vertical-align: 1px; }
+.chat-list { display: flex; flex-direction: column; gap: 8px; }
+.chat-item { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; background: white; border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; text-decoration: none; color: var(--charcoal); }
+.chat-item .who { font-weight: 600; font-size: 16px; }
+.chat-item .badge { justify-self: end; align-self: center; }
+.chat-item .last { grid-column: 1; color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-item .at { grid-column: 2; grid-row: 2; color: var(--muted); font-size: 12px; }
+.chat-item.unread { border-left: 4px solid var(--cherry); }
+.chat-item.unread .last { color: var(--charcoal); }
+.chat h1 { margin-bottom: 12px; }
+.messages { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; min-height: 40vh; }
+.msg { max-width: 80%; align-self: flex-start; background: white; border: 1px solid var(--rule); border-radius: 14px 14px 14px 4px; padding: 8px 12px; }
+.msg.mine { align-self: flex-end; background: var(--gumleaf); border-color: var(--gumleaf); border-radius: 14px 14px 4px 14px; }
+.msg .from { font-size: 12px; font-weight: 600; color: var(--eucalypt); }
+.msg p { margin: 2px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg .at { font-size: 11px; color: var(--muted); }
+.compose { position: sticky; bottom: 0; display: flex; gap: 8px; align-items: flex-end; background: var(--paper); padding: 10px 0 14px; }
+.compose textarea { flex: 1; resize: vertical; border-radius: 12px; }
+.compose button { padding: 12px 18px; border-radius: 12px; }
