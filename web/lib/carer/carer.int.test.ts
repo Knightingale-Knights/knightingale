@@ -75,8 +75,10 @@ describe.skipIf(!url)("carer (scratch database)", () => {
     await c.setAvailability(me, "2026-11-25", "0600___1400", false, "2026-11-20");
     expect(await c.myAvailability(ids.U1, "2026-11-25", 1)).toEqual([]);
     await expect(c.setAvailability(me, "2026-11-19", "0600___1400", true, "2026-11-20")).rejects.toThrow(/today or a later day/);
-    await sql`update app.availability set accepted = 'YES' where carer = ${ids.U1} and shift = 'night__11pm___7am_'`;
+    // Pretend the night slot is booked, then put it back so other test files see the seeded state.
+    await sql`update app.availability set accepted = 'YES' where carer = ${ids.U1} and shift = 'night__11pm___7am_' and accepted = 'pending'`;
     await expect(c.setAvailability(me, "2026-11-16", "night__11pm___7am_", false, "2026-11-16")).rejects.toThrow(/already booked/);
+    await sql`update app.availability set accepted = 'pending' where carer = ${ids.U1} and shift = 'night__11pm___7am_' and accepted = 'YES' and available`;
   });
 
   it("submits one progress note for an NDIS shift only", async () => {

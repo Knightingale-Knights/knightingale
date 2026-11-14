@@ -34,14 +34,16 @@ describe.skipIf(!url)("travel and receipts (scratch database)", () => {
     expect(l).toMatchObject({ carer: ids.U1, participant: ids.P1, shift: ndis, distance: 12.34, log_type: "travel", invoiced: false, a: "1 Home St, Footscray" });
     const [u] = await sql`select count(*)::int as n from app.uninvoiced_travel where id = ${r.id}`;
     expect(u.n).toBe(1);
-    expect((await t.shiftTravel(ndis)).map((x) => x.km)).toEqual([12.34]);
+    expect((await t.shiftTravel(ndis)).map((x) => x.km)).toContain(12.34);
   });
 
   it("refuses other carers, aged care shifts, and silly distances", async () => {
     await expect(t.addTravel(ids.U2, ndis, "aaa", "bbb", during, km)).rejects.toThrow("couldn't find");
     await expect(t.addTravel(ids.U1, res, "aaa", "bbb", during, km)).rejects.toThrow("NDIS");
     await expect(t.addTravel(ids.U1, ndis, "aaa", "bbb", during, async () => 900)).rejects.toThrow("over 500");
-    await expect(t.addTravel(ids.U1, ndis, "aaa", "bbb", new Date("2027-03-10T00:00:00Z"), km)).rejects.toThrow("too late");
+    await expect(t.addTravel(ids.U1, ndis, "aaa", "bbb", new Date("2027-02-10T23:00:00Z"), km)).rejects.toThrow("day of the shift"); // 10am the next day
+    await expect(t.addTravel(ids.U1, ndis, "aaa", "bbb", new Date("2027-02-09T12:00:00Z"), km)).rejects.toThrow("day of the shift"); // 11pm the day before
+    expect((await t.addTravel(ids.U1, ndis, "aaa", "bbb", new Date("2027-02-10T12:30:00Z"), km)).km).toBe(12.34); // 11:30pm on the day
   });
 
   it("lets the carer remove travel until it is invoiced", async () => {

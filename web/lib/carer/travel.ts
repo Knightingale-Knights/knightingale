@@ -3,12 +3,11 @@ import { sql } from "@/lib/db";
 import { myShift } from "./data";
 import { drivingKm, MapsError } from "./maps";
 import { readReceipt, type ReceiptReading } from "./receiptReader";
+import { isoDate } from "@/lib/invoicing/rules";
 
 type Tx = typeof sql;
 export class TravelError extends Error {}
 
-const DAY = 24 * 3600_000;
-export const TRAVEL_DAYS_AFTER = 14; // travel and receipts can be added up to two weeks after the shift
 export const MAX_KM = 500;
 export const MAX_RECEIPT_BYTES = 3.5 * 1024 * 1024;
 export const RECEIPT_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
@@ -19,8 +18,9 @@ async function ownNdisShift(carer: string, shiftId: string, now: Date) {
   if (s.kind !== "ndis") throw new TravelError("Travel and receipts are for NDIS shifts.");
   if (s.cancelled) throw new TravelError("This shift has been cancelled.");
   if (!s.start_at || !s.end_at) throw new TravelError("This shift has no times. Please contact the office.");
-  if (now.getTime() < s.start_at.getTime() - 3 * 3600_000) throw new TravelError("You can add these once the shift has started.");
-  if (now.getTime() > s.end_at.getTime() + TRAVEL_DAYS_AFTER * DAY) throw new TravelError("It's too late to add to this shift. Please contact the office.");
+  // Only on the day of the shift (Melbourne time). An overnight shift can also add them until it ends.
+  const onDay = isoDate(now) === s.day || (now >= s.start_at && now <= s.end_at);
+  if (!onDay) throw new TravelError("Travel and receipts can only be added on the day of the shift.");
   const [p] = await sql<{ participant: string }[]>`select participant from app.shifts where id = ${shiftId}`;
   return { ...s, participant: p.participant };
 }

@@ -9,6 +9,7 @@ import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { CarerNav } from "../../CarerNav";
 import { CheckButton, CheckPopup } from "../../check";
 import { dueCheck } from "@/lib/carer/rules";
+import { isoDate } from "@/lib/invoicing/rules";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,10 @@ export default async function Shift({ params, searchParams }: { params: Promise<
   const s = await myShift(me.id, id);
   if (!s) notFound();
   const due = dueCheck(s);
-  const ndisOpen = s.kind === "ndis" && !s.cancelled;
+  // Travel and receipts: NDIS shifts, on the day of the shift only (overnight shifts until they end).
+  const nowD = new Date();
+  const onDay = isoDate(nowD) === s.day || (s.start_at != null && s.end_at != null && nowD >= s.start_at && nowD <= s.end_at);
+  const ndisOpen = s.kind === "ndis" && !s.cancelled && onDay;
   const [travel, receipts] = ndisOpen ? await Promise.all([shiftTravel(s.id), shiftReceipts(s.id)]) : [[], null];
   const fromText = sp.check === "in" || sp.check === "out";
   const maps = s.address_text ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address_text)}` : null;
