@@ -5,7 +5,8 @@ import { myShift } from "@/lib/carer/data";
 import { clockLabel } from "@/lib/roster/rules";
 import { noteAction } from "../../actions";
 import { CarerNav } from "../../CarerNav";
-import { CheckButton } from "./CheckButton";
+import { CheckButton, CheckPopup } from "../../check";
+import { dueCheck } from "@/lib/carer/rules";
 
 export const dynamic = "force-dynamic";
 
@@ -13,18 +14,23 @@ const time = (d: Date) => new Intl.DateTimeFormat("en-AU", { hour: "numeric", mi
 const dayLabel = (day: string) =>
   new Intl.DateTimeFormat("en-AU", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`));
 
-export default async function Shift({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
+export default async function Shift({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; check?: string }> }) {
   const me = await requireCarer();
   const { id } = await params;
   const sp = await searchParams;
   const s = await myShift(me.id, id);
   if (!s) notFound();
+  const due = dueCheck(s);
+  const fromText = sp.check === "in" || sp.check === "out";
   const maps = s.address_text ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address_text)}` : null;
 
   return (
     <div className="carer">
       <CarerNav on="shifts" name={me.name} />
       <main>
+        {due && (
+          <CheckPopup kind={due} shiftId={s.id} force={fromText} title={`${s.place ?? "Your shift"}, ${clockLabel(s.start_time)}–${clockLabel(s.end_time)}`} detail={s.address_text ?? ""} />
+        )}
         <Link href="/carer" className="back">← My shifts</Link>
         <h1>{s.place ?? "Shift"}</h1>
         <p className="when">{dayLabel(s.day)} · {clockLabel(s.start_time)}–{clockLabel(s.end_time)}</p>

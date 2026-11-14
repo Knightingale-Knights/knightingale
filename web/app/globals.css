@@ -159,3 +159,12 @@ button:disabled { opacity: 0.6; cursor: default; }
 .slot { width: 100%; padding: 10px 4px; font-size: 13px; font-weight: 500; border-radius: 8px; background: white; color: var(--charcoal); border: 1px solid var(--rule); }
 .slot.on { background: var(--gumleaf); border-color: var(--eucalypt); color: var(--eucalypt); font-weight: 600; }
 .slot.booked { background: var(--eucalypt); color: white; }
+
+/* Check in / out popup */
+.popup-back { position: fixed; inset: 0; background: rgba(33, 53, 48, 0.55); display: flex; align-items: flex-end; justify-content: center; z-index: 50; padding: 12px; }
+.popup { background: white; width: 100%; max-width: 480px; border-radius: 16px; padding: 20px 18px 16px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25); }
+.popup h2 { margin: 0 0 4px; font-size: 20px; text-transform: none; letter-spacing: 0; color: var(--eucalypt); }
+.popup-shift { font-weight: 600; margin: 0 0 2px; }
+.popup .banner { margin-top: 12px; }
+.popup-later { display: block; margin: 12px auto 0; }
+@media (min-width: 640px) { .popup-back { align-items: center; } }

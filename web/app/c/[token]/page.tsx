@@ -1,8 +1,10 @@
+import { redirect } from "next/navigation";
 import { env } from "@/lib/env";
+import { currentUser } from "@/lib/auth";
 import { clockLabel } from "@/lib/roster/rules";
 import { linkExpired, verifyLink } from "@/lib/texts/rules";
 import { shiftForLink } from "@/lib/texts/data";
-import { CheckButton } from "@/app/carer/shift/[id]/CheckButton";
+import { CheckPopup } from "@/app/carer/check";
 
 export const dynamic = "force-dynamic";
 
@@ -19,36 +21,32 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Opened from a carer text. No sign-in needed: the signed link is for this one shift.
+// Opened from a carer text. A signed-in carer goes straight to the shift in the app, with the popup open.
+// Otherwise the signed link checks them in or out of this one shift without signing in.
 export default async function LinkPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const t = verifyLink(env.linkSecret, token);
   const s = t ? await shiftForLink(t.shiftId) : null;
   if (!t || !s) return <Shell><h1>Link not valid</h1><p>Please text Klarra for a new link.</p></Shell>;
 
+  const me = await currentUser();
+  if (me?.role === "carer" && me.id === s.carer) redirect(`/carer/shift/${s.id}?check=${t.kind}`);
+
+  const title = `${(s.track === "ndis" ? s.participant?.split(" ")[0] : s.place) ?? "Your shift"}, ${clockLabel(s.start_time)}–${clockLabel(s.end_time)}`;
   const done = t.kind === "in" ? s.attend_start : s.attend_end;
   const expired = linkExpired(t.kind, s.start_at.getTime(), s.end_at.getTime(), Date.now());
+  const blocked = s.cancelled
+    ? "This shift has been cancelled."
+    : done ? (t.kind === "in" ? `You checked in at ${time(s.attend_start!)}.` : `You checked out at ${time(s.attend_end!)}.`)
+    : t.kind === "out" && !s.attend_start ? "You haven't checked in to this shift. Please call Paul."
+    : expired ? "This link has expired. Text Klarra for a new one." : null;
+
   return (
     <Shell>
-      <h1>{(s.track === "ndis" ? s.participant?.split(" ")[0] : s.place) ?? "Your shift"}</h1>
+      <h1>{title.split(",")[0]}</h1>
       <p className="when">{dayLabel(s.day)} · {clockLabel(s.start_time)}–{clockLabel(s.end_time)}</p>
       {s.address_text && <p>{s.address_text}</p>}
-      <section className="block">
-        {s.cancelled ? (
-          <p className="banner warn">This shift has been cancelled.</p>
-        ) : done ? (
-          <p className="banner ok">{t.kind === "in" ? `You checked in at ${time(s.attend_start!)}.` : `You checked out at ${time(s.attend_end!)}.`}</p>
-        ) : t.kind === "out" && !s.attend_start ? (
-          <p className="banner warn">You haven&apos;t checked in to this shift. Please call Paul.</p>
-        ) : expired ? (
-          <p className="banner warn">This link has expired. Text Klarra for a new one.</p>
-        ) : (
-          <>
-            <CheckButton kind={t.kind} shiftId={s.id} token={token} />
-            <p className="hint">You need to be within 500 m of the address, with location turned on.</p>
-          </>
-        )}
-      </section>
+      {blocked ? <p className={`banner ${done ? "ok" : "warn"}`}>{blocked}</p> : <CheckPopup kind={t.kind} shiftId={s.id} token={token} force title={title} detail={s.address_text ?? ""} />}
     </Shell>
   );
 }

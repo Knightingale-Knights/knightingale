@@ -82,3 +82,16 @@ export function parseModelJson(text: string): Record<string, unknown> | null {
   }
   return null;
 }
+
+export const POPUP_IN_BEFORE_MS = 30 * 60_000; // the check-in popup shows from 30 min before the start...
+export const POPUP_OUT_BEFORE_MS = 15 * 60_000; // ...and the check-out popup from 15 min before the end
+
+/** Which check the app should prompt for right now: "in", "out" or null. Aged care check-outs are automatic. */
+export function dueCheck(s: ShiftForCheck & { kind: "ndis" | "residential" }, now = Date.now()): "in" | "out" | null {
+  if (s.cancelled || !s.start_at || !s.end_at) return null;
+  const start = s.start_at.getTime();
+  const end = s.end_at.getTime();
+  if (!s.attend_start) return now >= start - POPUP_IN_BEFORE_MS && now <= start + CHECK_IN_LATE_MS ? "in" : null;
+  if (!s.attend_end && s.kind === "ndis") return now >= end - POPUP_OUT_BEFORE_MS && now <= end + CHECK_OUT_LATE_MS ? "out" : null;
+  return null;
+}

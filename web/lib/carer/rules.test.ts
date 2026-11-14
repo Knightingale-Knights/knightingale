@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CheckError, assertCanCheck, formatNoteField, haversineM, parseModelJson } from "./rules";
+import { CheckError, assertCanCheck, dueCheck, formatNoteField, haversineM, parseModelJson } from "./rules";
 
 const home = { lat: -37.8548796, lng: 144.8790851 }; // 2 Wintringham Rd, Williamstown
 const start = new Date("2026-11-16T20:00:00Z"); // 7am Melbourne
@@ -48,5 +48,24 @@ describe("progress note fields", () => {
     expect(parseModelJson('```json\n{"a":"b"}\n```')).toEqual({ a: "b" });
     expect(parseModelJson('Here: {"a":1} done')).toEqual({ a: 1 });
     expect(parseModelJson("nope")).toBeNull();
+  });
+});
+
+describe("dueCheck", () => {
+  const H = 3_600_000;
+  const base = { start_at: new Date(10 * H), end_at: new Date(14 * H), cancelled: false, attend_start: null, attend_end: null, address: null, kind: "ndis" as const };
+  it("prompts check in from 30 minutes before the start until 6 hours after", () => {
+    expect(dueCheck(base, 9 * H)).toBeNull();
+    expect(dueCheck(base, 9.5 * H)).toBe("in");
+    expect(dueCheck(base, 16 * H)).toBe("in");
+    expect(dueCheck(base, 16 * H + 1)).toBeNull();
+  });
+  it("prompts NDIS check out from 15 minutes before the end, never for aged care", () => {
+    const inn = { ...base, attend_start: new Date(10 * H) };
+    expect(dueCheck(inn, 12 * H)).toBeNull();
+    expect(dueCheck(inn, 13.75 * H)).toBe("out");
+    expect(dueCheck({ ...inn, kind: "residential" }, 14 * H)).toBeNull();
+    expect(dueCheck({ ...inn, attend_end: new Date(14 * H) }, 14 * H)).toBeNull();
+    expect(dueCheck({ ...base, cancelled: true }, 10 * H)).toBeNull();
   });
 });

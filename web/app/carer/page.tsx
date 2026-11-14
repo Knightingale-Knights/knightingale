@@ -4,6 +4,8 @@ import { myShifts, type CarerShift } from "@/lib/carer/data";
 import { clockLabel } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "./CarerNav";
+import { CheckPopup } from "./check";
+import { dueCheck } from "@/lib/carer/rules";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +25,8 @@ export default async function MyShifts() {
   const shifts = await myShifts(me.id, today);
   const upcoming = shifts.filter((s) => s.day >= today);
   const recent = shifts.filter((s) => s.day < today).reverse();
+  const now = Date.now();
+  const due = shifts.map((s) => ({ s, kind: dueCheck(s, now) })).find((d) => d.kind);
   const card = (s: CarerShift) => (
     <Link key={s.id} href={`/carer/shift/${s.id}`} className={`cshift ${s.cancelled ? "cancelled" : ""}`}>
       <span className="when">{s.day === today ? "Today" : dayLabel(s.day)} · {clockLabel(s.start_time)}–{clockLabel(s.end_time)}</span>
@@ -33,6 +37,9 @@ export default async function MyShifts() {
   return (
     <div className="carer">
       <CarerNav on="shifts" name={me.name} />
+      {due && (
+        <CheckPopup kind={due.kind!} shiftId={due.s.id} title={`${due.s.place ?? "Your shift"}, ${clockLabel(due.s.start_time)}–${clockLabel(due.s.end_time)}`} detail={due.s.address_text ?? ""} />
+      )}
       <main>
         <h1>My shifts</h1>
         {upcoming.length ? upcoming.map(card) : <p className="empty">No shifts booked in the next four weeks.</p>}
