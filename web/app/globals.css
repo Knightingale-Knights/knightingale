@@ -1,0 +1,80 @@
+:root {
+  --cherry: #681334;
+  --eucalypt: #213530;
+  --gumleaf: #e4f7d6;
+  --pink-salt: #f3e3fb;
+  --sky: #9cc8fc;
+  --sand: #ede8dc;
+  --paper: #f7f4ef;
+  --charcoal: #2e2e2b;
+  --muted: #8a8478;
+  --rule: #d8d3cb;
+  --warn: #fff4d6;
+  --error: #fbe4e6;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  color: var(--charcoal);
+  background: var(--paper);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font-size: 14px; line-height: 1.5; }
+a { color: var(--cherry); }
+h1 { font-family: var(--font-display), serif; font-weight: 400; font-size: 34px; margin: 0 0 4px; color: var(--eucalypt); }
+
+.wordmark { font-family: var(--font-display), serif; font-weight: 500; font-size: 48px; letter-spacing: 0.01em; color: var(--eucalypt); margin: 0 0 24px; }
+.wordmark.small { font-size: 26px; margin: 0; color: var(--paper); }
+
+.top { display: flex; align-items: center; gap: 28px; padding: 14px 28px; background: var(--eucalypt); color: var(--paper); }
+.tabs { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+.tabs a { color: var(--sand); text-decoration: none; padding: 6px 12px; border-radius: 999px; }
+.tabs a.on { background: var(--gumleaf); color: var(--eucalypt); font-weight: 600; }
+.top .link { color: var(--sand); }
+
+.page { max-width: 1100px; margin: 0 auto; padding: 32px 28px 80px; }
+.lede { color: var(--muted); margin: 0 0 20px; max-width: 70ch; }
+.empty { padding: 28px; background: white; border: 1px dashed var(--rule); border-radius: 10px; color: var(--muted); }
+
+label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 500; }
+input, select { font: inherit; font-size: 14px; color: var(--charcoal); padding: 9px 11px; border: 1px solid var(--rule); border-radius: 8px; background: white; min-width: 0; }
+input:focus, select:focus { outline: 2px solid var(--sky); border-color: var(--sky); }
+button { font: inherit; font-weight: 600; padding: 10px 18px; border: 0; border-radius: 8px; background: var(--cherry); color: white; cursor: pointer; }
+button.secondary { background: var(--eucalypt); }
+button.link { background: none; padding: 0; color: var(--cherry); font-weight: 500; }
+button.link.danger { color: #a3262f; }
+button:hover { filter: brightness(1.08); }
+
+.row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 24px; }
+.row .grow { flex: 1; min-width: 260px; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.check { flex-direction: row; align-items: center; gap: 8px; font-size: 13px; color: var(--charcoal); margin: 4px 0 16px; }
+
+.banner { padding: 12px 16px; border-radius: 10px; margin: 0 0 16px; }
+.banner.ok { background: var(--gumleaf); }
+.banner.warn { background: var(--warn); }
+.banner.error { background: var(--error); color: #7a1620; }
+.error { color: #a3262f; }
+.note { color: var(--eucalypt); }
+
+.summary { display: flex; gap: 12px; flex-wrap: wrap; margin: 0 0 16px; }
+.summary div { background: white; border: 1px solid var(--rule); border-radius: 10px; padding: 10px 16px; min-width: 120px; }
+.summary span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.summary strong { font-size: 20px; font-variant-numeric: tabular-nums; }
+.summary .total { background: var(--eucalypt); color: var(--paper); border-color: var(--eucalypt); }
+.summary .total span { color: var(--gumleaf); }
+
+table.lines { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; margin-bottom: 24px; }
+.lines th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 500; padding: 10px 12px; background: var(--sand); }
+.lines td { padding: 9px 12px; border-top: 1px solid var(--rule); }
+.lines .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lines tr.late td { background: var(--pink-salt); }
+.lines tr.flag td { background: var(--warn); }
+.lines tr.travel td { color: var(--muted); }
+.lines tr.void td { color: var(--muted); text-decoration: line-through; }
+.lines .actions { display: flex; gap: 12px; align-items: center; }
+.confirm summary { color: #a3262f; cursor: pointer; list-style: none; }
+.confirm[open] summary { display: none; }
+
+.create { background: white; border: 1px solid var(--rule); border-radius: 12px; padding: 20px; }
+.create .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
+
+.login { max-width: 380px; margin: 14vh auto; padding: 0 24px; }
