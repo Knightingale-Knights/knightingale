@@ -1,12 +1,10 @@
 import { sql } from "@/lib/db";
-import { env } from "@/lib/env";
 import { ndisPdf, residentialPdf } from "@/lib/pdf";
 import { sendInvoiceEmail } from "@/lib/postmark";
-import { bubbleWritebackEnabled, patchBubble, patchMany } from "@/lib/bubble";
 import { billableShifts, billableTravel } from "./queries";
 import {
   NDIA_HEADERS, auDate, dueDate, ndiaCsvRows, ndisShiftItems, residentialLineItems, toCsv, totals, travelItems,
-  type InvoiceKind, type ShiftRow, type TravelRow,
+  type InvoiceKind, type TravelRow,
 } from "./rules";
 
 export type CreateInvoiceInput = {
@@ -19,7 +17,6 @@ export type CreateInvoiceInput = {
   sendTo: string;
   travelItemNo: string;
   travelItemDescription: string;
-  sendRoster: boolean;
   expectedShiftIds: string[]; // what the person reviewed; must still match
   createdBy: string | null;
 };
@@ -34,21 +31,18 @@ export type CreateInvoiceResult = {
 };
 
 type Target = {
-  name: string; address: string | null; email: string | null; ndis_number: string | null;
-  bubble_id: string | null; coordinator_email: string | null; location_id: string | null;
+  name: string; address: string | null; email: string | null; ndis_number: string | null; location_id: string | null;
 };
 
 async function loadTarget(kind: InvoiceKind, id: string): Promise<Target> {
   const rows = kind === "residential"
     ? await sql<Target[]>`
-        select coalesce(name, '') as name, address->>'address' as address, email, null as ndis_number,
-               bubble_id, null as coordinator_email, id as location_id
+        select coalesce(name, '') as name, address->>'address' as address, email, null as ndis_number, id as location_id
           from app.locations where id = ${id}`
     : await sql<Target[]>`
         select trim(concat_ws(' ', u.first_name, u.last_name)) as name, l.address->>'address' as address,
-               l.email, u.ndis_number, u.bubble_id, c.email as coordinator_email, l.id as location_id
+               l.email, u.ndis_number, l.id as location_id
           from app.users u
-          left join app.users c on c.id = u.coordinator
           left join lateral (
             select l.* from app.users_locations ul join app.locations l on l.id = ul.locations_id
              where ul.users_id = u.id order by l.name limit 1) l on true
@@ -163,30 +157,6 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<CreateIn
     }
   });
 
-  // 4. NDIS: weekly roster to the coordinator, as Bubble did.
-  if (input.kind === "ndis" && input.sendRoster && t.bubble_id && t.coordinator_email && env.rosterUrl) {
-    await attempt("Weekly roster email failed", async () => {
-      const res = await fetch(env.rosterUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ participant_id: t.bubble_id, to_email: t.coordinator_email }),
-      });
-      if (!res.ok) throw new Error(`status ${res.status}`);
-    });
-  }
-
-  // 5. Tell Bubble, while it's still live.
-  if (bubbleWritebackEnabled()) {
-    await attempt("Bubble update failed", async () => {
-      const errors = await writeBack(input.kind, input.target, created.shifts, created.travel, created.sum.amount, t);
-      if (errors.length) warnings.push(`Bubble wasn't fully updated (${errors.length} errors). See the invoice list.`);
-      await sql`
-        update app.invoices
-           set bubble_writeback_at = now(), bubble_writeback_error = ${errors.length ? errors.slice(0, 5).join(" | ") : null}
-         where id = ${created.id}`;
-    });
-  }
-
   return {
     invoiceId: created.id, amount: created.sum.amount, shifts: created.shifts.length,
     travel: created.travel.length, emailed, warnings,
@@ -197,29 +167,4 @@ async function locationName(id: string | null) {
   if (!id) return null;
   const [r] = await sql<{ name: string | null }[]>`select name from app.locations where id = ${id}`;
   return r?.name ?? null;
-}
-
-async function writeBack(kind: InvoiceKind, target: string, shifts: ShiftRow[], travel: TravelRow[], amount: number, t: Target) {
-  const jobs: Array<() => Promise<void>> = [];
-  for (const s of shifts) if (s.bubble_id) jobs.push(() => patchBubble("shift", s.bubble_id!, { invoiced: true }));
-  for (const l of travel) if (l.bubble_id) jobs.push(() => patchBubble("shiftlogs", l.bubble_id!, { invoiced: true }));
-
-  if (kind === "residential" && t.bubble_id && shifts.length) {
-    const last = shifts.reduce((a, s) => (s.date && (!a || s.date > a) ? s.date : a), null as Date | null);
-    if (last) jobs.push(() => patchBubble("locations", t.bubble_id!, { "invoiced through date": last.toISOString() }));
-  }
-  if (kind === "ndis") {
-    // Same as Bubble: take the invoice off the participant's current NDIS quarter.
-    const [q] = await sql<{ bubble_id: string; spent: number | null; remaining_budget: number | null }[]>`
-      select bubble_id, spent, remaining_budget from app.ndis_quarters
-       where participant = ${target} and start < now() and end_value > now() and bubble_id is not null
-       limit 1`;
-    if (q) {
-      jobs.push(() => patchBubble("ndisquarter", q.bubble_id, {
-        spent: (q.spent ?? 0) + amount,
-        "remaining budget": (q.remaining_budget ?? 0) - amount,
-      }));
-    }
-  }
-  return patchMany(jobs);
 }

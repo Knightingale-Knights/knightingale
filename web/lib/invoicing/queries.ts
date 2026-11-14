@@ -104,8 +104,7 @@ export async function nextInvoiceNumber(): Promise<string> {
 export type InvoiceListRow = {
   id: string; invoice_number: string | null; kind: string | null; state: string; amount: number | null;
   billed_to: string | null; period_ending: Date | null; invoice_date: Date | null; created_in_app: boolean;
-  emailed_to: string | null; emailed_at: Date | null; email_error: string | null;
-  bubble_writeback_at: Date | null; bubble_writeback_error: string | null; has_pdf: boolean; shift_count: number;
+  emailed_to: string | null; emailed_at: Date | null; email_error: string | null; has_pdf: boolean; shift_count: number;
 };
 
 export async function recentInvoices(limit = 40): Promise<InvoiceListRow[]> {
@@ -113,7 +112,6 @@ export async function recentInvoices(limit = 40): Promise<InvoiceListRow[]> {
     select i.id, i.invoice_number, i.kind, i.state, i.amount,
            coalesce(l.name, trim(concat_ws(' ', u.first_name, u.last_name))) as billed_to,
            i.period_ending, i.invoice_date, coalesce(i.created_in_app, false) as created_in_app, i.emailed_to, i.emailed_at, i.email_error,
-           i.bubble_writeback_at, i.bubble_writeback_error,
            exists (select 1 from app.invoice_files f where f.invoice_id = i.id) as has_pdf,
            (select count(*)::int from app.invoice_shifts x where x.invoice_id = i.id) as shift_count
       from app.invoices i

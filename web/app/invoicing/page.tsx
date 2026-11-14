@@ -198,9 +198,6 @@ async function Preview({
             </>
           )}
         </div>
-        {kind === "ndis" && (
-          <label className="check"><input type="checkbox" name="send_roster" defaultChecked /> Also email the weekly roster to the coordinator</label>
-        )}
         <button type="submit">Create and send invoice for {money(sum.amount)}</button>
       </form>
     </>
@@ -260,9 +257,8 @@ async function SentTab() {
               <td>{auDate(i.period_ending)}</td>
               <td className="num">{money(i.amount)}</td>
               <td>{i.state}</td>
-              <td title={i.email_error ?? i.bubble_writeback_error ?? ""}>
+              <td title={i.email_error ?? ""}>
                 {i.emailed_at ? `Sent to ${i.emailed_to}` : i.email_error ? "Failed" : i.created_in_app ? "Not sent" : ""}
-                {i.bubble_writeback_error ? " · Bubble update incomplete" : ""}
               </td>
               <td className="actions">
                 {i.created_in_app && i.state === "issued" && (

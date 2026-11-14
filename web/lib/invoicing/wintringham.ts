@@ -1,7 +1,6 @@
 import { sql } from "@/lib/db";
 import { env } from "@/lib/env";
 import { sendPlainEmail } from "@/lib/postmark";
-import { bubbleWritebackEnabled, patchBubble, patchMany } from "@/lib/bubble";
 import { wintringhamPending } from "./queries";
 import { WINTRINGHAM_HEADERS, isoDate, toCsv, wintringhamRows } from "./rules";
 
@@ -27,11 +26,5 @@ export async function sendWintringhamCsv(to: string) {
     return shifts;
   });
 
-  // Outside the transaction: Bubble can be slow and the CSV is already sent.
-  let bubbleErrors = 0;
-  if (bubbleWritebackEnabled()) {
-    const errs = await patchMany(sent.filter((s) => s.bubble_id).map((s) => () => patchBubble("shift", s.bubble_id!, { csv: true })));
-    bubbleErrors = errs.length;
-  }
-  return { rows: sent.length, bubbleErrors };
+  return { rows: sent.length };
 }

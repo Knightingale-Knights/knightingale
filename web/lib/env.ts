@@ -7,8 +7,5 @@ export const env = {
   residentialTo: process.env.RESIDENTIAL_INVOICE_TO ?? "care@knightingale.com.au",
   ndiaTo: process.env.NDIA_INVOICE_TO ?? "care@knightingale.com.au",
   wintringhamTo: process.env.WINTRINGHAM_CSV_TO ?? "",
-  rosterUrl: process.env.ROSTER_URL ?? "https://roster-liart-three.vercel.app/api/send-roster",
-  bubbleToken: process.env.BUBBLE_API_TOKEN ?? "",
-  bubbleBase: (process.env.BUBBLE_BASE_URL ?? "https://knightingale.com.au/api/1.1/obj").replace(/\/$/, ""),
   defaultPaymentTerms: process.env.DEFAULT_PAYMENT_TERMS ?? "14 days",
 };

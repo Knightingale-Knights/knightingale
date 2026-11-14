@@ -25,7 +25,6 @@ export async function createInvoiceAction(form: FormData) {
       sendTo: str(form, "send_to"),
       travelItemNo: str(form, "travel_item_no"),
       travelItemDescription: str(form, "travel_item_description"),
-      sendRoster: form.get("send_roster") === "on",
       expectedShiftIds: form.getAll("shift_id").map(String),
       createdBy: staff.id,
     });
@@ -42,7 +41,7 @@ export async function sendWintringhamAction(form: FormData) {
   let dest: string;
   try {
     const r = await sendWintringhamCsv(str(form, "send_to"));
-    dest = back({ tab: "wintringham", sent: String(r.rows), ...(r.bubbleErrors ? { warn: `Bubble wasn't fully updated (${r.bubbleErrors} errors).` } : {}) });
+    dest = back({ tab: "wintringham", sent: String(r.rows) });
   } catch (e) {
     dest = back({ tab: "wintringham", error: String((e as Error).message ?? e) });
   }
@@ -56,26 +55,13 @@ export async function setInvoiceStateAction(form: FormData) {
   const state = str(form, "state");
   if (!["issued", "paid", "void"].includes(state)) redirect(back({ tab: "sent", error: "Unknown status." }));
   if (state === "void") {
-    // Voiding frees its shifts so they can be invoiced again, here and in Bubble.
-    const freed = await sql.begin(async (tx) => {
+    // Voiding frees its shifts and travel so they can be invoiced again.
+    await sql.begin(async (tx) => {
       const [inv] = await tx`update app.invoices set state = 'void' where id = ${id} and created_in_app returning id`;
-      if (!inv) return { shifts: [] as string[], travel: [] as string[] };
-      const s = await tx<{ b: string }[]>`
-        delete from app.invoice_shifts x using app.shifts s
-         where x.invoice_id = ${id} and s.id = x.shift_id returning s.bubble_id as b`;
-      const t = await tx<{ b: string }[]>`
-        delete from app.invoice_travel x using app.shift_logs l
-         where x.invoice_id = ${id} and l.id = x.shift_log_id returning l.bubble_id as b`;
-      return { shifts: s.map((r) => r.b).filter(Boolean), travel: t.map((r) => r.b).filter(Boolean) };
+      if (!inv) return;
+      await tx`delete from app.invoice_shifts where invoice_id = ${id}`;
+      await tx`delete from app.invoice_travel where invoice_id = ${id}`;
     });
-    const { bubbleWritebackEnabled, patchBubble, patchMany } = await import("@/lib/bubble");
-    if (bubbleWritebackEnabled()) {
-      const errs = await patchMany([
-        ...freed.shifts.map((b) => () => patchBubble("shift", b, { invoiced: false })),
-        ...freed.travel.map((b) => () => patchBubble("shiftlogs", b, { invoiced: false })),
-      ]);
-      if (errs.length) redirect(back({ tab: "sent", warn: `Voided, but Bubble wasn't fully updated (${errs.length} errors).` }));
-    }
   } else {
     await sql`update app.invoices set state = ${state}, paid_at = case when ${state} = 'paid' then now() end where id = ${id}`;
   }
