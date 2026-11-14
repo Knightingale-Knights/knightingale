@@ -196,3 +196,13 @@ main.narrow { max-width: 720px; margin: 0 auto; padding: 24px 16px 60px; }
 .cshift .status.ok { color: var(--eucalypt); font-weight: 600; }
 .cshift .status.muted { color: var(--muted); }
 .shift.requested { box-shadow: inset 3px 0 0 var(--cherry); }
+
+/* Travel and receipts */
+.extras { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-direction: column; gap: 6px; }
+.extras li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; padding: 8px 10px; background: var(--paper); border-radius: 8px; font-size: 14px; }
+.extras li span, .extras li a { flex: 1 1 200px; }
+.extras li form { margin-left: auto; }
+.upload { display: block; }
+.upload .button { padding: 16px; font-size: 17px; font-weight: 600; display: block; text-align: center; background: var(--eucalypt); color: white; border-radius: 12px; cursor: pointer; }
+.upload input:disabled + .button { opacity: 0.6; }
+.extras-admin { border-top: 1px solid var(--rule); margin-top: 8px; padding-top: 8px; }

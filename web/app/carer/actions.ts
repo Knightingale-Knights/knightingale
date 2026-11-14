@@ -53,3 +53,55 @@ export async function availabilityAction(f: FormData) {
   revalidatePath("/carer/availability");
   redirect(dest);
 }
+
+// ---- travel and receipts ------------------------------------------------------
+import { addReceipt, addTravel, removeTravel, TravelError } from "@/lib/carer/travel";
+
+const shiftDest = (id: string, q: string) => `/carer/shift/${id}?${q}#extras`;
+const errMsg = (e: unknown) => (e instanceof TravelError ? e.message : (console.error(e), "Something went wrong. Please try again."));
+
+export async function travelAction(f: FormData) {
+  const me = await requireCarer();
+  const id = String(f.get("id") ?? "");
+  let dest = shiftDest(id, "travel=1");
+  try {
+    await addTravel(me.id, id, String(f.get("from") ?? ""), String(f.get("to") ?? ""));
+  } catch (e) {
+    dest = shiftDest(id, `xerror=${encodeURIComponent(errMsg(e))}`);
+  }
+  revalidatePath(`/carer/shift/${id}`);
+  redirect(dest);
+}
+
+export async function removeTravelAction(f: FormData) {
+  const me = await requireCarer();
+  const id = String(f.get("id") ?? "");
+  let dest = shiftDest(id, "removed=1");
+  try {
+    await removeTravel(me.id, String(f.get("log") ?? ""));
+  } catch (e) {
+    dest = shiftDest(id, `xerror=${encodeURIComponent(errMsg(e))}`);
+  }
+  revalidatePath(`/carer/shift/${id}`);
+  redirect(dest);
+}
+
+export type ReceiptResult = { ok: boolean; message: string };
+
+/** Called by the upload button with the (already shrunk) file. */
+export async function receiptAction(f: FormData): Promise<ReceiptResult> {
+  const me = await requireCarer();
+  const id = String(f.get("id") ?? "");
+  const file = f.get("file");
+  if (!(file instanceof File)) return { ok: false, message: "Choose a receipt to upload." };
+  try {
+    const r = await addReceipt(me.id, id, { name: file.name, type: file.type, bytes: Buffer.from(await file.arrayBuffer()) });
+    revalidatePath(`/carer/shift/${id}`);
+    const t = r.reading;
+    if (t && !t.needsReview && t.total != null) return { ok: true, message: `Receipt added: $${t.total.toFixed(2)}${t.merchant ? ` at ${t.merchant}` : ""}.` };
+    if (t?.reason === "not_a_receipt") return { ok: true, message: "Uploaded, but it doesn't look like a receipt. The office will check it." };
+    return { ok: true, message: "Receipt uploaded. The office will check the total." };
+  } catch (e) {
+    return { ok: false, message: errMsg(e) };
+  }
+}

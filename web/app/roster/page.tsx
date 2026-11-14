@@ -4,6 +4,7 @@ import { TopBar } from "@/components/TopBar";
 import { availableOn, getShift, rosterOptions, weekShifts, type RosterFilter, type RosterShift } from "@/lib/roster/queries";
 import { SLOTS, addDays, clockLabel, weekStart } from "@/lib/roster/rules";
 import { isoDate, roleLabel } from "@/lib/invoicing/rules";
+import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { attendedAction, cancelShiftAction, copyShiftAction, deleteShiftAction, saveShiftAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -228,7 +229,7 @@ function ShiftForm({
 async function EditPanel({ id, ...ctx }: Ctx & { id: string }) {
   const shift = await getShift(id);
   if (!shift) return <aside className="panel"><p className="empty">That shift no longer exists.</p></aside>;
-  const free = await availableOn(shift.day);
+  const [free, travel, receipts] = await Promise.all([availableOn(shift.day), shiftTravel(id), shiftReceipts(id)]);
   const nextWeek = Array.from({ length: 7 }, (_, i) => addDays(shift.day, i + 1));
   return (
     <div className="panel-stack">
@@ -237,6 +238,20 @@ async function EditPanel({ id, ...ctx }: Ctx & { id: string }) {
         <p className="figures">
           Fee ${Number(shift.fee ?? 0).toFixed(2)} · Wage ${Number(shift.wage ?? 0).toFixed(2)} · Revenue ${Number(shift.revenue ?? 0).toFixed(2)}
         </p>
+        {(travel.length > 0 || receipts.files.length > 0 || Number(receipts.total ?? 0) > 0) && (
+          <div className="extras-admin">
+            {travel.map((t) => (
+              <p key={t.id} className="hint">Travel {Number(t.km).toFixed(1)} km: {t.from} → {t.to}{t.invoiced ? " (invoiced)" : ""}</p>
+            ))}
+            {receipts.files.map((r) => (
+              <p key={r.id} className="hint">
+                Receipt <a href={`/receipts/${r.id}`} target="_blank" rel="noreferrer">{r.merchant ?? r.file_name}</a>{" "}
+                {r.total != null ? `$${Number(r.total).toFixed(2)}` : ""}{r.needs_review ? " (check total)" : ""}
+              </p>
+            ))}
+            {Number(receipts.total ?? 0) > 0 && <p className="hint">Receipts total ${Number(receipts.total).toFixed(2)}{receipts.oldFiles ? ` (incl. ${receipts.oldFiles} from Bubble)` : ""}</p>}
+          </div>
+        )}
         {!shift.invoiced && (
           <>
             <form action={attendedAction} className="pair end">

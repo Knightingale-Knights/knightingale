@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { requireCarer } from "@/lib/auth";
 import { myShift } from "@/lib/carer/data";
 import { clockLabel } from "@/lib/roster/rules";
-import { noteAction } from "../../actions";
+import { noteAction, removeTravelAction, travelAction } from "../../actions";
+import { AddressInput, ReceiptUpload } from "../../extras";
+import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { CarerNav } from "../../CarerNav";
 import { CheckButton, CheckPopup } from "../../check";
 import { dueCheck } from "@/lib/carer/rules";
@@ -14,13 +16,15 @@ const time = (d: Date) => new Intl.DateTimeFormat("en-AU", { hour: "numeric", mi
 const dayLabel = (day: string) =>
   new Intl.DateTimeFormat("en-AU", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`));
 
-export default async function Shift({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; check?: string }> }) {
+export default async function Shift({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; check?: string; xerror?: string; travel?: string }> }) {
   const me = await requireCarer();
   const { id } = await params;
   const sp = await searchParams;
   const s = await myShift(me.id, id);
   if (!s) notFound();
   const due = dueCheck(s);
+  const ndisOpen = s.kind === "ndis" && !s.cancelled;
+  const [travel, receipts] = ndisOpen ? await Promise.all([shiftTravel(s.id), shiftReceipts(s.id)]) : [[], null];
   const fromText = sp.check === "in" || sp.check === "out";
   const maps = s.address_text ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address_text)}` : null;
 
@@ -45,6 +49,51 @@ export default async function Shift({ params, searchParams }: { params: Promise<
             {!s.attend_start && <CheckButton kind="in" shiftId={s.id} />}
             {s.attend_start && !s.attend_end && <CheckButton kind="out" shiftId={s.id} />}
             <p className="hint">You need to be within 500 m of the address, with location turned on.</p>
+          </section>
+        )}
+
+        {ndisOpen && (
+          <section className="block" id="extras">
+            <h2>Travel</h2>
+            {sp.xerror && <p className="banner error">{sp.xerror}</p>}
+            {sp.travel && <p className="banner ok">Travel added.</p>}
+            {travel.length > 0 && (
+              <ul className="extras">
+                {travel.map((t) => (
+                  <li key={t.id}>
+                    <span>{t.from ?? "?"} → {t.to ?? "?"}</span>
+                    <strong>{Number(t.km).toFixed(1)} km</strong>
+                    {!t.invoiced && (
+                      <form action={removeTravelAction}>
+                        <input type="hidden" name="id" value={s.id} />
+                        <input type="hidden" name="log" value={t.id} />
+                        <button className="link danger">Remove</button>
+                      </form>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <form action={travelAction} className="stack">
+              <input type="hidden" name="id" value={s.id} />
+              <AddressInput name="from" label="From" listId="from-list" />
+              <AddressInput name="to" label="To" listId="to-list" defaultValue={s.address_text ?? ""} />
+              <button type="submit" className="secondary">Add travel</button>
+            </form>
+
+            <h2>Receipts</h2>
+            {receipts && receipts.files.length > 0 && (
+              <ul className="extras">
+                {receipts.files.map((r) => (
+                  <li key={r.id}>
+                    <a href={`/receipts/${r.id}`} target="_blank" rel="noreferrer">{r.merchant ?? r.file_name}</a>
+                    <strong>{r.total != null && !r.needs_review ? `$${Number(r.total).toFixed(2)}` : "Office to check"}</strong>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {receipts?.total != null && Number(receipts.total) > 0 && <p className="hint">Receipts total ${Number(receipts.total).toFixed(2)}</p>}
+            <ReceiptUpload shiftId={s.id} />
           </section>
         )}
 
