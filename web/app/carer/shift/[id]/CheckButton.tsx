@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
-import { checkAction, type CheckResult } from "../../actions";
+import { checkAction, type CheckResult } from "@/app/carer/actions";
+import { linkCheckAction } from "@/app/c/[token]/actions";
 
 /** Gets a fresh, precise location from the phone, then asks the server to check in or out. */
-export function CheckButton({ kind, shiftId }: { kind: "in" | "out"; shiftId: string }) {
+export function CheckButton({ kind, shiftId, token }: { kind: "in" | "out"; shiftId: string; token?: string }) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<CheckResult | null>(null);
 
@@ -16,7 +17,8 @@ export function CheckButton({ kind, shiftId }: { kind: "in" | "out"; shiftId: st
     setResult(null);
     navigator.geolocation.getCurrentPosition(
       async (p) => {
-        const r = await checkAction(kind, shiftId, { lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy });
+        const pos = { lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy };
+        const r = token ? await linkCheckAction(token, pos) : await checkAction(kind, shiftId, pos);
         setResult(r);
         setBusy(false);
         if (r.ok) setTimeout(() => window.location.reload(), 1500);

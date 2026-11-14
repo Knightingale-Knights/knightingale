@@ -1,4 +1,4 @@
-// Settings read from environment variables, with the defaults Bubble used.
+// Settings read from environment variables, with the defaults Bubble and CarerTexts used.
 export const env = {
   postmarkToken: process.env.POSTMARK_TOKEN ?? "",
   postmarkTemplateAlias: process.env.POSTMARK_TEMPLATE_ALIAS ?? "invoice",
@@ -8,4 +8,16 @@ export const env = {
   ndiaTo: process.env.NDIA_INVOICE_TO ?? "care@knightingale.com.au",
   wintringhamTo: process.env.WINTRINGHAM_CSV_TO ?? "",
   defaultPaymentTerms: process.env.DEFAULT_PAYMENT_TERMS ?? "14 days",
+
+  // Carer texts. Nothing is sent unless SMS_MODE=live.
+  get smsMode() { return process.env.SMS_MODE === "live" ? "live" : "dry"; },
+  get onlyPhone() { return process.env.ONLY_PHONE ?? ""; },
+  get notes2Enabled() { return process.env.NOTES_2_ENABLED === "1"; },
+  get twilioSid() { return process.env.TWILIO_ACCOUNT_SID ?? ""; },
+  get twilioToken() { return process.env.TWILIO_AUTH_TOKEN ?? ""; },
+  get twilioFrom() { return process.env.TWILIO_FROM ?? "+61483931556"; },
+  get publicBaseUrl() { return (process.env.PUBLIC_BASE_URL ?? "").replace(/\/$/, ""); },
+  get linkSecret() { return process.env.LINK_SECRET ?? ""; },
+  get klarraSecret() { return process.env.KLARRA_SHARED_SECRET ?? ""; },
+  get cronSecret() { return process.env.CRON_SECRET ?? ""; },
 };
