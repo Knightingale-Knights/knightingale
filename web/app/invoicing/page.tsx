@@ -7,7 +7,8 @@ import {
 import {
   auDate, clock, feeMismatches, isoDate, lineDate, roleLabel, totals, type InvoiceKind,
 } from "@/lib/invoicing/rules";
-import { createInvoiceAction, sendWintringhamAction, setInvoiceStateAction, signOutAction } from "./actions";
+import { TopBar } from "@/components/TopBar";
+import { createInvoiceAction, sendWintringhamAction, setInvoiceStateAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -31,17 +32,11 @@ export default async function Invoicing({ searchParams }: { searchParams: Promis
 
   return (
     <div className="shell">
-      <header className="top">
-        <span className="wordmark small">knightingale</span>
-        <nav className="tabs">
-          {TABS.map(([k, label]) => (
-            <Link key={k} href={`/invoicing?tab=${k}`} className={k === tab ? "on" : ""}>{label}</Link>
-          ))}
-        </nav>
-        <form action={signOutAction}>
-          <button className="link" title={staff.email}>Sign out</button>
-        </form>
-      </header>
+      <TopBar section="/invoicing" email={staff.email}>
+        {TABS.map(([k, label]) => (
+          <Link key={k} href={`/invoicing?tab=${k}`} className={k === tab ? "on" : ""}>{label}</Link>
+        ))}
+      </TopBar>
 
       <main className="page">
         {sp.done && (

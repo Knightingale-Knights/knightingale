@@ -7,5 +7,5 @@ export async function GET(request: NextRequest) {
     const supabase = await supabaseServer();
     await supabase.auth.exchangeCodeForSession(code);
   }
-  return NextResponse.redirect(new URL("/invoicing", request.url));
+  return NextResponse.redirect(new URL("/roster", request.url));
 }

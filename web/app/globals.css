@@ -25,6 +25,9 @@ h1 { font-family: var(--font-display), serif; font-weight: 400; font-size: 34px;
 .wordmark.small { font-size: 26px; margin: 0; color: var(--paper); }
 
 .top { display: flex; align-items: center; gap: 28px; padding: 14px 28px; background: var(--eucalypt); color: var(--paper); }
+.sections { display: flex; gap: 2px; border-right: 1px solid rgba(255,255,255,0.2); padding-right: 20px; }
+.sections a { color: var(--sand); text-decoration: none; padding: 6px 10px; font-weight: 500; }
+.sections a.on { color: white; box-shadow: inset 0 -2px 0 var(--gumleaf); }
 .tabs { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
 .tabs a { color: var(--sand); text-decoration: none; padding: 6px 12px; border-radius: 999px; }
 .tabs a.on { background: var(--gumleaf); color: var(--eucalypt); font-weight: 600; }
@@ -78,3 +81,47 @@ table.lines { width: 100%; border-collapse: collapse; background: white; border:
 .create .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
 
 .login { max-width: 380px; margin: 14vh auto; padding: 0 24px; }
+
+/* Roster */
+.page.wide { max-width: none; padding: 24px 28px 60px; }
+.page.with-panel { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+.weeknav { display: flex; gap: 12px; align-items: center; margin-left: auto; }
+.weeknav a { text-decoration: none; font-weight: 600; }
+.week { display: grid; grid-template-columns: repeat(7, minmax(130px, 1fr)); gap: 8px; margin-bottom: 12px; overflow-x: auto; }
+.day { background: white; border: 1px solid var(--rule); border-radius: 10px; min-height: 160px; display: flex; flex-direction: column; }
+.day.today { border-color: var(--eucalypt); box-shadow: 0 0 0 1px var(--eucalypt); }
+.day header { display: flex; justify-content: space-between; padding: 8px 10px; background: var(--sand); border-radius: 10px 10px 0 0; font-weight: 600; font-size: 12px; }
+.day header a { text-decoration: none; font-size: 16px; line-height: 1; }
+.day .none { color: var(--muted); font-size: 12px; padding: 10px; margin: 0; }
+.shift { display: flex; flex-direction: column; gap: 1px; margin: 6px 6px 0; padding: 7px 9px; border-radius: 8px; text-decoration: none; color: var(--charcoal); border-left: 4px solid var(--sky); background: #f4f8fe; font-size: 12px; }
+.shift.residential { border-left-color: var(--cherry); background: #fbf3f6; }
+.shift.open { background: var(--warn); }
+.shift.cancelled { opacity: 0.55; text-decoration: line-through; }
+.shift.active { outline: 2px solid var(--eucalypt); }
+.shift .time { font-weight: 600; font-variant-numeric: tabular-nums; }
+.shift .who { font-weight: 500; }
+.shift .carer, .shift .meta { color: var(--muted); }
+.shift.open .carer { color: #8a5a00; font-weight: 600; }
+
+.panel-stack { display: flex; flex-direction: column; gap: 12px; }
+.panel { background: white; border: 1px solid var(--rule); border-radius: 12px; padding: 18px; position: sticky; top: 16px; }
+.panel-stack .panel { position: static; }
+.panel header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.panel h2 { font-family: var(--font-display), serif; font-weight: 400; font-size: 24px; margin: 0; color: var(--eucalypt); }
+.panel header a { text-decoration: none; color: var(--muted); font-size: 18px; }
+.panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 16px 0 6px; }
+.panel .free ul { list-style: none; padding: 0; margin: 0; font-size: 13px; }
+.panel .free li { padding: 4px 0; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 8px; }
+.panel .free li span { color: var(--muted); }
+.panel .figures { margin: 0 0 12px; font-variant-numeric: tabular-nums; color: var(--eucalypt); font-weight: 500; }
+.panel form + form { margin-top: 14px; }
+.pair { display: flex; gap: 10px; }
+.pair > label { flex: 1; }
+.pair.end { align-items: flex-end; }
+.row.tight { margin: 14px 0 0; align-items: center; }
+textarea { font: inherit; font-size: 14px; padding: 9px 11px; border: 1px solid var(--rule); border-radius: 8px; resize: vertical; }
+.label { font-size: 12px; color: var(--muted); font-weight: 500; margin: 0 0 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.chip { flex-direction: row; align-items: center; gap: 6px; font-size: 12px; color: var(--charcoal); background: var(--sand); padding: 5px 9px; border-radius: 999px; cursor: pointer; }
+.chip input { margin: 0; }
+@media (max-width: 1100px) { .page.with-panel { grid-template-columns: 1fr; } .panel { position: static; } }
