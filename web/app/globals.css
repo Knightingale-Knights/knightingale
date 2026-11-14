@@ -222,3 +222,14 @@ main.narrow { max-width: 720px; margin: 0 auto; padding: 24px 16px 60px; }
 table.compliance td.cell { font-size: 12px; white-space: nowrap; text-align: center; }
 table.compliance td.cell.expired, table.compliance td.cell.missing { background: #f6dde3; color: var(--cherry); font-weight: 600; }
 table.compliance td.cell.soon, table.compliance td.cell.check { background: var(--sand); }
+
+/* Sign-up */
+.steps { list-style: none; display: flex; gap: 6px; padding: 0; margin: 0 0 16px; overflow-x: auto; }
+.steps li a { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: white; border: 1px solid var(--rule); text-decoration: none; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.steps li.done a { color: var(--eucalypt); border-color: var(--gumleaf); background: var(--gumleaf); }
+.steps li.on a { color: white; background: var(--eucalypt); border-color: var(--eucalypt); }
+.steps li a span { font-weight: 600; }
+.avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; display: block; margin-bottom: 8px; }
+fieldset.chips { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+fieldset.chips legend { font-weight: 600; margin-bottom: 6px; }
+.login h2 { font-size: 18px; color: var(--eucalypt); }

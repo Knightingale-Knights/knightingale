@@ -17,7 +17,8 @@ async function who(carerField: FormDataEntryValue | null) {
   return { me, carer };
 }
 
-const pathFor = (role: string, carer: string) => (role === "admin" ? `/compliance/${carer}` : "/carer/documents");
+const pathFor = (role: string, carer: string, back?: string) =>
+  role === "admin" ? `/compliance/${carer}` : back && /^\/join\/[a-z]+$/.test(back) ? back : "/carer/documents";
 
 export async function uploadDocAction(f: FormData): Promise<DocResult> {
   const { me, carer } = await who(f.get("carer"));
@@ -27,6 +28,7 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
   try {
     const r = await uploadDoc(carer, key, { name: file.name, type: file.type, bytes: Buffer.from(await file.arrayBuffer()) }, me.id, isoDate(new Date()));
     revalidatePath(pathFor(me.role, carer));
+    revalidatePath("/join/[step]", "page");
     const label = docDef(key)?.label ?? "Document";
     if (r.reading?.reason === "document_type_mismatch") {
       return { ok: false, message: `Saved, but this doesn't look like a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."} The office will check it.` };
@@ -43,7 +45,7 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
 export async function detailsAction(f: FormData) {
   const { me, carer } = await who(f.get("carer"));
   const key = String(f.get("doc") ?? "") as DocKey;
-  const base = pathFor(me.role, carer);
+  const base = pathFor(me.role, carer, String(f.get("back") ?? ""));
   let dest = `${base}?saved=${key}#${key}`;
   try {
     const v: { number?: string; expiry?: string } = {};

@@ -41,6 +41,7 @@ export default async function MyShifts() {
         <CheckPopup kind={due.kind!} shiftId={due.s.id} title={`${due.s.place ?? "Your shift"}, ${clockLabel(due.s.start_time)}–${clockLabel(due.s.end_time)}`} detail={due.s.address_text ?? ""} />
       )}
       <main>
+        {!me.approved && <p className="banner ok">Thanks for applying! We&apos;re reviewing your application and will be in touch. Keep your documents up to date in the Documents tab.</p>}
         <h1>My shifts</h1>
         {upcoming.length ? upcoming.map(card) : <p className="empty">No shifts booked in the next four weeks.</p>}
         {recent.length > 0 && (<><h2>Last 7 days</h2>{recent.map(card)}</>)}

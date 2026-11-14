@@ -5,7 +5,7 @@ import { detailsAction } from "./actions";
 import { DocUpload } from "./DocUpload";
 
 /** The list of documents with status, files, details and upload. Used by carers and by the office. */
-export function DocList({ docs, carer, admin }: { docs: DocState[]; carer?: string; admin?: boolean }) {
+export function DocList({ docs, carer, admin, back }: { docs: DocState[]; carer?: string; admin?: boolean; back?: string }) {
   return (
     <div className="docs">
       {docs.map(({ def, status, files, expiry, number }) => (
@@ -27,6 +27,7 @@ export function DocList({ docs, carer, admin }: { docs: DocState[]; carer?: stri
             <form action={detailsAction} className="pair end">
               {carer && <input type="hidden" name="carer" value={carer} />}
               <input type="hidden" name="doc" value={def.key} />
+              {back && <input type="hidden" name="back" value={back} />}
               {def.numberCol && <label>{def.numberLabel}<input name="number" defaultValue={number ?? ""} maxLength={60} /></label>}
               {def.expiryCol && (!def.uploadCol || admin) && <label>Expiry<input type="date" name="expiry" defaultValue={expiry ?? ""} /></label>}
               <button className="secondary">Save</button>
