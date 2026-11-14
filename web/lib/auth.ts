@@ -3,25 +3,53 @@ import { sql } from "@/lib/db";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export type Staff = { id: string; email: string; name: string };
+export type AppUser = Staff & { role: "admin" | "carer"; roles: string[] | null; phone: string | null };
 
 const extraAdmins = () =>
   (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
 
-/** The signed-in staff member, or null. Admin = Bubble account type "admin", or listed in ADMIN_EMAILS. */
-export async function currentStaff(): Promise<Staff | null> {
+/**
+ * The signed-in person, matched to their app user by email.
+ * Admin = account type "admin" or listed in ADMIN_EMAILS. Carer = active account type "carer".
+ * Anyone else (participants, locations, inactive carers) gets no access yet.
+ */
+export async function currentUser(): Promise<AppUser | null> {
   const supabase = await supabaseServer();
   const { data } = await supabase.auth.getUser();
   const email = data.user?.email?.toLowerCase();
   if (!email) return null;
-  const [u] = await sql<Staff[]>`
-    select id, email, trim(concat_ws(' ', first_name, last_name)) as name
-      from app.users where lower(email) = ${email}
-       and (account_type = 'admin' or ${extraAdmins().includes(email)})`;
-  return u ?? null;
+  const [u] = await sql<(Omit<AppUser, "role"> & { account_type: string | null; active: boolean | null })[]>`
+    select id, email, trim(concat_ws(' ', first_name, last_name)) as name, account_type, active, roles, phone_number as phone
+      from app.users where lower(email) = ${email}`;
+  if (!u) return null;
+  const role = u.account_type === "admin" || extraAdmins().includes(email)
+    ? "admin"
+    : u.account_type === "carer" && u.active ? "carer" : null;
+  if (!role) return null;
+  return { id: u.id, email: u.email, name: u.name, roles: u.roles, phone: u.phone, role };
+}
+
+export async function currentStaff(): Promise<Staff | null> {
+  const u = await currentUser();
+  return u?.role === "admin" ? u : null;
 }
 
 export async function requireStaff(): Promise<Staff> {
-  const s = await currentStaff();
-  if (!s) redirect("/login");
-  return s;
+  const u = await currentUser();
+  if (!u) redirect("/login");
+  if (u.role !== "admin") redirect("/carer");
+  return u;
+}
+
+export async function requireCarer(): Promise<AppUser> {
+  const u = await currentUser();
+  if (!u) redirect("/login");
+  if (u.role !== "carer") redirect("/roster");
+  return u;
+}
+
+/** Where someone lands after signing in. */
+export async function homeFor(): Promise<string> {
+  const u = await currentUser();
+  return u?.role === "carer" ? "/carer" : u?.role === "admin" ? "/roster" : "/login?error=" + encodeURIComponent("This email doesn't have access yet.");
 }

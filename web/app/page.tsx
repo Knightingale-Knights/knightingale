@@ -1,4 +1,8 @@
 import { redirect } from "next/navigation";
-export default function Home() {
-  redirect("/roster");
+import { homeFor } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  redirect(await homeFor());
 }
