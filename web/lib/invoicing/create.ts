@@ -1,6 +1,7 @@
 import { sql } from "@/lib/db";
 import { ndisPdf, residentialPdf } from "@/lib/pdf";
 import { sendInvoiceEmail } from "@/lib/postmark";
+import { sendWeeklyRoster } from "@/lib/roster/weekly";
 import { billableShifts, billableTravel } from "./queries";
 import {
   NDIA_HEADERS, auDate, dueDate, ndiaCsvRows, ndisShiftItems, residentialLineItems, toCsv, totals, travelItems,
@@ -151,6 +152,14 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<CreateIn
       });
       emailed = true;
       await sql`update app.invoices set emailed_at = now(), email_error = null where id = ${created.id}`;
+      // As in Bubble: a plan-managed NDIS invoice also sends next week's roster to the coordinator.
+      if (input.kind === "ndis") {
+        try {
+          await sendWeeklyRoster(input.target);
+        } catch (e) {
+          warnings.push(`The invoice was sent, but next week's roster wasn't: ${String((e as Error).message ?? e)}`);
+        }
+      }
     } catch (e) {
       await sql`update app.invoices set email_error = ${String((e as Error).message ?? e)} where id = ${created.id}`;
       throw e;

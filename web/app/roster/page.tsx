@@ -5,7 +5,7 @@ import { availableOn, getShift, rosterOptions, weekShifts, type RosterFilter, ty
 import { SLOTS, addDays, clockLabel, weekStart } from "@/lib/roster/rules";
 import { isoDate, roleLabel } from "@/lib/invoicing/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
-import { attendedAction, cancelShiftAction, copyShiftAction, deleteShiftAction, saveShiftAction } from "./actions";
+import { attendedAction, cancelShiftAction, copyShiftAction, deleteShiftAction, saveShiftAction, sendRosterAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +89,14 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
             })}
           </div>
           <p className="lede">{shifts.length} shifts this week · {shifts.filter((s) => !s.carer && !s.cancelled).length} without a carer</p>
+          {view === "participant" && sp.who && (
+            <form action={sendRosterAction} className="row tight">
+              <input type="hidden" name="week" value={week} />
+              <input type="hidden" name="view" value={view} />
+              <input type="hidden" name="who" value={sp.who} />
+              <button className="secondary">Email this week&apos;s roster to the coordinator</button>
+            </form>
+          )}
         </div>
 
         {panel === "edit" && sp.edit && <EditPanel id={sp.edit} opts={opts} close={keep({})} week={week} view={view} who={sp.who} />}

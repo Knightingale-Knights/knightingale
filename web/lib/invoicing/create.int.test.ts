@@ -75,7 +75,9 @@ describe.skipIf(!url)("invoicing (scratch database)", () => {
       expectedShiftIds: shifts.map((s) => s.id), createdBy: null,
     });
     expect(r).toMatchObject({ shifts: 1, travel: 1, amount: 380.4, warnings: [] }); // 5 x 73.58 + 12.5 km
-    expect(calls.map((c) => new URL(c.url).host)).toEqual(["api.postmarkapp.com"]);
+    // The invoice, then next week's roster to the coordinator (or the participant when there is none), as Bubble did.
+    expect(calls.map((c) => new URL(c.url).host)).toEqual(["api.postmarkapp.com", "api.postmarkapp.com"]);
+    expect(calls[1].body.Subject).toMatch(/^Weekly roster — Sam Day — /);
     const [inv] = await sql`select due_date::text as due, gst, participant from app.invoices where id = ${r.invoiceId}`;
     expect(inv).toMatchObject({ due: "2026-11-18", gst: 0, participant: ids.P1 });
     expect(await q.billableTravel(ids.P1, "2026-11-10")).toEqual([]);

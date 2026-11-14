@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireStaff } from "@/lib/auth";
 import { copyShift, createShifts, deleteShift, markAttended, setCancelled, updateShift, type ShiftInput } from "@/lib/roster/mutate";
 import { weekStart } from "@/lib/roster/rules";
+import { sendWeeklyRoster } from "@/lib/roster/weekly";
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
@@ -93,4 +94,12 @@ export async function attendedAction(f: FormData) {
     await markAttended(id, str(f, "attend_start"), str(f, "attend_end"));
     return { msg: "Attendance recorded." };
   }, { edit: id });
+}
+
+/** Emails the shown week's roster to the participant's coordinator. */
+export async function sendRosterAction(f: FormData) {
+  await run(f, async () => {
+    const r = await sendWeeklyRoster(str(f, "who"), weekStart(str(f, "week")));
+    return { msg: `Roster emailed to ${r.to} (${r.shifts} shift${r.shifts === 1 ? "" : "s"}).` };
+  }, {});
 }
