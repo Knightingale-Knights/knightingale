@@ -1,6 +1,7 @@
 import { sql } from "@/lib/db";
 import { addDays, clashes, hoursBetween, parseClock, price, slotsFor, weeklyDates, type ShiftKind } from "./rules";
 import { carerBookings, fromDay, melbDay } from "./queries";
+import { rosterProblems } from "@/lib/compliance/data";
 
 type Tx = typeof sql;
 
@@ -61,12 +62,15 @@ async function context(tx: Tx, i: ShiftInput) {
   return { address: l.address, coordinator: null };
 }
 
-async function clashWarnings(tx: Tx, carer: string | null, day: string, start: number, end: number, excludeId: string | null) {
+async function clashWarnings(tx: Tx, carer: string | null, day: string, start: number, end: number, excludeId: string | null, ndis = false) {
   if (!carer) return [];
   const others = await carerBookings(carer, day, excludeId, tx);
   const me = { id: "new", day, start_time: start, end_time: end };
   const hit = others.filter((o) => clashes(me, o));
-  return hit.length ? [`This carer already has ${hit.length > 1 ? `${hit.length} shifts` : "a shift"} overlapping ${day}.`] : [];
+  const out = hit.length ? [`This carer already has ${hit.length > 1 ? `${hit.length} shifts` : "a shift"} overlapping ${day}.`] : [];
+  const docs = await rosterProblems(carer, day, ndis, tx);
+  if (docs.length) out.push(`Check this carer's documents: ${docs.join(", ")}.`);
+  return out;
 }
 
 /** Marks the carer's matching availability slots as taken. */
@@ -114,7 +118,7 @@ export async function createShifts(i: ShiftInput, createdBy: string | null): Pro
     const ids: string[] = [];
     const warnings: string[] = [];
     for (const day of days) {
-      warnings.push(...(await clashWarnings(t, i.carer, day, start, end, null)));
+      warnings.push(...(await clashWarnings(t, i.carer, day, start, end, null, i.kind === "ndis")));
       const [row] = await t<{ id: string }[]>`
         insert into app.shifts (
           date, start_time, end_time, hours, rate, fee, revenue, wage, roles,
@@ -145,7 +149,7 @@ export async function updateShift(id: string, i: ShiftInput): Promise<SaveResult
     const before = await assertEditable(t, id);
     const p = price(hours, await priceItem(t, i.kind, i.priceItem));
     const ctx = await context(t, i);
-    const warnings = await clashWarnings(t, i.carer, i.day, start, end, id);
+    const warnings = await clashWarnings(t, i.carer, i.day, start, end, id, i.kind === "ndis");
     await t`
       update app.shifts set
         date = ${fromDay(i.day)}, start_time = ${start}, end_time = ${end}, hours = ${hours},
@@ -191,13 +195,13 @@ export async function copyShift(id: string, days: string[], createdBy: string | 
   if (!days.length) throw new Error("Choose at least one day to copy to.");
   return sql.begin(async (tx) => {
     const t = tx as unknown as Tx;
-    const [src] = await t<{ carer: string | null; start_time: number; end_time: number }[]>`
-      select carer, start_time, end_time from app.shifts where id = ${id}`;
+    const [src] = await t<{ carer: string | null; start_time: number; end_time: number; ndis: boolean }[]>`
+      select carer, start_time, end_time, participant is not null as ndis from app.shifts where id = ${id}`;
     if (!src) throw new Error("That shift no longer exists.");
     const ids: string[] = [];
     const warnings: string[] = [];
     for (const day of days) {
-      warnings.push(...(await clashWarnings(t, src.carer, day, src.start_time, src.end_time, null)));
+      warnings.push(...(await clashWarnings(t, src.carer, day, src.start_time, src.end_time, null, src.ndis)));
       const [row] = await t<{ id: string }[]>`
         insert into app.shifts (
           date, start_time, end_time, hours, rate, fee, revenue, wage, roles, carer, participant, coordinator,

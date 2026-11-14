@@ -206,3 +206,19 @@ main.narrow { max-width: 720px; margin: 0 auto; padding: 24px 16px 60px; }
 .upload .button { padding: 16px; font-size: 17px; font-weight: 600; display: block; text-align: center; background: var(--eucalypt); color: white; border-radius: 12px; cursor: pointer; }
 .upload input:disabled + .button { opacity: 0.6; }
 .extras-admin { border-top: 1px solid var(--rule); margin-top: 8px; padding-top: 8px; }
+
+/* Compliance */
+.carer-top nav { flex-wrap: wrap; row-gap: 6px; }
+.doc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.doc-head h2 { margin: 0; }
+.pill { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: var(--gumleaf); color: var(--eucalypt); white-space: nowrap; }
+.pill.soon, .pill.check { background: var(--sand); color: var(--charcoal); }
+.pill.expired, .pill.missing { background: var(--cherry); color: white; }
+.doc.expired, .doc.missing { border-left: 4px solid var(--cherry); }
+.doc.soon, .doc.check { border-left: 4px solid var(--sand); }
+.doc .files { display: flex; gap: 12px; }
+.doc .upload .button { padding: 10px; margin-top: 8px; }
+.table-wrap { overflow-x: auto; }
+table.compliance td.cell { font-size: 12px; white-space: nowrap; text-align: center; }
+table.compliance td.cell.expired, table.compliance td.cell.missing { background: #f6dde3; color: var(--cherry); font-weight: 600; }
+table.compliance td.cell.soon, table.compliance td.cell.check { background: var(--sand); }

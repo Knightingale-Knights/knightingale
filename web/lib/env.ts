@@ -23,5 +23,8 @@ export const env = {
   // Facility bookings text this number (the office), as Bubble did.
   // Server-side Google Maps key (Distance Matrix and Places). Needs no HTTP referrer restriction.
   get googleMapsKey() { return process.env.GOOGLE_MAPS_API_KEY ?? ""; },
+  // Automatic emails (such as the daily document expiry email) only go out when AUTOMATIONS=live, so Bubble and the new app don't both send.
+  get automationsLive() { return process.env.AUTOMATIONS === "live"; },
+  get complianceAlertTo() { return process.env.COMPLIANCE_ALERT_TO ?? "paul@knightingale.com.au"; },
   get bookingAlertTo() { return process.env.BOOKING_ALERT_TO ?? "0426512584"; },
 };

@@ -1,0 +1,66 @@
+// The compliance documents kept for each carer, and where Bubble stores each one.
+export type DocKey = "cpr" | "first_aid" | "police" | "wwcc" | "ndis_screening" | "flu" | "id" | "qualification";
+
+export type DocDef = {
+  key: DocKey;
+  label: string;
+  table: string;
+  fileCols: string[]; // a record "has a file" when any of these is set ("[]" marks a list column)
+  uploadCol: string | null; // where a new upload goes (null: no file, details only)
+  uploadIsArray: boolean;
+  expiryCol: string | null;
+  numberCol: string | null;
+  numberLabel: string | null;
+  ai: { label: string; fallbackMonths: number | null } | null; // read the expiry from the upload
+  roster: "all" | "ndis" | null; // warn on the roster when this has expired
+  hint: string;
+};
+
+export const DOCS: DocDef[] = [
+  { key: "cpr", label: "CPR", table: "cpr_certificates", fileCols: ["cpr_certificate"], uploadCol: "cpr_certificate", uploadIsArray: false,
+    expiryCol: "expiry", numberCol: null, numberLabel: null, ai: { label: "CPR / cardiopulmonary resuscitation)", fallbackMonths: 12 }, roster: "all",
+    hint: "Statement of Attainment for HLTAID009 from a registered training organisation." },
+  { key: "first_aid", label: "First aid", table: "first_aid_certificates", fileCols: ["first_aid_certificate"], uploadCol: "first_aid_certificate", uploadIsArray: false,
+    expiryCol: "expiry", numberCol: null, numberLabel: null, ai: { label: "First Aid (HLTAID011 Provide First Aid)", fallbackMonths: 36 }, roster: "all",
+    hint: "Statement of Attainment for HLTAID011 from a registered training organisation." },
+  { key: "police", label: "Police check", table: "police_checks", fileCols: ["image"], uploadCol: "image", uploadIsArray: false,
+    expiryCol: "expiry_date", numberCol: "reference_number", numberLabel: "Reference number", ai: { label: "National Police Check certificate", fallbackMonths: 36 }, roster: "all",
+    hint: "Your National Police Check certificate." },
+  { key: "wwcc", label: "Working with Children Check", table: "wwcc_checks", fileCols: ["image"], uploadCol: "image", uploadIsArray: false,
+    expiryCol: "expiry", numberCol: "card_number", numberLabel: "Card number", ai: { label: "Working with Children Check card", fallbackMonths: null }, roster: "all",
+    hint: "A photo of your WWCC card." },
+  { key: "ndis_screening", label: "NDIS worker screening", table: "ndis_screening_checks", fileCols: [], uploadCol: null, uploadIsArray: false,
+    expiryCol: "expiry_date", numberCol: "id_number", numberLabel: "Screening ID", ai: null, roster: "ndis",
+    hint: "Your NDIS Worker Screening ID and its expiry date." },
+  { key: "flu", label: "Flu vaccination", table: "vaccinations", fileCols: ["flu", "influenza[]"], uploadCol: "influenza", uploadIsArray: true,
+    expiryCol: "expiry", numberCol: null, numberLabel: null, ai: { label: "Influenza (flu) vaccination record", fallbackMonths: 12 }, roster: null,
+    hint: "Your flu vaccination record or immunisation history statement." },
+  { key: "id", label: "Photo ID", table: "identity_documents", fileCols: ["passport", "license", "citizenship"], uploadCol: "license", uploadIsArray: false,
+    expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null,
+    hint: "Your driver licence or passport." },
+  { key: "qualification", label: "Qualification", table: "qualifications", fileCols: ["transcript[]", "ahpra[]"], uploadCol: "transcript", uploadIsArray: true,
+    expiryCol: "expiry", numberCol: "registration_number", numberLabel: "AHPRA registration number", ai: null, roster: null,
+    hint: "Your certificate or transcript. Nurses: add your AHPRA number." },
+];
+
+export const docDef = (k: string) => DOCS.find((d) => d.key === k) ?? null;
+
+export const SOON_DAYS = 30;
+export type Status = "ok" | "soon" | "expired" | "missing" | "check";
+
+/** missing: nothing on file. check: on file but no expiry date yet (for a document that has one). */
+export function statusOf(d: DocDef, r: { has_file: boolean; has_record: boolean; expiry: string | null; number: string | null } | undefined, today: string): Status {
+  const onFile = d.uploadCol ? Boolean(r?.has_file) : Boolean(r?.has_record && (r.number || r.expiry));
+  if (!onFile) return "missing";
+  if (!d.expiryCol) return "ok";
+  if (!r?.expiry) return "check";
+  if (r.expiry < today) return "expired";
+  const soon = new Date(`${today}T00:00:00Z`);
+  soon.setUTCDate(soon.getUTCDate() + SOON_DAYS);
+  return r.expiry <= soon.toISOString().slice(0, 10) ? "soon" : "ok";
+}
+
+export const STATUS_LABEL: Record<Status, string> = { ok: "Up to date", soon: "Expiring soon", expired: "Expired", missing: "Missing", check: "Office to check" };
+
+/** Bubble file links sometimes start with //. */
+export const fileHref = (v: string) => (v.startsWith("//") ? `https:${v}` : v);

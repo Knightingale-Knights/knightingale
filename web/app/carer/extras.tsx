@@ -26,7 +26,7 @@ export function AddressInput({ name, label, defaultValue, listId }: { name: stri
 }
 
 /** Shrinks a phone photo to at most 1800px on its longest side (JPEG), so it uploads quickly. PDFs go as they are. */
-async function shrink(file: File): Promise<File> {
+export async function shrink(file: File): Promise<File> {
   if (!file.type.startsWith("image/")) return file;
   try {
     const img = await createImageBitmap(file);

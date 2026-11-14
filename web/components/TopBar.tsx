@@ -7,6 +7,7 @@ const SECTIONS = [
   ["/roster", "Roster"],
   ["/invoicing", "Invoicing"],
   ["/chats", "Chats"],
+  ["/compliance", "Compliance"],
 ] as const;
 
 export async function TopBar({ section, email, children }: { section: string; email: string; children?: React.ReactNode }) {

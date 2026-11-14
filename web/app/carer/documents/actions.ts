@@ -1,0 +1,61 @@
+"use server";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { currentUser } from "@/lib/auth";
+import { DocError, setDetails, uploadDoc } from "@/lib/compliance/data";
+import { docDef, STATUS_LABEL, type DocKey } from "@/lib/compliance/docs";
+import { auDate, isoDate } from "@/lib/invoicing/rules";
+
+export type DocResult = { ok: boolean; message: string };
+
+/** Carers upload their own documents; staff can upload for any carer. */
+async function who(carerField: FormDataEntryValue | null) {
+  const me = await currentUser();
+  if (!me || me.role === "facility") redirect("/login");
+  const carer = me.role === "admin" && carerField ? String(carerField) : me.id;
+  if (me.role !== "admin" && carer !== me.id) redirect("/carer");
+  return { me, carer };
+}
+
+const pathFor = (role: string, carer: string) => (role === "admin" ? `/compliance/${carer}` : "/carer/documents");
+
+export async function uploadDocAction(f: FormData): Promise<DocResult> {
+  const { me, carer } = await who(f.get("carer"));
+  const key = String(f.get("doc") ?? "") as DocKey;
+  const file = f.get("file");
+  if (!(file instanceof File)) return { ok: false, message: "Choose a file to upload." };
+  try {
+    const r = await uploadDoc(carer, key, { name: file.name, type: file.type, bytes: Buffer.from(await file.arrayBuffer()) }, me.id, isoDate(new Date()));
+    revalidatePath(pathFor(me.role, carer));
+    const label = docDef(key)?.label ?? "Document";
+    if (r.reading?.reason === "document_type_mismatch") {
+      return { ok: false, message: `Saved, but this doesn't look like a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."} The office will check it.` };
+    }
+    if (r.status === "expired") return { ok: false, message: `Saved, but this ${label} expired on ${auDate(r.expiry)}. Please upload a current one.` };
+    if (r.expiry) return { ok: true, message: `Thanks, your ${label} is saved. It expires on ${auDate(r.expiry)}.` };
+    return { ok: true, message: `Thanks, your ${label} is saved. ${r.status === "check" ? STATUS_LABEL.check + "." : ""}`.trim() };
+  } catch (e) {
+    if (!(e instanceof DocError)) console.error(e);
+    return { ok: false, message: e instanceof DocError ? e.message : "Upload failed. Please try again." };
+  }
+}
+
+export async function detailsAction(f: FormData) {
+  const { me, carer } = await who(f.get("carer"));
+  const key = String(f.get("doc") ?? "") as DocKey;
+  const base = pathFor(me.role, carer);
+  let dest = `${base}?saved=${key}#${key}`;
+  try {
+    const v: { number?: string; expiry?: string } = {};
+    if (f.has("number")) v.number = String(f.get("number") ?? "");
+    // Carers can type the expiry only for documents with no file to read it from; staff can always correct it.
+    const d = docDef(key);
+    if (f.has("expiry") && (me.role === "admin" || (d && !d.uploadCol))) v.expiry = String(f.get("expiry") ?? "");
+    await setDetails(carer, key, me.id, v, isoDate(new Date()));
+  } catch (e) {
+    if (!(e instanceof DocError)) console.error(e);
+    dest = `${base}?error=${encodeURIComponent(e instanceof DocError ? e.message : "Something went wrong. Please try again.")}#${key}`;
+  }
+  revalidatePath(base);
+  redirect(dest);
+}
