@@ -21,7 +21,8 @@ export function sendInvoiceEmail(o: {
   return post("email/withTemplate", {
     From: env.fromEmail,
     To: o.to,
-    Cc: env.ccEmail,
+    // Skip the copy when it would go to the same inbox twice.
+    ...(o.to.trim().toLowerCase() === env.ccEmail.toLowerCase() ? {} : { Cc: env.ccEmail }),
     TemplateAlias: env.postmarkTemplateAlias,
     TemplateModel: {
       participant: o.participant,
