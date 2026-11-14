@@ -109,75 +109,82 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<CreateIn
     return { id: inv.id, shifts, travel, sum };
   });
 
+  // Everything after this point is best effort: the invoice is saved, so
+  // problems become warnings rather than errors (a retry would double-bill).
   const warnings: string[] = [];
-
-  // 2. Make the PDF with the existing designs and keep a copy.
-  const common = {
-    invoice_number: number,
-    period_ending: auDate(input.through),
-    invoice_date: auDate(input.invoiceDate),
-    payment_terms: input.paymentTerms,
-    due_date: auDate(due),
-    location_address: t.address ?? "",
+  const attempt = async (what: string, fn: () => Promise<void>) => {
+    try { await fn(); } catch (e) { warnings.push(`${what}: ${String((e as Error).message ?? e)}`); }
   };
-  const pdf = input.kind === "residential"
-    ? await residentialPdf({ ...common, location_name: t.name, line_items: residentialLineItems(created.shifts) })
-    : await ndisPdf({
-        ...common,
-        participant: firstName(t.name),
-        ndis_number: t.ndis_number ?? "",
-        location_name: (await locationName(t.location_id)) ?? "",
-        shift_items: ndisShiftItems(created.shifts),
-        travel_items: travelItems(created.travel, input.travelItemNo, input.travelItemDescription),
-      });
-  const filename = `${input.kind === "residential" ? t.name : firstName(t.name)} - Invoice ${number}.pdf`;
-  await sql`insert into app.invoice_files (invoice_id, filename, pdf) values (${created.id}, ${filename}, ${Buffer.from(pdf, "base64")})`;
-
-  // 3. Email it.
-  const attachments = [{ Name: filename, Content: pdf, ContentType: "application/pdf" }];
-  if (input.kind === "ndia") {
-    const csv = toCsv(NDIA_HEADERS, ndiaCsvRows(created.shifts, number));
-    attachments.push({ Name: `ndia-claims-${number}.csv`, Content: Buffer.from(csv, "utf8").toString("base64"), ContentType: "text/csv" });
-  }
   let emailed = false;
-  try {
-    await sendInvoiceEmail({
-      to: input.sendTo,
-      participant: input.kind === "residential" ? t.name : firstName(t.name),
-      locationName: input.kind === "residential" ? t.name : (await locationName(t.location_id)) ?? "",
-      invoiceNumber: number,
-      attachments,
-    });
-    emailed = true;
-    await sql`update app.invoices set emailed_at = now(), email_error = null where id = ${created.id}`;
-  } catch (e) {
-    const msg = String((e as Error).message ?? e);
-    warnings.push(`The invoice was saved but the email failed: ${msg}`);
-    await sql`update app.invoices set email_error = ${msg} where id = ${created.id}`;
-  }
+
+  await attempt("The invoice was saved but sending it failed", async () => {
+    // 2. Make the PDF with the existing designs and keep a copy.
+    const locName = input.kind === "residential" ? t.name : (await locationName(t.location_id)) ?? "";
+    const common = {
+      invoice_number: number,
+      period_ending: auDate(input.through),
+      invoice_date: auDate(input.invoiceDate),
+      payment_terms: input.paymentTerms,
+      due_date: auDate(due),
+      location_address: t.address ?? "",
+    };
+    const pdf = input.kind === "residential"
+      ? await residentialPdf({ ...common, location_name: t.name, line_items: residentialLineItems(created.shifts) })
+      : await ndisPdf({
+          ...common,
+          participant: firstName(t.name),
+          ndis_number: t.ndis_number ?? "",
+          location_name: locName,
+          shift_items: ndisShiftItems(created.shifts),
+          travel_items: travelItems(created.travel, input.travelItemNo, input.travelItemDescription),
+        });
+    const filename = `${input.kind === "residential" ? t.name : firstName(t.name)} - Invoice ${number}.pdf`;
+    await sql`insert into app.invoice_files (invoice_id, filename, pdf) values (${created.id}, ${filename}, ${Buffer.from(pdf, "base64")})`;
+
+    // 3. Email it (NDIA also gets the claims CSV).
+    const attachments = [{ Name: filename, Content: pdf, ContentType: "application/pdf" }];
+    if (input.kind === "ndia") {
+      const csv = toCsv(NDIA_HEADERS, ndiaCsvRows(created.shifts, number));
+      attachments.push({ Name: `ndia-claims-${number}.csv`, Content: Buffer.from(csv, "utf8").toString("base64"), ContentType: "text/csv" });
+    }
+    try {
+      await sendInvoiceEmail({
+        to: input.sendTo,
+        participant: input.kind === "residential" ? t.name : firstName(t.name),
+        locationName: locName,
+        invoiceNumber: number,
+        attachments,
+      });
+      emailed = true;
+      await sql`update app.invoices set emailed_at = now(), email_error = null where id = ${created.id}`;
+    } catch (e) {
+      await sql`update app.invoices set email_error = ${String((e as Error).message ?? e)} where id = ${created.id}`;
+      throw e;
+    }
+  });
 
   // 4. NDIS: weekly roster to the coordinator, as Bubble did.
   if (input.kind === "ndis" && input.sendRoster && t.bubble_id && t.coordinator_email && env.rosterUrl) {
-    try {
+    await attempt("Weekly roster email failed", async () => {
       const res = await fetch(env.rosterUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ participant_id: t.bubble_id, to_email: t.coordinator_email }),
       });
-      if (!res.ok) warnings.push(`Weekly roster email failed (${res.status}).`);
-    } catch {
-      warnings.push("Weekly roster email failed.");
-    }
+      if (!res.ok) throw new Error(`status ${res.status}`);
+    });
   }
 
   // 5. Tell Bubble, while it's still live.
   if (bubbleWritebackEnabled()) {
-    const errors = await writeBack(input.kind, input.target, created.shifts, created.travel, created.sum.amount, t);
-    if (errors.length) warnings.push(`Bubble wasn't fully updated (${errors.length} errors). See the invoice list.`);
-    await sql`
-      update app.invoices
-         set bubble_writeback_at = now(), bubble_writeback_error = ${errors.length ? errors.slice(0, 5).join(" | ") : null}
-       where id = ${created.id}`;
+    await attempt("Bubble update failed", async () => {
+      const errors = await writeBack(input.kind, input.target, created.shifts, created.travel, created.sum.amount, t);
+      if (errors.length) warnings.push(`Bubble wasn't fully updated (${errors.length} errors). See the invoice list.`);
+      await sql`
+        update app.invoices
+           set bubble_writeback_at = now(), bubble_writeback_error = ${errors.length ? errors.slice(0, 5).join(" | ") : null}
+         where id = ${created.id}`;
+    });
   }
 
   return {

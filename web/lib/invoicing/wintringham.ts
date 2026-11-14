@@ -10,7 +10,7 @@ export async function sendWintringhamCsv(to: string) {
   const recipient = to.trim() || env.wintringhamTo;
   if (!recipient) throw new Error("Enter who the Wintringham CSV goes to.");
 
-  return sql.begin(async (tx) => {
+  const sent = await sql.begin(async (tx) => {
     await tx`select pg_advisory_xact_lock(hashtext('app.wintringham'))`;
     const shifts = await wintringhamPending(tx as unknown as typeof sql);
     if (!shifts.length) throw new Error("No billed shifts are waiting to be sent.");
@@ -24,12 +24,14 @@ export async function sendWintringhamCsv(to: string) {
       attachments: [{ Name: `wintringham-${date}.csv`, Content: Buffer.from(csv, "utf8").toString("base64"), ContentType: "text/csv" }],
     });
     await tx`insert into app.wintringham_csv_sent (shift_id) select unnest(${shifts.map((s) => s.id)}::uuid[]) on conflict do nothing`;
-
-    let bubbleErrors = 0;
-    if (bubbleWritebackEnabled()) {
-      const errs = await patchMany(shifts.filter((s) => s.bubble_id).map((s) => () => patchBubble("shift", s.bubble_id!, { csv: true })));
-      bubbleErrors = errs.length;
-    }
-    return { rows: shifts.length, bubbleErrors };
+    return shifts;
   });
+
+  // Outside the transaction: Bubble can be slow and the CSV is already sent.
+  let bubbleErrors = 0;
+  if (bubbleWritebackEnabled()) {
+    const errs = await patchMany(sent.filter((s) => s.bubble_id).map((s) => () => patchBubble("shift", s.bubble_id!, { csv: true })));
+    bubbleErrors = errs.length;
+  }
+  return { rows: sent.length, bubbleErrors };
 }
