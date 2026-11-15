@@ -2,22 +2,22 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-// Same faces as the invoice PDFs: Geist for text, Antic Didone for the wordmark.
-const ui = localFont({
+// Paper design system: Helvetica Neue (system) for UI text, Newsreader for titles.
+const serif = localFont({
   src: [
-    { path: "./fonts/Geist-Regular.ttf", weight: "400" },
-    { path: "./fonts/Geist-Medium.ttf", weight: "500" },
-    { path: "./fonts/Geist-Bold.ttf", weight: "600" },
+    { path: "./fonts/newsreader-latin-300-normal.woff2", weight: "300", style: "normal" },
+    { path: "./fonts/newsreader-latin-300-italic.woff2", weight: "300", style: "italic" },
+    { path: "./fonts/newsreader-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/newsreader-latin-400-italic.woff2", weight: "400", style: "italic" },
   ],
-  variable: "--font-ui",
+  variable: "--font-display",
 });
-const display = localFont({ src: "./fonts/AnticDidone-Regular.ttf", variable: "--font-display" });
 
 export const metadata: Metadata = { title: "Knightingale", robots: { index: false } };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-AU" className={`${ui.variable} ${display.variable}`}>
+    <html lang="en-AU" className={serif.variable}>
       <body>{children}</body>
     </html>
   );

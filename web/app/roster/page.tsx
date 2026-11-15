@@ -58,7 +58,7 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
         <Link href={keep({ new: "residential", day: newDay })}>+ Residential shift</Link>
       </TopBar>
 
-      <main className={`page wide ${panel ? "with-panel" : ""}`}>
+      <main className={`page wide ${panel ? "with-panel" : ""} ${mode === "month" ? "roster-month" : ""}`}>
         <div>
           {sp.msg && <p className="banner ok">{sp.msg}</p>}
           {sp.warn && <p className="banner warn">{sp.warn}</p>}
@@ -157,7 +157,7 @@ function MonthGrid({ from, to, month, today, shifts, href }: {
             <Link key={day} href={href(day)} className={`cal-cell ${day.startsWith(month) ? "" : "out"}`}>
               <span className={`num ${day === today ? "today" : ""}`}>{Number(day.slice(8))}</span>
               <span className="amt">{list.length ? money(total(list)) : "\u00a0"}</span>
-              {open > 0 ? <span className="open">{open} open</span> : <span className="open">{"\u00a0"}</span>}
+              {open > 0 && <span className="open">{open} open</span>}
               <span className="go"><OpenIcon /></span>
             </Link>
           );
