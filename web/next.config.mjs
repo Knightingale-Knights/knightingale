@@ -14,7 +14,6 @@ const nextConfig = {
       { source: "/graduates", destination: "/healthcare_professionals", permanent: true },
       { source: "/acu", destination: "/healthcare_professionals", permanent: true },
       { source: "/carers", destination: "/login", permanent: false }, // link in the carer welcome email
-      { source: "/version-test/:path*", destination: "/", permanent: false },
     ];
   },
   outputFileTracingIncludes: { "/**": ["./lib/pdf/fonts/**", "./lib/pdf/*.cjs"] },

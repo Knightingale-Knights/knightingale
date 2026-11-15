@@ -5,6 +5,7 @@ import { requireStaff } from "@/lib/auth";
 import { copyShift, createShifts, deleteShift, markAttended, setCancelled, updateShift, type ShiftInput } from "@/lib/roster/mutate";
 import { weekStart } from "@/lib/roster/rules";
 import { sendWeeklyRoster } from "@/lib/roster/weekly";
+import { prepareDelete, pushShifts } from "@/lib/klarra/push";
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
@@ -53,6 +54,7 @@ export async function saveShiftAction(f: FormData) {
   const staff = await requireStaff();
   await run(f, async () => {
     const r = id ? await updateShift(id, i) : await createShifts(i, staff.id);
+    await pushShifts(id ? [id] : r.ids);
     return {
       msg: id ? "Shift saved." : r.ids.length > 1 ? `${r.ids.length} shifts created.` : "Shift created.",
       warnings: r.warnings,
@@ -66,6 +68,7 @@ export async function cancelShiftAction(f: FormData) {
   const cancel = str(f, "cancel") === "1";
   await run(f, async () => {
     await setCancelled(id, cancel);
+    await pushShifts([id]);
     return { msg: cancel ? "Shift cancelled." : "Shift restored." };
   }, { edit: id });
 }
@@ -73,7 +76,9 @@ export async function cancelShiftAction(f: FormData) {
 export async function deleteShiftAction(f: FormData) {
   const id = str(f, "id");
   await run(f, async () => {
+    const told = await prepareDelete(id);
     await deleteShift(id);
+    await told();
     return { msg: "Shift deleted." };
   }, { edit: id });
 }
@@ -84,6 +89,7 @@ export async function copyShiftAction(f: FormData) {
   const staff = await requireStaff();
   await run(f, async () => {
     const r = await copyShift(id, days, staff.id);
+    await pushShifts(r.ids);
     return { msg: `Copied to ${r.ids.length} day${r.ids.length > 1 ? "s" : ""}.`, warnings: r.warnings };
   }, { edit: id });
 }
