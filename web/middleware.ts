@@ -3,6 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Keeps the Supabase sign-in cookie fresh on every request.
 export async function middleware(request: NextRequest) {
+  // A sign-in link that fell back to the Site URL lands on "/?code=...": finish signing in.
+  const code = request.nextUrl.searchParams.get("code");
+  if (code && request.nextUrl.pathname === "/") {
+    const to = request.nextUrl.clone();
+    to.pathname = "/auth/callback";
+    return NextResponse.redirect(to);
+  }
+
   let response = NextResponse.next({ request });
   const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     cookies: {
