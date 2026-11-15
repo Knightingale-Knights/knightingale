@@ -62,7 +62,7 @@ export function Rich({ text }: { text: string | null | undefined }) {
 /** Body text: blank lines become paragraphs, lines starting with • become lists. */
 export function Prose({ text }: { text: string }) {
   // Bubble often wrote lists on one line ("• A • B • C"): put each item on its own line.
-  const blocks = text.trim().replace(/\s*•\s*$/gm, "").replace(/([^\n])\s+•\s+/g, "$1\n• ").split(/\n\s*\n/);
+  const blocks = text.trim().replace(/\s*•\s*$/gm, "").replace(/([^\n])[ \t]+•[ \t]+/g, "$1\n• ").split(/\n\s*\n/);
   return (
     <>
       {blocks.map((b, i) => {
