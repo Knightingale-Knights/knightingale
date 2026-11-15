@@ -1,6 +1,10 @@
+import { redirect } from "next/navigation";
+import { currentUser, homePath } from "@/lib/auth";
 import { sendMagicLink } from "./actions";
 
 export default async function Login({ searchParams }: { searchParams: Promise<{ sent?: string; error?: string }> }) {
+  const me = await currentUser();
+  if (me) redirect(homePath(me.role));
   const sp = await searchParams;
   return (
     <main className="login">
@@ -15,6 +19,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           </label>
           <button type="submit">Email me a sign-in link</button>
           {sp.error && <p className="error">{sp.error}</p>}
+          <p className="hint">New to Knightingale? <a href="/join">Join us</a></p>
         </form>
       )}
     </main>
