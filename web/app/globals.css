@@ -64,10 +64,12 @@ h2 { font-weight: 400; }
 
 label { display: flex; flex-direction: column; gap: 6px; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); font-weight: 400; }
 input, select, textarea { font: inherit; font-size: 14px; letter-spacing: 0.03em; text-transform: none; color: var(--ink); min-width: 0; border-radius: 0; }
-input, select { padding: 8px 0; border: 0; border-bottom: 1px solid var(--line-2); background: transparent; transition: border-color 160ms; }
+input, select, textarea { padding: 11px 14px; border: 1px solid var(--line-2); background: var(--paper); transition: border-color 160ms; }
+input::placeholder, textarea::placeholder { color: var(--ink-4); letter-spacing: 0.08em; }
+input[type="checkbox"], input[type="radio"] { padding: 0; }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--ink); }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--ink); }
-textarea { padding: 9px 11px; border: 1px solid var(--line-2); background: transparent; resize: vertical; }
+textarea { resize: vertical; }
 button, .button { font: inherit; font-size: 10px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; min-height: 34px; padding: 0 22px; border: 1px solid var(--ink); border-radius: 0; background: var(--ink); color: var(--paper); cursor: pointer; transition: background 160ms, color 160ms; }
 button:hover { background: var(--ink-hover); border-color: var(--ink-hover); }
 button.secondary { background: transparent; color: var(--ink); border-color: var(--ink); }
@@ -312,6 +314,6 @@ table.grid td { padding: 10px 8px; border-top: 1px solid var(--line); }
 /* Join intro */
 .join-intro p { margin: 0 0 14px; color: var(--ink-2); }
 .join-intro p:first-child { font-family: var(--serif); font-weight: 300; font-style: italic; font-size: 20px; line-height: 1.4; color: var(--ink); }
-.join-docs { list-style: none; padding: 0; margin: 0 0 8px; border-top: 1px solid var(--ink); }
+.join-docs { list-style: none; padding: 0; margin: 0 0 32px; border-top: 1px solid var(--ink); }
 .join-docs li { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .join-docs svg { flex: none; color: var(--ink); }
