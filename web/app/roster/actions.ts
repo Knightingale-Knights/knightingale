@@ -9,10 +9,10 @@ import { prepareDelete, pushShifts } from "@/lib/klarra/push";
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
-/** Keeps the week and filter the person was looking at. */
+/** Keeps the calendar view and filter the person was looking at. */
 function back(f: FormData, extra: Record<string, string>) {
   const p = new URLSearchParams();
-  for (const k of ["week", "view", "who"]) if (str(f, k)) p.set(k, str(f, k));
+  for (const k of ["mode", "date", "view", "who"]) if (str(f, k)) p.set(k, str(f, k));
   for (const [k, v] of Object.entries(extra)) if (v) p.set(k, v);
   return `/roster?${p}`;
 }
@@ -35,12 +35,12 @@ function input(f: FormData): ShiftInput {
   };
 }
 
-async function run(f: FormData, work: () => Promise<{ msg: string; warnings?: string[]; week?: string }>, onError: Record<string, string>) {
+async function run(f: FormData, work: () => Promise<{ msg: string; warnings?: string[]; date?: string }>, onError: Record<string, string>) {
   await requireStaff();
   let dest: string;
   try {
     const r = await work();
-    dest = back(f, { msg: r.msg, warn: (r.warnings ?? []).join(" "), ...(r.week ? { week: r.week } : {}) });
+    dest = back(f, { msg: r.msg, warn: (r.warnings ?? []).join(" "), ...(r.date ? { date: r.date } : {}) });
   } catch (e) {
     dest = back(f, { ...onError, error: String((e as Error).message ?? e) });
   }
@@ -58,7 +58,7 @@ export async function saveShiftAction(f: FormData) {
     return {
       msg: id ? "Shift saved." : r.ids.length > 1 ? `${r.ids.length} shifts created.` : "Shift created.",
       warnings: r.warnings,
-      week: weekStart(i.day),
+      date: i.day,
     };
   }, id ? { edit: id } : { new: i.kind, day: i.day });
 }

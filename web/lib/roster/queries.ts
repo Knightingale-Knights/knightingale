@@ -11,13 +11,17 @@ export type RosterShift = {
   carer: string | null; carer_name: string | null; participant: string | null; participant_name: string | null;
   location: string | null; location_name: string | null; item_name: string | null; notes: string | null;
   requested_by: string | null; // set when a facility booked it
+  revenue: number | null; carer_first: string | null; carer_photo: string | null;
 };
 
 export type RosterFilter = { participant?: string; location?: string; carer?: string };
 
-export async function weekShifts(monday: string, f: RosterFilter): Promise<RosterShift[]> {
+export const weekShifts = (monday: string, f: RosterFilter) => rangeShifts(monday, addDays(monday, 7), f);
+
+/** Shifts from `from` up to (not including) `to`, Melbourne days. */
+export async function rangeShifts(from: string, to: string, f: RosterFilter): Promise<RosterShift[]> {
   const where = [
-    sql`s.date >= ${fromDay(monday)} and s.date < ${fromDay(addDays(monday, 7))}`,
+    sql`s.date >= ${fromDay(from)} and s.date < ${fromDay(to)}`,
     f.participant ? sql`s.participant = ${f.participant}` : null,
     f.location ? sql`s.location = ${f.location}` : null,
     f.carer ? sql`s.carer = ${f.carer}` : null,
@@ -33,7 +37,8 @@ export async function weekShifts(monday: string, f: RosterFilter): Promise<Roste
            (select coalesce(nullif(trim(concat_ws(' ', fu.first_name, fu.last_name)), ''), 'facility') from app.users fu
              where fu.account_type = 'location'
                and (fu.id = s.created_by or exists (select 1 from app.users_shifts_requested q where q.shifts_id = s.id and q.users_id = fu.id))
-             limit 1) as requested_by
+             limit 1) as requested_by,
+           s.revenue, nullif(trim(c.first_name), '') as carer_first, c.profile_photo as carer_photo
       from app.shifts s
       left join app.users c on c.id = s.carer
       left join app.users p on p.id = s.participant
@@ -59,6 +64,7 @@ export async function getShift(id: string): Promise<ShiftDetail | null> {
            s.carer, trim(concat_ws(' ', c.first_name, c.last_name)) as carer_name,
            s.participant, trim(concat_ws(' ', p.first_name, p.last_name)) as participant_name,
            s.location, l.name as location_name, null as item_name, s.notes, null as requested_by,
+           nullif(trim(c.first_name), '') as carer_first, c.profile_photo as carer_photo,
            s.ndis_pricing, s.res_pricing, s.rate, s.fee, s.wage, s.revenue, s.supervisor, s.recurring,
            s.attend_start, s.attend_end, s.bubble_id
       from app.shifts s

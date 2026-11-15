@@ -111,3 +111,26 @@ export function addDays(day: string, n: number) {
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
 }
+
+export type Period = "am" | "pm" | "ns";
+/** Roster grouping by start time: AM 7:00 to before 12:00, PM 12:00 to before 22:00, NS 22:00 to before 7:00. */
+export function periodOf(start: number | null): Period {
+  if (start == null) return "am";
+  if (start >= 700 && start < 1200) return "am";
+  if (start >= 1200 && start < 2200) return "pm";
+  return "ns";
+}
+
+/** First day of the month n months from day's month. */
+export function addMonths(day: string, n: number) {
+  const [y, m] = day.split("-").map(Number);
+  const d = new Date(Date.UTC(y, m - 1 + n, 1));
+  return d.toISOString().slice(0, 10);
+}
+
+/** Monday-first weeks covering day's month: [first day shown, day after the last shown]. */
+export function monthGrid(day: string): [string, string] {
+  const first = `${day.slice(0, 7)}-01`;
+  const last = addDays(addMonths(first, 1), -1);
+  return [weekStart(first), addDays(weekStart(last), 7)];
+}

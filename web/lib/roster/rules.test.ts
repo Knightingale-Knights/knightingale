@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, clashes, clockLabel, hoursBetween, parseClock, price, slotsFor, weekStart, weeklyDates } from "./rules";
+import { addDays, addMonths, clashes, clockLabel, hoursBetween, monthGrid, parseClock, periodOf, price, slotsFor, weekStart, weeklyDates } from "./rules";
 
 describe("times", () => {
   it("parses the ways people type times", () => {
@@ -59,5 +59,17 @@ describe("dates", () => {
     expect(weekStart("2026-11-15")).toBe("2026-11-09"); // Sunday
     expect(weekStart("2026-11-16")).toBe("2026-11-16"); // Monday
     expect(addDays("2026-11-30", 2)).toBe("2026-12-02");
+  });
+});
+
+describe("calendar", () => {
+  it("groups shifts into AM, PM and NS by start time", () => {
+    expect([700, 1159, 1200, 2159, 2200, 0, 659, null].map(periodOf)).toEqual(["am", "am", "pm", "pm", "ns", "ns", "ns", "am"]);
+  });
+  it("builds Monday-first month grids", () => {
+    expect(monthGrid("2026-11-15")).toEqual(["2026-10-26", "2026-12-07"]);
+    expect(monthGrid("2027-02-10")).toEqual(["2027-02-01", "2027-03-01"]);
+    expect(addMonths("2026-12-31", 1)).toBe("2027-01-01");
+    expect(addMonths("2026-01-31", -1)).toBe("2025-12-01");
   });
 });
