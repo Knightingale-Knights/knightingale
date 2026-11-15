@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Prose, Rich } from "@/lib/site/bbcode";
 import type { Cta, Section } from "@/lib/site/types";
+import { siteImg } from "@/lib/files";
 
 function Buttons({ cta, light }: { cta: Cta; light?: boolean }) {
   if (!cta?.length) return null;
@@ -30,7 +31,7 @@ export function SiteSection({ s: raw, i }: { s: Section; i: number }) {
               <div className="s-lead"><Body body={s.body} /></div>
               <Buttons cta={s.cta} />
             </div>
-            {s.image && <img src={s.image} alt="" className="s-hero-img" />}
+            {s.image && <img src={siteImg(s.image)} alt="" className="s-hero-img" />}
           </div>
         </section>
       );
@@ -55,7 +56,7 @@ export function SiteSection({ s: raw, i }: { s: Section; i: number }) {
               <Body body={s.body} />
               <Buttons cta={s.cta} />
             </div>
-            <img src={s.image} alt="" className="s-split-img" />
+            <img src={siteImg(s.image)} alt="" className="s-split-img" />
           </div>
         </section>
       );
@@ -71,7 +72,7 @@ export function SiteSection({ s: raw, i }: { s: Section; i: number }) {
                 <article key={n} className="s-card">
                   {s.numbered ? <span className="s-num">{(it.kicker ?? it.title).replace(".", "")}</span> : it.kicker && <span className="s-kicker"><Rich text={it.kicker} /></span>}
                   {!(s.numbered && /^\d+\.?$/.test(it.title)) && <h3><Rich text={it.title} /></h3>}
-                  {it.image && <img src={it.image} alt="" />}
+                  {it.image && <img src={siteImg(it.image)} alt="" />}
                   <Body body={it.body} />
                 </article>
               ))}
@@ -96,7 +97,7 @@ export function SiteSection({ s: raw, i }: { s: Section; i: number }) {
         <section className="s-logos">
           <div className="s-wrap">
             <p className="s-eyebrow center"><Rich text={s.title} /></p>
-            <div className="s-logo-row">{s.images.map((src) => <img key={src} src={src} alt="" />)}</div>
+            <div className="s-logo-row">{s.images.map((src) => <img key={src} src={siteImg(src)} alt="" />)}</div>
           </div>
         </section>
       );
@@ -165,7 +166,7 @@ export function SiteSection({ s: raw, i }: { s: Section; i: number }) {
               <div className="s-stats">{s.stats.map((x) => <div key={x.label}><strong>{x.value}</strong><span>{x.label}</span></div>)}</div>
               <Buttons cta={s.cta} />
             </div>
-            {s.image && <img src={s.image} alt="" className="s-hero-img" />}
+            {s.image && <img src={siteImg(s.image)} alt="" className="s-hero-img" />}
           </div>
         </section>
       );
@@ -180,7 +181,7 @@ export function SiteSection({ s: raw, i }: { s: Section; i: number }) {
               <tbody>
                 {s.rows.map((r) => (
                   <tr key={r.price} className={r.ours ? "ours" : ""}>
-                    <td>{r.logo ? <img src={r.logo} alt={r.label} /> : r.label}</td>
+                    <td>{r.logo ? <img src={siteImg(r.logo)} alt={r.label} /> : r.label}</td>
                     <td className="price">{r.price}</td>
                     <td className="note">{r.note}</td>
                   </tr>
@@ -204,7 +205,7 @@ export function SiteSection({ s: raw, i }: { s: Section; i: number }) {
                 ))}
               </dl>
             </div>
-            {s.image && <img src={s.image} alt="" className="s-split-img" />}
+            {s.image && <img src={siteImg(s.image)} alt="" className="s-split-img" />}
           </div>
         </section>
       );

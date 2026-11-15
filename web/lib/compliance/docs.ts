@@ -62,5 +62,5 @@ export function statusOf(d: DocDef, r: { has_file: boolean; has_record: boolean;
 
 export const STATUS_LABEL: Record<Status, string> = { ok: "Up to date", soon: "Expiring soon", expired: "Expired", missing: "Missing", check: "Office to check" };
 
-/** Bubble file links sometimes start with //. */
-export const fileHref = (v: string) => (v.startsWith("//") ? `https:${v}` : v);
+/** Links to stored documents: Bubble's go through the app (copied into Supabase Storage at switch-over). */
+export { fileHref } from "@/lib/files";
