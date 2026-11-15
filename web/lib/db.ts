@@ -7,9 +7,20 @@ import postgres from "postgres";
 // Tests set DB_POOL_MAX=1: the scratch database is a single session, so parallel connections would share transactions.
 const globalForSql = globalThis as unknown as { sql?: postgres.Sql };
 
+/** Always use the Supabase transaction pooler (6543): the session pooler (5432) runs out of clients. */
+export function poolerUrl(url: string) {
+  try {
+    const u = new URL(url);
+    if (u.hostname.endsWith(".pooler.supabase.com") && u.port === "5432") u.port = "6543";
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 export const sql =
   globalForSql.sql ??
-  postgres(process.env.DATABASE_URL!, {
+  postgres(poolerUrl(process.env.DATABASE_URL!), {
     prepare: false,
     max_pipeline: 1,
     max: Number(process.env.DB_POOL_MAX ?? 5),
