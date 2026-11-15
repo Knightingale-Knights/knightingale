@@ -42,3 +42,8 @@ export function sendPlainEmail(o: { to: string; subject: string; text: string; a
     From: env.fromEmail, To: o.to, Subject: o.subject, TextBody: o.text, Attachments: o.attachments, MessageStream: "outbound",
   });
 }
+
+/** Sends a Postmark template by its ID. */
+export function sendTemplateEmail(templateId: number, to: string, model: Record<string, unknown>, from = env.fromEmail) {
+  return post("email/withTemplate", { TemplateId: templateId, From: from, To: to, TemplateModel: model, MessageStream: "outbound" });
+}

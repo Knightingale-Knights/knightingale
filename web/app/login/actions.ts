@@ -1,7 +1,7 @@
 "use server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { supabaseServer } from "@/lib/supabase/server";
+import { sendLoginLink } from "@/lib/magicLink";
 
 async function send(form: FormData, join: boolean) {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
@@ -9,12 +9,14 @@ async function send(form: FormData, join: boolean) {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) redirect(`${back}?error=${encodeURIComponent("Enter a valid email address.")}`);
   const h = await headers();
   const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
-  const supabase = await supabaseServer();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: `${origin}/auth/callback${join ? "?join=1" : ""}`, shouldCreateUser: true },
-  });
-  if (error) redirect(`${back}?error=${encodeURIComponent(error.message)}`);
+  let error = "";
+  try {
+    await sendLoginLink(email, origin, join);
+  } catch (e) {
+    console.error("login link failed", e);
+    error = "Couldn't send the sign-in email. Please try again.";
+  }
+  if (error) redirect(`${back}?error=${encodeURIComponent(error)}`);
   redirect(`${back}?sent=1`);
 }
 
