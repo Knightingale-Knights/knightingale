@@ -244,7 +244,7 @@ const page: Page = {
       "lines": [
         {
           "label": "Our address",
-          "value": "55 Collins Street, Melbourne, VIC 3000"
+          "value": "Suite 133, 22 Kavanagh Street, Southbank VIC 3006"
         },
         {
           "label": "Speak directly to our founder",
