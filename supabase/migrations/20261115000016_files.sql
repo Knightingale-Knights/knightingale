@@ -1,6 +1,10 @@
 -- Copy Bubble's stored files into Supabase Storage (private bucket "files"), so they outlive Bubble.
 -- sync.queue_bubble_files() lists every Bubble file the app's records point to; the bubble-files edge function copies them.
-insert into storage.buckets (id, name, public) values ('files', 'files', false) on conflict (id) do nothing;
+do $$ begin
+  if to_regclass('storage.buckets') is not null then
+    insert into storage.buckets (id, name, public) values ('files', 'files', false) on conflict (id) do nothing;
+  end if;
+end $$;
 
 create table if not exists app.file_copies (
   url text primary key,
