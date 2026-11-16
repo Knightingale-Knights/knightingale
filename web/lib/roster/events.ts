@@ -15,8 +15,8 @@ export function checkEvent(i: EventInput) {
   return String(time).padStart(4, "0");
 }
 
-/** Creates the event, and weekly copies up to repeatUntil. Returns how many were made. */
-export async function createEvents(i: EventInput, createdBy: string | null): Promise<number> {
+/** Creates the event, and weekly copies up to repeatUntil. Returns their ids. */
+export async function createEvents(i: EventInput, createdBy: string | null): Promise<string[]> {
   const time = checkEvent(i);
   const days = weeklyDates(i.day, i.repeatUntil, 52);
   return sql.begin(async (tx) => {
@@ -24,14 +24,16 @@ export async function createEvents(i: EventInput, createdBy: string | null): Pro
       select id, coordinator_2 as coordinator from app.users where id = ${i.participant}`;
     if (!p) throw new Error("That participant no longer exists.");
     const address = i.where ? sql.json({ address: i.where }) : null;
+    const ids: string[] = [];
     for (const day of days) {
       const [e] = await tx<{ id: string }[]>`
         insert into app.events (date, time, details, address, participant, coordinator, created_by, done, refused, to_do)
         values (${fromDay(day)}, ${time}, ${i.details}, ${address}, ${p.id}, ${p.coordinator}, ${createdBy}, false, false, false)
         returning id`;
       await tx`insert into app.users_events (users_id, events_id) values (${p.id}, ${e.id})`;
+      ids.push(e.id);
     }
-    return days.length;
+    return ids;
   });
 }
 
