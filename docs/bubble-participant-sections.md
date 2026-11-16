@@ -65,3 +65,19 @@ Participant card: name, coordinator email under it, 18 buttons. Page also has "S
 
 ## Matching tables in the app schema
 consents (41), emergency_plans (44), intakes (52), risk_assessments (26) + risk_management_plans (104), service_agreements (38) + support_arrangements (49, schedule rows), shift_duties (165), support_plans (29), participant_surveys (1), participant_documents (38), incidents (11), progress_notes (4534), info_book_signoffs (29), feedback (0), ndis_quarters (0, funding), group_chats (37). About = users.about (check column).
+
+## Admin Intake (page /intake_admin/<admin user id>, built by Grok)
+Top: "Open intake", "Open staff questions", and a participant dropdown (34 participants).
+
+### Open intake (popup), one form, raw field names as placeholders
+Selects: participant (top), gender {Male|Female|...}, contact preference {Phone|SMS|...}, communication type {Verbal|Non-Verbal|...}, contact1 type + contact2 type {advocate|guardian|...}, living situation {Own home (alone)|Own home (family)|...}, NDIS funding {Self Managed|Plan Managed|...}, consent (multi: NDIS Audits|Social Media|Website...), plan manager {Plan Partners|My Plan Manager|... from plan_managers}.
+Text: aborigin, contact1 name/relation/phone/email/advocacyform, contact2 name/relation/phone/email/advocacyform, dairy, interpreter, vegetarian, vegan, gluten, allergies, 7 x "Type here..." boxes, carer training, cultural values, diet requirements, dont eat, favourite food, goals, hospital admission assistance, hospital admission history, language, legal issues, medication assistance, medications, mental medications, other info, outcomes, physical medications, primary diagnosis, religion, secondary diagnosis, support needs, twelve month goals, unique you.
+Multi-tags: manual handling (Mobility|Moving In Bed|Personal Care...), mental health (ABI|Auditory Hallucinations|Depression...), mobility aids (Falls Risk|Independent|Manual Assist...), personal care (Bathing|Dental Hygiene|Dressing...), physical conditions (Allergies|Arthritis|Asthma...), support needed (Travel/Transport|Managing Life Stages/Transitions|Community...).
+Date (today), 2 address inputs ("Start typing..."), 3 signature pads (Clear/Save each), "Save intake".
+
+### Open staff questions (popup "Knightingale staff questions")
+home safety notes; Home Safety selects {safe|unsafe|n/a}: bathroom access, bathroom drainage, bathroom ventilation, bed height, bed space, cleaning products, cleaning products storage, clothesline, door access, electrical equipment, electrical leads, floor surfaces, food prep equipment, fridge freezer, furniture placement, gates, laundry drainage, laundry ventilation, lighting, manual handling, parking, pathway garden, portable heaters, power points, room to move, stairs, stove, switches plugs, tables chairs, vacuum, verandah, walking aid access, washer dryer.
+{Yes|No|Unknown}: dangerous visitors, doors locked, exposed gas cylinders, faulty smoke detectors, hoarding, infectious disease, pests, pets, power points near water, restraint used, smoker in home, weapons.
+Risk multi-tags (each with "None" + options and an "other" text): accidental movement (Bumping|Falling|Grabbing|Holding|Leaning...), environmental (Absconding|Electrocution|Fire|Poisons...), financial (Challenges Budgeting|Debt|Financially Exploited...), manual handling (Mobility|Moving In Bed|Personal Care|Transfers...), mental health (ABI|...), nutrition/eating (Alertness|Allergies|Behaviours|Choking...), personal care (Bathing|...), medical (Allergies|Arthritis|...), social (Anti-Social Peers|Criminal Behaviour|...), substance use (Alcohol|Drugs|Medication Misuse|Smoking...).
+Text: health/safety impact, other risks, personal contact, persons involved, physical mobility, provider timing, reliance, sole worker, supervision timing, communication; a checkbox; date (Today); "Save staff questions".
+These map onto the Risk Assessment and home_safety records.
