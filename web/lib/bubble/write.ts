@@ -1,6 +1,7 @@
 // Writes admin changes back to Bubble through its Data API, so Bubble stays the live system
 // until switch-over. On by default when BUBBLE_API_TOKEN is set; BUBBLE_WRITE=off turns it off.
 // Field names are Bubble's display names, the same keys the sync reads.
+import { createHash } from "node:crypto";
 import { sql } from "@/lib/db";
 
 const BASE = (process.env.BUBBLE_API_BASE ?? "https://knightingale.com.au/api/1.1/obj").replace(/\/$/, "");
@@ -21,6 +22,20 @@ async function api<T = unknown>(method: "GET" | "POST" | "PATCH" | "DELETE", pat
     throw new Error(`Bubble ${method} ${path.split("/")[0]} failed (${res.status}): ${why}`);
   }
   return (text ? JSON.parse(text) : {}) as T;
+}
+
+/** The id the sync gives a Bubble thing: md5(bubble id) as a uuid. */
+export function bubbleUuid(bubbleId: string) {
+  const h = createHash("md5").update(bubbleId).digest("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+
+export async function bubbleCreate(type: string, body: Record<string, unknown>) {
+  return (await api<{ id: string }>("POST", type, body)).id;
+}
+
+export async function bubblePatch(type: string, id: string, body: Record<string, unknown>) {
+  await api("PATCH", `${type}/${id}`, body);
 }
 
 /** Drops undefined keys; keeps null so PATCH can clear a field. */

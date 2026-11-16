@@ -383,3 +383,17 @@ table.people .num { text-align: right; white-space: nowrap; }
 .profile-head .portrait { width: 72px; height: 72px; font-size: 28px; }
 .profile-head h1 { margin: 0 0 4px; }
 .section-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; max-width: 900px; }
+
+/* Long record forms (intake, staff questions) */
+.form-page { max-width: 980px; }
+.form-section { border: 0; border-top: 1px solid var(--ink); margin: 0 0 26px; padding: 14px 0 0; }
+.form-section > legend { font-family: var(--serif); font-weight: 300; font-size: 24px; padding: 0 12px 0 0; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+.form-grid .wide { grid-column: 1 / -1; }
+.form-grid fieldset.chips legend { font-size: 9px; }
+.form-save { position: sticky; bottom: 0; background: var(--paper); padding: 14px 0; border-top: 1px solid var(--line); }
+.sig-field .label { display: block; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px; }
+.sigpad { border: 1px solid var(--line-2); background: var(--paper); position: relative; max-width: 520px; }
+.sigpad canvas { display: block; width: 100%; height: 160px; touch-action: none; cursor: crosshair; }
+.sigpad .sig-saved { position: absolute; inset: 0; width: 100%; height: 160px; object-fit: contain; pointer-events: none; opacity: 0.85; }
+.sig-actions { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-3); }

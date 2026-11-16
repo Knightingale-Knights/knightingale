@@ -7,7 +7,8 @@ import { participant } from "@/lib/participants/data";
 
 export const dynamic = "force-dynamic";
 
-// The participant's sections, as in Bubble. None are built yet.
+// The participant's sections, as in Bubble. Those with a link are built.
+const BUILT: Record<string, string> = { "Intake Form": "intake" };
 const SECTIONS = [
   "About", "Carers", "Consent", "Documents", "Emergency", "Feedback", "Funding", "Group Chat", "Incident Reports",
   "Info Book", "Intake Form", "Progress Notes", "Risk Assessment", "Service Agreement", "Shift Duties", "Summary",
@@ -34,7 +35,9 @@ export default async function Participant({ params }: { params: Promise<{ id: st
           </div>
         </div>
         <nav className="section-grid">
-          {SECTIONS.map((s) => <span key={s} className="side-btn off" title="Not built yet">{s}</span>)}
+          {SECTIONS.map((s) => BUILT[s]
+            ? <Link key={s} href={`/participants/${id}/${BUILT[s]}`} className="side-btn">{s}</Link>
+            : <span key={s} className="side-btn off" title="Not built yet">{s}</span>)}
         </nav>
       </main>
     </div>
