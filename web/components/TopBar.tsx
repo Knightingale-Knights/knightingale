@@ -3,31 +3,52 @@ import { signOutAction } from "@/app/invoicing/actions";
 import { currentUser } from "@/lib/auth";
 import { unreadTotal } from "@/lib/chats/data";
 
-const SECTIONS = [
-  ["/roster", "Roster"],
-  ["/invoicing", "Invoicing"],
-  ["/chats", "Chats"],
-  ["/compliance", "Compliance"],
-  ["/applicants", "Applicants"],
-] as const;
+// Admin sidebar. Items with no href are not built yet and show greyed out.
+const MENU: { label: string; href?: string; section?: string }[] = [
+  { label: "Shifts", href: "/roster", section: "/roster" },
+  { label: "Carers", href: "/compliance", section: "/compliance" },
+  { label: "Applicants", href: "/applicants", section: "/applicants" },
+  { label: "Create Shift", href: "/roster?new=ndis" },
+  { label: "Create Event" },
+  { label: "Ask Klarra" },
+  { label: "Participants" },
+  { label: "Invoicing", href: "/invoicing", section: "/invoicing" },
+  { label: "Map" },
+  { label: "Timesheets" },
+  { label: "Group Chats", href: "/chats", section: "/chats" },
+  { label: "Metrics" },
+  { label: "Guru Email" },
+  { label: "Delete" },
+];
 
 export async function TopBar({ section, email, children }: { section: string; email: string; children?: React.ReactNode }) {
   const me = await currentUser();
   const unread = me ? await unreadTotal(me) : 0;
   return (
-    <header className="top">
-      <span className="wordmark small">knightingale</span>
-      <nav className="sections">
-        {SECTIONS.map(([href, label]) => (
-          <Link key={href} href={href} className={href === section ? "on" : ""}>
-            {label}{href === "/chats" && unread > 0 && <span className="badge">{unread}</span>}
-          </Link>
-        ))}
-      </nav>
-      <nav className="tabs">{children}</nav>
-      <form action={signOutAction}>
-        <button className="link" title={email}>Sign out</button>
-      </form>
-    </header>
+    <>
+      <aside className="side">
+        <span className="wordmark small">knightingale</span>
+        <nav>
+          {MENU.map((m) =>
+            m.href ? (
+              <Link key={m.label} href={m.href} className={`side-btn ${m.section === section ? "on" : ""}`}>
+                {m.label}
+                {m.section === "/chats" && unread > 0 && <span className="badge">{unread}</span>}
+              </Link>
+            ) : (
+              <span key={m.label} className="side-btn off" title="Not built yet">{m.label}</span>
+            ),
+          )}
+        </nav>
+        <form action={signOutAction}>
+          <button className="side-out" title={email}>Logout</button>
+        </form>
+      </aside>
+      {children && (
+        <header className="top">
+          <nav className="tabs">{children}</nav>
+        </header>
+      )}
+    </>
   );
 }

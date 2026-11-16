@@ -317,3 +317,23 @@ table.grid td { padding: 10px 8px; border-top: 1px solid var(--line); }
 .join-docs { list-style: none; padding: 0; margin: 0 0 32px; border-top: 1px solid var(--ink); }
 .join-docs li { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .join-docs svg { flex: none; color: var(--ink); }
+
+/* Admin sidebar */
+.shell { padding-left: 232px; }
+.side { position: fixed; top: 0; left: 0; bottom: 0; width: 232px; overflow-y: auto; z-index: 30; display: flex; flex-direction: column; gap: 22px; padding: 22px 26px 26px; background: var(--paper); border-right: 1px solid var(--line); }
+.side .wordmark.small { font-size: 9px; letter-spacing: 0.22em; color: var(--ink-4); }
+.side nav { display: flex; flex-direction: column; gap: 10px; }
+.side-btn { display: flex; align-items: center; justify-content: center; gap: 6px; height: 40px; border: 1px solid var(--ink); color: var(--ink); text-decoration: none; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; transition: background 160ms, color 160ms; }
+.side-btn:hover, .side-btn.on { background: var(--ink); color: var(--paper); }
+.side-btn.on .badge, .side-btn:hover .badge { background: var(--paper); color: var(--ink); }
+.side-btn.off { border-color: var(--line); color: var(--ink-4); cursor: default; }
+.side-btn.off:hover { background: transparent; color: var(--ink-4); }
+.side form { margin-top: auto; }
+.side-out { width: 100%; min-height: 40px; }
+.shell .top { padding: 0 26px; }
+@media (max-width: 900px) {
+  .shell { padding-left: 0; }
+  .side { position: static; width: auto; border-right: 0; border-bottom: 1px solid var(--line); gap: 14px; }
+  .side nav { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+  .side form { margin-top: 0; }
+}
