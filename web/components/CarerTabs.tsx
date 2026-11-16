@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const TABS = [["/carers", "Active Carers"], ["/compliance", "Compliance"], ["/carers/availability", "Availability"]] as const;
+const TABS = [["/availability", "Availability"], ["/active-carers", "Active Carers"], ["/compliance", "Compliance"]] as const;
 
 /** The three Carers views, shown in the top bar. */
 export function CarerTabs({ on }: { on: (typeof TABS)[number][0] }) {

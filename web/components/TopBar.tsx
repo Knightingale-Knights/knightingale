@@ -6,7 +6,7 @@ import { unreadTotal } from "@/lib/chats/data";
 // Admin sidebar. Items with no href are not built yet and show greyed out.
 const MENU: { label: string; href?: string; section?: string }[] = [
   { label: "Shifts", href: "/roster", section: "/roster" },
-  { label: "Carers", href: "/carers", section: "/carers" },
+  { label: "Carers", href: "/availability", section: "/carers" },
   { label: "Applicants", href: "/applicants", section: "/applicants" },
   { label: "Create Shift", href: "/roster?new=ndis" },
   { label: "Create Event" },

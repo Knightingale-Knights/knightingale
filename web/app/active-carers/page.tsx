@@ -14,10 +14,10 @@ export default async function ActiveCarers({ searchParams }: { searchParams: Pro
   const q = (sp.q ?? "").trim();
   const role = isRole(sp.role) ? sp.role : null;
   const rows = await activeCarers(isoDate(new Date()), q, role);
-  const href = (r: string | null) => `/carers?${new URLSearchParams({ ...(q ? { q } : {}), ...(r ? { role: r } : {}) })}`;
+  const href = (r: string | null) => `/active-carers?${new URLSearchParams({ ...(q ? { q } : {}), ...(r ? { role: r } : {}) })}`;
   return (
     <div className="shell">
-      <TopBar section="/carers" email={staff.email}><CarerTabs on="/carers" /></TopBar>
+      <TopBar section="/carers" email={staff.email}><CarerTabs on="/active-carers" /></TopBar>
       <main>
         <h1>Active carers</h1>
         <p className="lede">{rows.length} carer{rows.length === 1 ? "" : "s"}{role ? ` · ${role.toUpperCase()}` : ""}</p>

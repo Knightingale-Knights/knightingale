@@ -19,10 +19,10 @@ export default async function Availability({ searchParams }: { searchParams: Pro
   const date = validDay(sp.date) ?? today;
   const role = isRole(sp.role) ? sp.role : null;
   const rows = await availableCarers(date, today, role);
-  const href = (r: string | null) => `/carers/availability?${new URLSearchParams({ date, ...(r ? { role: r } : {}) })}`;
+  const href = (r: string | null) => `/availability?${new URLSearchParams({ date, ...(r ? { role: r } : {}) })}`;
   return (
     <div className="shell">
-      <TopBar section="/carers" email={staff.email}><CarerTabs on="/carers/availability" /></TopBar>
+      <TopBar section="/carers" email={staff.email}><CarerTabs on="/availability" /></TopBar>
       <main>
         <h1>Availability</h1>
         <p className="lede">{longDay(date)} · {rows.length} carer{rows.length === 1 ? "" : "s"} available{role ? ` · ${role.toUpperCase()}` : ""}</p>
