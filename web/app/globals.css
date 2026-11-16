@@ -155,20 +155,20 @@ table.lines { width: 100%; border-collapse: collapse; margin-bottom: 26px; }
 .cal-modes a { min-width: 140px; height: 34px; display: grid; place-items: center; border: 1px solid var(--ink); color: var(--ink); text-decoration: none; letter-spacing: 0.22em; text-transform: uppercase; font-size: 10px; transition: background 160ms, color 160ms; }
 .cal-modes a:hover, .cal-modes a.on { background: var(--ink); color: var(--paper); }
 .cal-nav { display: flex; align-items: center; justify-content: space-between; max-width: 760px; width: 100%; margin: 0 auto 6px; }
-.cal-nav a { text-decoration: none; color: var(--ink-3); font-size: 30px; font-weight: 300; line-height: 1; padding: 0 12px; }
+.cal-nav a { text-decoration: none; color: var(--ink-3); font-size: 22.5px; font-weight: 300; line-height: 1; padding: 0 12px; }
 .cal-nav a:hover { color: var(--ink); }
-.cal-nav h2 { font-family: var(--serif); font-weight: 300; font-size: clamp(22px, 3.6vh, 34px); letter-spacing: 0; margin: 0; }
-.cal-head { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-family: var(--serif); font-weight: 300; font-size: clamp(16px, 2.6vh, 26px); margin-bottom: 4px; }
+.cal-nav h2 { font-family: var(--serif); font-weight: 300; font-size: clamp(16.5px, 2.7vh, 25.5px); letter-spacing: 0; margin: 0; }
+.cal-head { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-family: var(--serif); font-weight: 300; font-size: clamp(12px, 1.95vh, 19.5px); margin-bottom: 4px; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); flex: 1; min-height: 0; background: var(--paper); border: 1px solid var(--line); }
 .cal-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(2px, 1vh, 12px); padding: 4px 2px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); min-width: 0; min-height: 0; overflow: hidden; transition: background 160ms; }
 .cal-cell:nth-child(7n) { border-right: 0; }
 .cal-cell:nth-last-child(-n + 7) { border-bottom: 0; }
 .cal-cell:hover { background: #efece6; }
 .cal-cell.out { color: var(--ink-3); }
-.cal-cell .num { font-family: var(--serif); font-weight: 300; font-size: clamp(14px, 3.2vh, 30px); line-height: 1; padding: 0.22em 0.32em; }
+.cal-cell .num { font-family: var(--serif); font-weight: 300; font-size: clamp(10.5px, 2.4vh, 22.5px); line-height: 1; padding: 0.22em 0.32em; }
 .cal-cell .num.today { background: var(--ink); color: var(--paper); }
-.cal-cell .amt { font-size: clamp(8px, 1.4vh, 11px); letter-spacing: 0.12em; white-space: nowrap; }
-.cal-cell .open { font-size: clamp(8px, 1.3vh, 10px); letter-spacing: 0.2em; text-transform: uppercase; color: var(--alert); }
+.cal-cell .amt { font-size: clamp(6px, 1.05vh, 8.25px); letter-spacing: 0.12em; white-space: nowrap; }
+.cal-cell .open { font-size: clamp(6px, 0.98vh, 7.5px); letter-spacing: 0.2em; text-transform: uppercase; color: var(--alert); }
 .cal-cell .go { color: var(--ink-4); line-height: 0; }
 .cal-cell .go svg { width: clamp(11px, 2.2vh, 20px); height: auto; }
 .roster-month .lede { font-size: 11px; color: var(--ink-3); margin: 0; text-align: center; }
