@@ -377,3 +377,9 @@ table.people .num { text-align: right; white-space: nowrap; }
 .srow { flex-wrap: wrap; }
 .srow .sevents { flex-basis: 100%; padding-left: 74px; font-size: 11px; letter-spacing: 0.04em; color: var(--ink-2); }
 .srow .sevents::before { content: "Event · "; text-transform: uppercase; letter-spacing: 0.2em; font-size: 9px; color: var(--ink-3); }
+
+/* Participant profile */
+.profile-head { display: flex; align-items: center; gap: 22px; margin-bottom: 26px; }
+.profile-head .portrait { width: 72px; height: 72px; font-size: 28px; }
+.profile-head h1 { margin: 0 0 4px; }
+.section-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; max-width: 900px; }

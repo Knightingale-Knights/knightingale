@@ -11,7 +11,7 @@ const MENU: { label: string; href?: string; section?: string }[] = [
   { label: "Create Shift", href: "/roster?new=ndis" },
   { label: "Create Event", href: "/roster?event=new" },
   { label: "Ask Klarra" },
-  { label: "Participants" },
+  { label: "Participants", href: "/participants", section: "/participants" },
   { label: "Invoicing", href: "/invoicing", section: "/invoicing" },
   { label: "Map" },
   { label: "Timesheets" },
