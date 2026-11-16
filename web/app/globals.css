@@ -337,3 +337,19 @@ table.grid td { padding: 10px 8px; border-top: 1px solid var(--line); }
   .side nav { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
   .side form { margin-top: 0; }
 }
+
+/* Carers lists */
+.row.filters { align-items: center; gap: 14px; }
+.filters .search { display: flex; gap: 10px; align-items: center; }
+.filters .search input { min-width: 260px; }
+.role-filter { display: flex; gap: 8px; flex-wrap: wrap; }
+.role-filter a { min-width: 64px; height: 34px; padding: 0 14px; display: grid; place-items: center; border: 1px solid var(--ink); color: var(--ink); text-decoration: none; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; transition: background 160ms, color 160ms; }
+.role-filter a:hover, .role-filter a.on { background: var(--ink); color: var(--paper); }
+table.people td { vertical-align: middle; }
+table.people td.pic { width: 56px; }
+table.people .num { text-align: right; white-space: nowrap; }
+.portrait { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 0 0 1px var(--line-2); }
+.portrait.blank { display: grid; place-items: center; background: var(--desk); color: var(--ink-2); font-family: var(--serif); font-size: 18px; }
+.period-cell { text-align: center; width: 64px; }
+.period-cell .tick { display: inline-block; min-width: 40px; padding: 3px 8px; border: 1px solid var(--ink); font-size: 10px; letter-spacing: 0.2em; }
+.period-cell .dash { color: var(--ink-4); }

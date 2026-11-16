@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
+import { CarerTabs } from "@/components/CarerTabs";
 import { complianceTable } from "@/lib/compliance/data";
 import { DOCS, STATUS_LABEL, type Status } from "@/lib/compliance/docs";
 import { auDate, isoDate } from "@/lib/invoicing/rules";
@@ -27,13 +28,16 @@ export default async function Compliance({ searchParams }: { searchParams: Promi
   });
   return (
     <div className="shell">
-      <TopBar section="/compliance" email={staff.email}>
-        {SHOW.map(([k, l]) => <Link key={k} href={`/compliance?show=${k}`} className={k === show ? "on" : ""}>{l}</Link>)}
-      </TopBar>
+      <TopBar section="/carers" email={staff.email}><CarerTabs on="/compliance" /></TopBar>
       <main>
         <h1>Carer compliance</h1>
         <p className="lede">{all.length} active carers · {counts("expired")} with something expired · {counts("soon")} expiring in 30 days · {counts("missing")} missing a document</p>
-        <form className="row tight"><input type="hidden" name="show" value={show} /><input name="q" defaultValue={sp.q ?? ""} placeholder="Search carers" /><button className="secondary">Search</button></form>
+        <div className="row filters">
+          <form className="search"><input type="hidden" name="show" value={show} /><input name="q" defaultValue={sp.q ?? ""} placeholder="Search carers" /><button className="secondary">Search</button></form>
+          <nav className="role-filter">
+            {SHOW.map(([k, l]) => <Link key={k} href={`/compliance?${new URLSearchParams({ show: k, ...(sp.q ? { q: sp.q } : {}) })}`} className={k === show ? "on" : ""}>{l}</Link>)}
+          </nav>
+        </div>
         <div className="table-wrap">
           <table className="grid compliance">
             <thead><tr><th>Carer</th>{DOCS.map((d) => <th key={d.key}>{d.label}</th>)}</tr></thead>
