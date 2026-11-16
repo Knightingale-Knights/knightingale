@@ -353,3 +353,27 @@ table.people .num { text-align: right; white-space: nowrap; }
 .period-cell { text-align: center; width: 64px; }
 .period-cell .tick { display: inline-block; min-width: 40px; padding: 3px 8px; border: 1px solid var(--ink); font-size: 10px; letter-spacing: 0.2em; }
 .period-cell .dash { color: var(--ink-4); }
+
+/* Popups */
+.modal-back { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-start; justify-content: center; padding: 6vh 16px; overflow-y: auto; }
+.modal-shade { position: fixed; inset: 0; background: rgba(26, 25, 23, 0.45); }
+.panel.modal { position: relative; top: 0; width: 100%; max-width: 460px; border: 0; padding: 26px; box-shadow: var(--shadow-sheet); animation: rise 420ms var(--ease); }
+.kind-toggle { display: grid; grid-template-columns: 1fr 1fr; margin: 0 0 18px; border: 1px solid var(--ink); }
+.kind-toggle a { height: 34px; display: grid; place-items: center; text-decoration: none; color: var(--ink); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; }
+.kind-toggle a.on { background: var(--ink); color: var(--paper); }
+.recurring summary { cursor: pointer; display: inline-flex; align-items: center; height: 34px; padding: 0 18px; border: 1px solid var(--ink); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; list-style: none; }
+.recurring summary::-webkit-details-marker { display: none; }
+.recurring[open] summary { background: var(--ink); color: var(--paper); margin-bottom: 14px; }
+.modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+.modal-actions .button { display: grid; place-items: center; text-decoration: none; }
+.button.secondary { background: transparent; color: var(--ink); }
+
+/* Events on the roster */
+.erow { display: flex; align-items: baseline; gap: 18px; padding: 14px 26px; border-bottom: 1px solid var(--line); }
+.erow:last-child { border-bottom: 0; }
+.erow .etime { font-size: 11px; letter-spacing: 0.04em; color: var(--ink-2); min-width: 64px; }
+.erow .ewhat { font-family: var(--serif); font-size: 22px; font-weight: 300; }
+.erow .who { font-size: 13px; color: var(--ink-2); }
+.srow { flex-wrap: wrap; }
+.srow .sevents { flex-basis: 100%; padding-left: 74px; font-size: 11px; letter-spacing: 0.04em; color: var(--ink-2); }
+.srow .sevents::before { content: "Event · "; text-transform: uppercase; letter-spacing: 0.2em; font-size: 9px; color: var(--ink-3); }

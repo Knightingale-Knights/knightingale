@@ -6,7 +6,8 @@ import { SLOTS, addDays, addMonths, clockLabel, monthGrid, periodOf, weekStart, 
 import { isoDate } from "@/lib/invoicing/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { fileHref } from "@/lib/files";
-import { attendedAction, cancelShiftAction, copyShiftAction, deleteShiftAction, saveShiftAction, sendRosterAction } from "./actions";
+import { attendedAction, cancelShiftAction, copyShiftAction, deleteShiftAction, saveEventAction, saveShiftAction, sendRosterAction } from "./actions";
+import { dayEvents, type DayEvent } from "@/lib/roster/events";
 
 export const dynamic = "force-dynamic";
 
@@ -39,13 +40,18 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
   const filter: RosterFilter = view === "all" || !sp.who ? {} : { [view]: sp.who };
 
   const [from, to] = mode === "month" ? monthGrid(date) : [date, addDays(date, 1)];
-  const [opts, shifts] = await Promise.all([rosterOptions(), rangeShifts(from, to, filter)]);
+  const [opts, shifts, events] = await Promise.all([
+    rosterOptions(),
+    rangeShifts(from, to, filter),
+    mode === "day" && (view === "all" || view === "participant") ? dayEvents(date, view === "participant" ? sp.who : undefined) : Promise.resolve([] as DayEvent[]),
+  ]);
   const keep = (extra: Record<string, string>) => {
     const p = new URLSearchParams({ mode, date, view, ...(sp.who ? { who: sp.who } : {}), ...extra });
     return `/roster?${p}`;
   };
   const whoOptions = view === "participant" ? opts.participants : view === "location" ? opts.locations : view === "carer" ? opts.carers : [];
-  const panel = sp.edit ? "edit" : sp.new ? "new" : null;
+  const panel = sp.edit ? "edit" : null;
+  const popup = sp.new ? "shift" : sp.event === "new" ? "event" : null;
   const newDay = date < today ? today : date;
   const month = date.slice(0, 7);
   const dayForDayView = mode === "month" && today.slice(0, 7) === month ? today : date;
@@ -54,8 +60,8 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
   return (
     <div className="shell">
       <TopBar section="/roster" email={staff.email}>
-        <Link href={keep({ new: "ndis", day: newDay })}>+ NDIS shift</Link>
-        <Link href={keep({ new: "residential", day: newDay })}>+ Residential shift</Link>
+        <Link href={keep({ new: "ndis", day: newDay })}>+ Create shift</Link>
+        <Link href={keep({ event: "new", day: newDay })}>+ Create event</Link>
       </TopBar>
 
       <main className={`page wide ${panel ? "with-panel" : ""} ${mode === "month" ? "roster-month" : ""}`}>
@@ -103,7 +109,7 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
             {mode === "month" ? (
               <MonthGrid from={from} to={to} month={month} today={today} shifts={shifts} href={(d) => keep({ mode: "day", date: d })} />
             ) : (
-              <DayView shifts={shifts} active={sp.edit} href={(id) => keep({ edit: id })} newHref={keep({ new: "ndis", day: date })} />
+              <DayView shifts={shifts} events={events} active={sp.edit} href={(id) => keep({ edit: id })} newHref={keep({ new: "ndis", day: date })} />
             )}
           </div>
 
@@ -123,14 +129,26 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
         </div>
 
         {panel === "edit" && sp.edit && <EditPanel id={sp.edit} opts={opts} close={keep({})} mode={mode} date={date} view={view} who={sp.who} />}
-        {panel === "new" && (
-          <ShiftForm
-            opts={opts} close={keep({})} mode={mode} date={date} view={view} who={sp.who}
-            kind={sp.new === "residential" ? "residential" : "ndis"} day={validDay(sp.day) ?? newDay}
-            free={await availableOn(validDay(sp.day) ?? newDay)}
-          />
-        )}
       </main>
+
+      {popup && (
+        <div className="modal-back">
+          <Link href={keep({})} className="modal-shade" aria-label="Close" />
+          {popup === "shift" ? (
+            <ShiftForm
+              opts={opts} close={keep({})} mode={mode} date={date} view={view} who={sp.who}
+              kind={sp.new === "residential" ? "residential" : "ndis"} day={validDay(sp.day) ?? newDay}
+              free={await availableOn(validDay(sp.day) ?? newDay)}
+              toggle={(k) => keep({ new: k, day: validDay(sp.day) ?? newDay })}
+            />
+          ) : (
+            <EventForm
+              opts={opts} close={keep({})} mode={mode} date={date} view={view} who={sp.who}
+              day={validDay(sp.day) ?? newDay} participant={view === "participant" ? sp.who : undefined}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -167,10 +185,27 @@ function MonthGrid({ from, to, month, today, shifts, href }: {
   );
 }
 
-function DayView({ shifts, active, href, newHref }: { shifts: RosterShift[]; active?: string; href: (id: string) => string; newHref: string }) {
+function DayView({ shifts, events, active, href, newHref }: {
+  shifts: RosterShift[]; events: DayEvent[]; active?: string; href: (id: string) => string; newHref: string;
+}) {
+  const forShift = (s: RosterShift) => (s.kind === "ndis" && s.participant ? events.filter((e) => e.participant === s.participant) : []);
   return (
     <>
       <p className="cal-total">{money(total(shifts))}</p>
+      {events.length > 0 && (
+        <section className="period events">
+          <h3>Events</h3>
+          <div className="period-list">
+            {events.map((e) => (
+              <div key={e.id} className="erow">
+                <span className="etime">{clockLabel(e.time)}</span>
+                <span className="ewhat">{e.details}</span>
+                <span className="who">({e.participant_name || "?"}){e.address ? ` · ${e.address}` : ""}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
       {PERIODS.map(([p, label]) => {
         const list = shifts.filter((s) => periodOf(s.start_time) === p);
         return (
@@ -178,7 +213,7 @@ function DayView({ shifts, active, href, newHref }: { shifts: RosterShift[]; act
             <h3>{label}</h3>
             <div className="period-list">
               {list.length === 0 && <p className="none">No shifts. <Link href={newHref}>Add one</Link></p>}
-              {list.map((s) => <ShiftRow key={s.id} s={s} href={href(s.id)} active={s.id === active} />)}
+              {list.map((s) => <ShiftRow key={s.id} s={s} events={forShift(s)} href={href(s.id)} active={s.id === active} />)}
             </div>
           </section>
         );
@@ -187,7 +222,7 @@ function DayView({ shifts, active, href, newHref }: { shifts: RosterShift[]; act
   );
 }
 
-function ShiftRow({ s, href, active }: { s: RosterShift; href: string; active: boolean }) {
+function ShiftRow({ s, events, href, active }: { s: RosterShift; events: DayEvent[]; href: string; active: boolean }) {
   const who = s.kind === "ndis" ? s.participant_name : s.location_name;
   const name = s.carer ? s.carer_first ?? s.carer_name ?? "Carer" : "No carer yet";
   return (
@@ -200,6 +235,9 @@ function ShiftRow({ s, href, active }: { s: RosterShift; href: string; active: b
         {clockLabel(s.start_time)}–{clockLabel(s.end_time)}
         {s.cancelled ? " · cancelled" : s.requested_by && !s.carer ? " · requested" : ""}
       </span>
+      {events.length > 0 && (
+        <span className="sevents">{events.map((e) => `${clockLabel(e.time)} ${e.details ?? ""}`).join(" · ")}</span>
+      )}
     </Link>
   );
 }
@@ -219,9 +257,9 @@ function Keep({ mode, date, view, who }: { mode: string; date: string; view: str
 }
 
 function ShiftForm({
-  opts, close, mode, date, view, who, kind, day, shift, free,
+  opts, close, mode, date, view, who, kind, day, shift, free, toggle,
 }: Ctx & {
-  kind: "ndis" | "residential"; day: string;
+  kind: "ndis" | "residential"; day: string; toggle?: (k: "ndis" | "residential") => string;
   shift?: Awaited<ReturnType<typeof getShift>>;
   free?: Awaited<ReturnType<typeof availableOn>>;
 }) {
@@ -230,11 +268,17 @@ function ShiftForm({
   const role = shift?.roles?.[0] ?? (ndis ? "dsw" : "en");
   const freeIds = new Set((free ?? []).map((f) => f.carer));
   return (
-    <aside className="panel">
+    <aside className={toggle ? "panel modal" : "panel"}>
       <header>
-        <h2>{shift ? "Edit shift" : ndis ? "New NDIS shift" : "New residential shift"}</h2>
+        <h2>{shift ? "Edit shift" : "Create shift"}</h2>
         <Link href={close} aria-label="Close">✕</Link>
       </header>
+      {toggle && (
+        <nav className="kind-toggle">
+          <Link href={toggle("ndis")} className={ndis ? "on" : ""}>NDIS</Link>
+          <Link href={toggle("residential")} className={!ndis ? "on" : ""}>Residential</Link>
+        </nav>
+      )}
       <form action={saveShiftAction} className="stack">
         <Keep mode={mode} date={date} view={view} who={who} />
         <input type="hidden" name="kind" value={kind} />
@@ -375,5 +419,39 @@ async function EditPanel({ id, ...ctx }: Ctx & { id: string }) {
         )}
       </aside>
     </div>
+  );
+}
+
+function EventForm({ opts, close, mode, date, view, who, day, participant }: Ctx & { day: string; participant?: string }) {
+  return (
+    <aside className="panel modal">
+      <header>
+        <h2>Create event</h2>
+        <Link href={close} aria-label="Close">✕</Link>
+      </header>
+      <form action={saveEventAction} className="stack">
+        <Keep mode={mode} date={date} view={view} who={who} />
+        <label>Who
+          <select name="participant" defaultValue={participant ?? ""} required>
+            <option value="" disabled>Choose a participant…</option>
+            {opts.participants.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+          </select>
+        </label>
+        <label>What<textarea name="details" rows={2} placeholder="Physio appointment" required /></label>
+        <div className="pair">
+          <label>When<input type="date" name="day" defaultValue={day} required /></label>
+          <label>Time<input name="time" placeholder="13:00" required /></label>
+        </div>
+        <label>Where<input name="where" placeholder="59 Monroe Street" /></label>
+        <details className="recurring">
+          <summary>Recurring?</summary>
+          <label>Repeat weekly until<input type="date" name="repeat_until" /></label>
+        </details>
+        <div className="modal-actions">
+          <Link href={close} className="button secondary">Cancel</Link>
+          <button type="submit">Create</button>
+        </div>
+      </form>
+    </aside>
   );
 }

@@ -6,6 +6,7 @@ import { copyShift, createShifts, deleteShift, markAttended, setCancelled, updat
 import { weekStart } from "@/lib/roster/rules";
 import { sendWeeklyRoster } from "@/lib/roster/weekly";
 import { prepareDelete, pushShifts } from "@/lib/klarra/push";
+import { createEvents } from "@/lib/roster/events";
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
@@ -61,6 +62,18 @@ export async function saveShiftAction(f: FormData) {
       date: i.day,
     };
   }, id ? { edit: id } : { new: i.kind, day: i.day });
+}
+
+export async function saveEventAction(f: FormData) {
+  const staff = await requireStaff();
+  const day = str(f, "day");
+  await run(f, async () => {
+    const n = await createEvents({
+      participant: str(f, "participant"), details: str(f, "details"), day,
+      time: str(f, "time"), where: str(f, "where"), repeatUntil: str(f, "repeat_until") || null,
+    }, staff.id);
+    return { msg: n > 1 ? `${n} events created.` : "Event created.", date: day };
+  }, { event: "new" });
 }
 
 export async function cancelShiftAction(f: FormData) {
