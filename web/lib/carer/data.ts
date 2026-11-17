@@ -31,7 +31,7 @@ const shiftSelect = () => sql`
 const shiftJoins = () => sql`
   left join app.users p on p.id = s.participant
   left join app.locations l on l.id = s.location
-  left join lateral (select pn.id, pn.submit from app.progress_notes pn where pn.shift = s.id order by pn.created_at desc limit 1) n on true`;
+  left join lateral (select pn.id, pn.submit, pn.summary from app.progress_notes pn where pn.shift = s.id order by pn.created_at desc limit 1) n on true`;
 
 /** The carer's shifts from a week ago to four weeks ahead. */
 export async function myShifts(carer: string, today: string): Promise<CarerShift[]> {
