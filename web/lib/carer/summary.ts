@@ -17,7 +17,7 @@ export async function requestSummary(carer: { id: string; email: string; name: s
   const res = await fetch(URL_(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ participant_id: s.participant_b, format: "pdf", months_back: 3 }),
+    body: JSON.stringify({ participant_id: s.participant_b, format: "pdf", months_back: 1 }),
     cache: "no-store",
   });
   const out = (await res.json().catch(() => ({}))) as { error?: string; filename?: string; file_base64?: string; mime_type?: string; report_period?: string };
@@ -25,11 +25,20 @@ export async function requestSummary(carer: { id: string; email: string; name: s
   if (!res.ok || !out.file_base64) throw new Error("The summary couldn't be made just now. Please try again later.");
 
   const first = s.first ?? "Your participant";
+  const attachment = { Name: out.filename ?? `${first}_Supports_Summary.pdf`, Content: out.file_base64, ContentType: out.mime_type ?? "application/pdf" };
   await sendPlainEmail({
     to: carer.email,
     subject: `${first}'s support summary`,
     text: `Hi ${carer.name.split(" ")[0] || "there"},\n\nAttached is ${first}'s support summary${out.report_period ? ` (${out.report_period})` : ""}. We hope it helps on your shift.\n\nIf you have any suggestions on how to make it better, please email care@knightingale.com.au.\n\nKnightingale`,
-    attachments: [{ Name: out.filename ?? `${first}_Supports_Summary.pdf`, Content: out.file_base64, ContentType: out.mime_type ?? "application/pdf" }],
+    attachments: [attachment],
   });
+  // A copy to Paul, so he knows who is asking and what the summaries say.
+  const copyTo = process.env.SUMMARY_COPY_TO ?? "paul@knightingale.com.au";
+  await sendPlainEmail({
+    to: copyTo,
+    subject: `${first}'s support summary, requested by ${carer.name || carer.email}`,
+    text: `${carer.name || "A carer"} (${carer.email}) requested ${first}'s support summary${out.report_period ? ` covering ${out.report_period}` : ""}. A copy is attached.`,
+    attachments: [attachment],
+  }).catch((e) => console.error("summary copy failed", e));
   return first;
 }
