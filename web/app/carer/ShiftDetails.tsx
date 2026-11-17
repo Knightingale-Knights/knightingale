@@ -102,7 +102,7 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
 
   return (
     <div className="popup-back">
-      <Link href={close} className="modal-shade" aria-label="Close" />
+      <Link href={open ? home : close} className="modal-shade" aria-label="Close" />
       <div className="popup details-popup shift-details">
         {!open ? (
           <>
@@ -129,7 +129,7 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
             <Section s={s} day={day} tab={open.key} first={name.split(" ")[0]} email={email} msgs={msgs} />
           </>
         )}
-        <Link href={close} className="button secondary popup-later">Close</Link>
+        <Link href={open ? home : close} className="button secondary popup-later">Close</Link>
       </div>
     </div>
   );
