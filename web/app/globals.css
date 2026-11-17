@@ -397,3 +397,12 @@ table.people .num { text-align: right; white-space: nowrap; }
 .sigpad canvas { display: block; width: 100%; height: 160px; touch-action: none; cursor: crosshair; }
 .sigpad .sig-saved { position: absolute; inset: 0; width: 100%; height: 160px; object-fit: contain; pointer-events: none; opacity: 0.85; }
 .sig-actions { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-3); }
+
+/* Admin map */
+.usermap { display: flex; flex-direction: column; gap: 12px; }
+.map-bar { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+.map-bar .check { margin: 0; }
+.map-bar .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 1px var(--paper), 0 0 0 2px var(--line-2); }
+.map-box { width: 100%; height: calc(100dvh - 260px); min-height: 420px; border: 1px solid var(--line); }
+.map-info { display: flex; flex-direction: column; gap: 2px; font-family: var(--font-ui); font-size: 12px; color: #1a1917; }
+.map-info a, .map-info strong { font-size: 14px; font-weight: 500; }

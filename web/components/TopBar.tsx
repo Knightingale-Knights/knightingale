@@ -13,7 +13,7 @@ const MENU: { label: string; href?: string; section?: string }[] = [
   { label: "Ask Klarra" },
   { label: "Participants", href: "/participants", section: "/participants" },
   { label: "Invoicing", href: "/invoicing", section: "/invoicing" },
-  { label: "Map" },
+  { label: "Map", href: "/map", section: "/map" },
   { label: "Timesheets" },
   { label: "Group Chats", href: "/chats", section: "/chats" },
   { label: "Metrics" },
