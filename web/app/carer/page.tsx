@@ -26,7 +26,7 @@ function status(s: CarerShift) {
 }
 const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; sent?: string; summary_error?: string; details?: string; tab?: string; saved?: string; error?: string; travel?: string; xerror?: string }> }) {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; sent?: string; summary_error?: string; details?: string; tab?: string; note?: string; view?: string; done?: string; saved?: string; error?: string; travel?: string; xerror?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());

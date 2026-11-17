@@ -13,8 +13,9 @@ import { INTAKE, intakeFor } from "@/lib/participants/intake";
 import { loadOptions, planManagers, readRecord } from "@/lib/forms/fields";
 import { INCIDENT_HARM, INCIDENT_TYPES, INJURY_LOCATION, INJURY_NATURE, NOT_NDIS, REPORTABLE_TYPES } from "@/lib/participants/incident";
 import { isoDate } from "@/lib/invoicing/rules";
+import { sql } from "@/lib/db";
 
-export type DetailsMsgs = { done?: string; view?: string; saved?: string; error?: string; travel?: string; xerror?: string; sent?: string; summary_error?: string };
+export type DetailsMsgs = { note?: string; done?: string; view?: string; saved?: string; error?: string; travel?: string; xerror?: string; sent?: string; summary_error?: string };
 
 const I = (d: ReactNode) => (
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>
@@ -39,7 +40,21 @@ const TITLES: Record<string, (n: string) => string> = {
   receipts: (n) => `${n} receipts`,
   intake: (n) => `${n} intake form`,
   incident: (n) => `${n}'s incident report`,
+  note: (n) => `${n}'s progress note`,
 };
+
+type NoteRow = { id: string; day: string; carer: string | null; summary: string | null; comms: string | null; best_day: string | null };
+
+/** Submitted progress notes for the participant, newest first. */
+async function participantNotes(participant: string) {
+  return sql<NoteRow[]>`
+    select n.id, to_char(n.date at time zone 'Australia/Melbourne', 'YYYY-MM-DD') as day, c.first_name as carer,
+           n.summary, n.comms, n.best_day
+      from app.progress_notes n left join app.users c on c.id = n.carer
+     where n.participant = ${participant} and coalesce(n.submit, false)
+     order by n.date desc nulls last, n.created_at desc limit 300`;
+}
+const dm = (d: string) => `${d.slice(8)}/${d.slice(5, 7)}`;
 
 const Sel = ({ name, label, options, required, hint }: { name: string; label: string; options: string[]; required?: boolean; hint?: string }) => (
   <label>{label}
@@ -56,12 +71,33 @@ const Ticks = ({ name, label, options }: { name: string; label: string; options:
   </fieldset>
 );
 
+async function NotesList({ s, home }: { s: CarerShift; home: string }) {
+  const notes = await participantNotes(s.participant!);
+  return (
+    <>
+      <h3>Progress notes</h3>
+      {notes.length === 0 ? (
+        <p className="hint">No progress notes yet.</p>
+      ) : (
+        <ul className="note-list">
+          {notes.map((n) => (
+            <li key={n.id}>
+              <span>{n.day ? dm(n.day) : "–"}</span>
+              <Link href={`${home}&tab=note&note=${n.id}`} className="button secondary">Open</Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
 /** The NDIS shift details popup: a grid of buttons, each opening its own view inside the popup. */
 export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShift; day: string; tab?: string; email: string; msgs: DetailsMsgs }) {
   if (!s || s.kind !== "ndis") return null;
   const close = `/carer?date=${day}`;
   const home = `${close}&details=${s.id}`;
-  const open = TABS.find((t) => t.key === tab);
+  const open = TABS.find((t) => t.key === tab) ?? (tab === "note" ? { key: "note", label: "Progress note", icon: null } : undefined);
   const name = s.participant_name ?? s.place ?? "Shift";
 
   return (
@@ -84,6 +120,7 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
                 <Link key={t.key} href={`${home}&tab=${t.key}`} className="sd-btn">{t.icon}<span>{t.label}</span></Link>
               ))}
             </div>
+            {s.participant && <NotesList s={s} home={home} />}
           </>
         ) : (
           <>
@@ -247,6 +284,22 @@ async function Section({ s, day, tab, first, email, msgs }: { s: CarerShift; day
         </fieldset>
         <PendingButton className="big" pending="Sending…">Submit incident report</PendingButton>
       </form>
+    );
+  }
+
+  if (tab === "note") {
+    const n = s.participant && msgs.note ? (await participantNotes(s.participant)).find((x) => x.id === msgs.note) : undefined;
+    if (!n) return <p className="hint">We couldn't find that progress note.</p>;
+    return (
+      <div className="note-view">
+        <p className="hint">{n.day ? dm(n.day) : ""}{n.carer ? ` · ${n.carer}` : ""}</p>
+        <h3>Summary</h3>
+        <p>{n.summary ?? "–"}</p>
+        <h3>Communication book</h3>
+        <p>{n.comms ?? "–"}</p>
+        <h3>Best day</h3>
+        <p>{n.best_day ?? "–"}</p>
+      </div>
     );
   }
 
