@@ -17,8 +17,6 @@ const MENU: { label: string; href?: string; section?: string }[] = [
   { label: "Timesheets", href: "/timesheets", section: "/timesheets" },
   { label: "Group Chats", href: "/chats", section: "/chats" },
   { label: "Metrics", href: "/metrics", section: "/metrics" },
-  { label: "Guru Email" },
-  { label: "Delete" },
 ];
 
 export async function TopBar({ section, email, children }: { section: string; email: string; children?: React.ReactNode }) {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { timesheets, type PayLine, type SheetShift } from "@/lib/timesheets/data";
-import { addDays, clockLabel, weekStart } from "@/lib/roster/rules";
+import { addDays, clockLabel, payWeekStart } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 import { deleteTimesheetShiftAction } from "./actions";
 
@@ -20,8 +20,8 @@ export default async function Timesheets({ searchParams }: { searchParams: Promi
   const staff = await requireStaff();
   const sp = await searchParams;
   const today = isoDate(new Date());
-  const from = validDay(sp.from) ?? weekStart(today);
-  const to = validDay(sp.to) ?? addDays(weekStart(today), 6);
+  const from = validDay(sp.from) ?? payWeekStart(today);
+  const to = validDay(sp.to) ?? addDays(payWeekStart(today), 6);
   const q = (sp.q ?? "").trim();
   const sheets = from <= to ? await timesheets(from, to, q) : [];
   const shifts = sheets.reduce((a, s) => a + s.shifts.length, 0);
@@ -30,9 +30,9 @@ export default async function Timesheets({ searchParams }: { searchParams: Promi
   return (
     <div className="shell">
       <TopBar section="/timesheets" email={staff.email}>
-        <Link href={span(addDays(from, -7), addDays(to, -7))}>‹ Previous week</Link>
-        <Link href={span(weekStart(today), addDays(weekStart(today), 6))}>This week</Link>
-        <Link href={span(addDays(from, 7), addDays(to, 7))}>Next week ›</Link>
+        <Link href={span(addDays(from, -7), addDays(to, -7))}>‹ Previous pay week</Link>
+        <Link href={span(payWeekStart(today), addDays(payWeekStart(today), 6))}>This pay week</Link>
+        <Link href={span(addDays(from, 7), addDays(to, 7))}>Next pay week ›</Link>
       </TopBar>
       <main className="page wide">
         <h1>Timesheets</h1>
