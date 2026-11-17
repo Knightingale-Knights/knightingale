@@ -31,21 +31,22 @@ export async function checkAction(kind: "in" | "out", shiftId: string, pos: Posi
 /** Back to one view of the shift's Details popup on the day page. */
 async function detailsDest(carer: string, id: string, tab: string, q: Record<string, string>) {
   const s = await myShift(carer, id);
-  const p = new URLSearchParams({ date: s?.day ?? isoDate(new Date()), details: id, tab, ...q });
+  const p = new URLSearchParams({ date: s?.day ?? isoDate(new Date()), details: id, ...(tab ? { tab } : {}), ...q });
   return `/carer?${p}`;
 }
 
 export async function noteAction(f: FormData) {
   const me = await requireCarer();
   const id = String(f.get("id") ?? "");
-  let q: Record<string, string> = { saved: "1" };
+  let tab = "", q: Record<string, string> = { saved: "1" };
   try {
-    await submitNote(me.id, id, String(f.get("summary") ?? ""));
+    await submitNote(me.id, id, String(f.get("summary") ?? ""), { comms: String(f.get("comms") ?? ""), bestDay: String(f.get("best_day") ?? "") });
   } catch (e) {
+    tab = "notes";
     q = { error: String((e as Error).message ?? e) };
   }
   revalidatePath("/carer");
-  redirect(await detailsDest(me.id, id, "notes", q));
+  redirect(await detailsDest(me.id, id, tab, q));
 }
 
 export async function availabilityAction(f: FormData) {

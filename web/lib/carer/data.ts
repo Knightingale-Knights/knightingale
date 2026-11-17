@@ -138,8 +138,10 @@ export async function setAvailability(carer: { id: string; name: string; phone: 
 // ---- progress notes ---------------------------------------------------------
 
 /** Saves the carer's summary, links it to the shift, then (best effort) sorts it into the note's fields. */
-export async function submitNote(carer: string, id: string, summary: string) {
+export async function submitNote(carer: string, id: string, summary: string, extra: { comms?: string; bestDay?: string } = {}) {
   const text = summary.trim();
+  const comms = (extra.comms ?? "").trim().slice(0, 4000) || "Nothing to report.";
+  const bestDay = (extra.bestDay ?? "").trim().slice(0, 4000) || null;
   if (text.length < 20) throw new Error("Please write a little more about the shift.");
   if (text.length > 8000) throw new Error("That's too long. Please keep it under 8,000 characters.");
   const noteId = await sql.begin(async (tx) => {
@@ -150,8 +152,8 @@ export async function submitNote(carer: string, id: string, summary: string) {
     if (s.cancelled) throw new Error("This shift has been cancelled.");
     if (s.note_submitted) throw new Error("A progress note has already been submitted for this shift.");
     const [row] = await t<{ id: string }[]>`
-      insert into app.progress_notes (carer, participant, coordinator, shift, date, summary, submit, created_by)
-      select ${carer}, s.participant, s.coordinator, s.id, s.date, ${text}, true, ${carer} from app.shifts s where s.id = ${id}
+      insert into app.progress_notes (carer, participant, coordinator, shift, date, summary, comms, best_day, submit, created_by)
+      select ${carer}, s.participant, s.coordinator, s.id, s.date, ${text}, ${comms}, ${bestDay}, true, ${carer} from app.shifts s where s.id = ${id}
       returning id`;
     await t`update app.shifts set progress_note = ${row.id} where id = ${id}`;
     return row.id;

@@ -3,9 +3,10 @@ import type { ReactNode } from "react";
 import type { CarerShift } from "@/lib/carer/data";
 import { onShiftDay } from "@/lib/carer/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
-import { noteAction, removeTravelAction, requestSummaryAction, travelAction } from "./actions";
+import { removeTravelAction, requestSummaryAction, travelAction } from "./actions";
 import { AddressInput, ReceiptUpload } from "./extras";
 import { PendingButton } from "@/components/PendingButton";
+import { NoteSteps } from "./NoteSteps";
 
 export type DetailsMsgs = { saved?: string; error?: string; travel?: string; xerror?: string; sent?: string; summary_error?: string };
 
@@ -28,8 +29,6 @@ const TABS: { key: string; label: string; icon: ReactNode }[] = [
   { key: "emergency", label: "Emergency", icon: I(<><path d="M7 15.5a4.5 4.5 0 0 1-.4-9A6 6 0 0 1 18 8a3.8 3.8 0 0 1-.5 7.5H7z" /><path d="m10 17-1.5 3M14 17l-1.5 3M12.5 13 11 16h3l-1.5 3" /></>) },
 ];
 
-const time = (d: Date) => new Intl.DateTimeFormat("en-AU", { hour: "numeric", minute: "2-digit", timeZone: "Australia/Melbourne" }).format(d);
-
 /** The NDIS shift details popup: a grid of buttons, each opening its own view inside the popup. */
 export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShift; day: string; tab?: string; email: string; msgs: DetailsMsgs }) {
   if (!s || s.kind !== "ndis") return null;
@@ -45,6 +44,7 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
         {!open ? (
           <>
             <h2>{name}</h2>
+            {msgs.saved && <p className="banner ok">Thanks, your progress note is in.</p>}
             {s.address_text && (
               <>
                 <h3>Address</h3>
@@ -60,7 +60,7 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
         ) : (
           <>
             <Link href={home} className="back">← {name}</Link>
-            <h2>{open.label}</h2>
+            <h2>{open.key === "notes" ? `${name}'s progress note` : open.label}</h2>
             <Section s={s} day={day} tab={open.key} first={name.split(" ")[0]} email={email} msgs={msgs} />
           </>
         )}
@@ -97,21 +97,8 @@ async function Section({ s, day, tab, first, email, msgs }: { s: CarerShift; day
   }
 
   if (tab === "notes") {
-    if (s.note_submitted) return <p className="banner ok">{msgs.saved ? "Thanks, your progress note is in." : "Your progress note has been submitted."}</p>;
-    return (
-      <>
-        {s.attend_start && <p className="hint">Checked in at {time(s.attend_start)}{s.attend_end ? `, checked out at ${time(s.attend_end)}` : ""}.</p>}
-        {msgs.error && <p className="banner error">{msgs.error}</p>}
-        <form action={noteAction} className="stack">
-          <input type="hidden" name="id" value={s.id} />
-          <label>
-            How did the shift go? Include personal care, meals and drinks, mood, outings, housework, and anything the team should know.
-            <textarea name="summary" rows={8} required minLength={20} maxLength={8000} />
-          </label>
-          <button type="submit" className="big">Submit progress note</button>
-        </form>
-      </>
-    );
+    if (s.note_submitted) return <p className="banner ok">Your progress note has been submitted.</p>;
+    return <NoteSteps shiftId={s.id} error={msgs.error} />;
   }
 
   if (tab === "trip") {
