@@ -46,9 +46,9 @@ export function price(hours: number, item: PriceItem) {
 
 // Availability slots carers tick in the app (Bubble's "shift_time" option set).
 export const SLOTS = [
-  { value: "0600___1400", label: "Morning", start: 600, end: 1400 },
-  { value: "night__2200___0715_", label: "Afternoon", start: 1200, end: 2000 },
-  { value: "night__11pm___7am_", label: "Night", start: 2000, end: 600 },
+  { value: "0600___1400", label: "Morning", short: "AM", start: 600, end: 1400 },
+  { value: "night__2200___0715_", label: "Afternoon", short: "PM", start: 1200, end: 2000 },
+  { value: "night__11pm___7am_", label: "Night", short: "NS", start: 2000, end: 600 },
 ] as const;
 
 /** [start, end) in minutes from the start of the shift's day; overnight windows run past 1440. */

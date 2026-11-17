@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 type SP = Record<string, string | undefined>;
 const ROLES = [["en", "EN"], ["rn", "RN"], ["pca", "PCA"], ["dsw", "DSW"], ["cleaner", "CL"], ["student_nurse", "Student nurse"]] as const;
 const VIEWS = [["all", "Everyone"], ["participant", "Participant"], ["location", "Location"], ["carer", "Carer"]] as const;
-const SLOT_LABEL = Object.fromEntries(SLOTS.map((s) => [s.value, s.label]));
+const SLOT_LABEL = Object.fromEntries(SLOTS.map((s) => [s.value, s.short]));
 const PERIODS: [Period, string][] = [["am", "AM"], ["pm", "PM"], ["ns", "NS"]];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 

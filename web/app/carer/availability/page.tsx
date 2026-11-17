@@ -42,7 +42,7 @@ export default async function Availability({ searchParams }: { searchParams: Pro
                     <input type="hidden" name="slot" value={slot.value} />
                     <input type="hidden" name="on" value={state === "off" ? "1" : "0"} />
                     <button className={`slot ${state}`} disabled={state === "booked"} aria-pressed={state !== "off"}>
-                      {slot.label}{state === "booked" ? " · booked" : ""}
+                      {slot.short}{state === "booked" ? " · booked" : ""}
                     </button>
                   </form>
                 );
