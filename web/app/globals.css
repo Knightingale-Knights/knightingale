@@ -462,3 +462,19 @@ table.people .num { text-align: right; white-space: nowrap; }
 .view-as-bar button:hover { background: var(--desk); color: var(--ink); }
 form.inline { display: inline; }
 .title-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+
+/* Carer pages with the left menu */
+.carer.with-side, .carer:has(> .side) { padding-left: 232px; }
+.side-hello { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-3); margin-top: -10px; }
+.carer .carer-main, .carer:has(> .side) main { max-width: 760px; }
+.carer-cal .cal-grid { grid-auto-rows: minmax(84px, auto); }
+.carer-cal .cal-cell { justify-content: flex-start; gap: 4px; padding: 10px 2px; }
+.carer-cal .cal-cell .num { font-size: 22px; }
+.carer-cal .cal-cell .amt { font-size: 10px; letter-spacing: 0.04em; }
+.carer-cal .cal-cell.has { background: #f0ede7; }
+.carer-cal .cal-cell.has:hover { background: #e9e5de; }
+@media (max-width: 900px) {
+  .carer.with-side, .carer:has(> .side) { padding-left: 0; }
+  .carer-cal .cal-grid { grid-auto-rows: minmax(64px, auto); }
+  .carer-cal .cal-cell .num { font-size: 16px; padding: 4px 6px; }
+}

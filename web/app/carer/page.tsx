@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireCarer } from "@/lib/auth";
-import { myShifts, type CarerShift } from "@/lib/carer/data";
-import { clockLabel } from "@/lib/roster/rules";
+import { myShifts, myShiftsBetween, type CarerShift } from "@/lib/carer/data";
+import { addDays, addMonths, clockLabel, monthGrid } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "./CarerNav";
 import { CheckPopup } from "./check";
@@ -9,8 +9,10 @@ import { dueCheck } from "@/lib/carer/rules";
 
 export const dynamic = "force-dynamic";
 
-const dayLabel = (day: string) =>
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const dayTitle = (day: string) =>
   new Intl.DateTimeFormat("en-AU", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`));
+const validDay = (v?: string) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v)) ? v : null);
 
 function status(s: CarerShift) {
   if (s.cancelled) return "Cancelled";
@@ -18,34 +20,80 @@ function status(s: CarerShift) {
   if (s.attend_start) return "Checked in";
   return null;
 }
+const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts() {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string }> }) {
   const me = await requireCarer();
+  const sp = await searchParams;
   const today = isoDate(new Date());
-  const shifts = await myShifts(me.id, today);
-  const upcoming = shifts.filter((s) => s.day >= today);
-  const recent = shifts.filter((s) => s.day < today).reverse();
+  const day = validDay(sp.date);
+  const month = /^\d{4}-\d{2}$/.test(sp.month ?? "") ? sp.month! : (day ?? today).slice(0, 7);
+  const [from, to] = monthGrid(`${month}-01`);
+  const [near, shifts] = await Promise.all([myShifts(me.id, today), myShiftsBetween(me.id, day ?? from, day ? addDays(day, 1) : to)]);
   const now = Date.now();
-  const due = shifts.map((s) => ({ s, kind: dueCheck(s, now) })).find((d) => d.kind);
-  const card = (s: CarerShift) => (
-    <Link key={s.id} href={`/carer/shift/${s.id}`} className={`cshift ${s.cancelled ? "cancelled" : ""}`}>
-      <span className="when">{s.day === today ? "Today" : dayLabel(s.day)} · {clockLabel(s.start_time)}–{clockLabel(s.end_time)}</span>
-      <span className="where">{s.place ?? "Shift"}</span>
-      {status(s) && <span className={`status ${status(s) === "Progress note needed" ? "todo" : ""}`}>{status(s)}</span>}
-    </Link>
-  );
+  const due = near.map((s) => ({ s, kind: dueCheck(s, now) })).find((d) => d.kind);
+
   return (
-    <div className="carer">
+    <div className="carer with-side">
       <CarerNav on="shifts" name={me.name} />
       {due && (
         <CheckPopup kind={due.kind!} shiftId={due.s.id} title={`${due.s.place ?? "Your shift"}, ${clockLabel(due.s.start_time)}–${clockLabel(due.s.end_time)}`} detail={due.s.address_text ?? ""} />
       )}
-      <main>
+      <main className="carer-main">
         {!me.approved && <p className="banner ok">Thanks for applying! We&apos;re reviewing your application and will be in touch. Keep your documents up to date in the Documents tab.</p>}
-        <h1>My shifts</h1>
-        {upcoming.length ? upcoming.map(card) : <p className="empty">No shifts booked in the next four weeks.</p>}
-        {recent.length > 0 && (<><h2>Last 7 days</h2>{recent.map(card)}</>)}
+        {day ? <DayList day={day} today={today} shifts={shifts} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
     </div>
+  );
+}
+
+function MonthCal({ month, from, to, today, shifts }: { month: string; from: string; to: string; today: string; shifts: CarerShift[] }) {
+  const days: string[] = [];
+  for (let d = from; d < to; d = addDays(d, 1)) days.push(d);
+  const first = `${month}-01`;
+  return (
+    <div className="cal carer-cal">
+      <div className="cal-nav">
+        <Link href={`/carer?month=${addMonths(first, -1).slice(0, 7)}`} aria-label="Previous month">‹</Link>
+        <h2>{MONTHS[Number(month.slice(5)) - 1]}{month.slice(0, 4) !== today.slice(0, 4) ? ` ${month.slice(0, 4)}` : ""}</h2>
+        <Link href={`/carer?month=${addMonths(first, 1).slice(0, 7)}`} aria-label="Next month">›</Link>
+      </div>
+      <div className="cal-head">{["M", "T", "W", "T", "F", "S", "S"].map((d, i) => <span key={i}>{d}</span>)}</div>
+      <div className="cal-grid">
+        {days.map((d) => {
+          const list = shifts.filter((s) => s.day === d && !s.cancelled);
+          return (
+            <Link key={d} href={`/carer?date=${d}`} className={`cal-cell ${d.startsWith(month) ? "" : "out"} ${list.length ? "has" : ""}`}>
+              <span className={`num ${d === today ? "today" : ""}`}>{Number(d.slice(8))}</span>
+              {list.slice(0, 2).map((s) => <span key={s.id} className="amt">{clockLabel(s.start_time)}</span>)}
+              {list.length > 2 && <span className="amt">+{list.length - 2} more</span>}
+              {list.some(needsNote) && <span className="open">Note due</span>}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DayList({ day, today, shifts }: { day: string; today: string; shifts: CarerShift[] }) {
+  return (
+    <>
+      <div className="cal-nav">
+        <Link href={`/carer?date=${addDays(day, -1)}`} aria-label="Previous day">‹</Link>
+        <h2>{day === today ? "Today" : dayTitle(day)}</h2>
+        <Link href={`/carer?date=${addDays(day, 1)}`} aria-label="Next day">›</Link>
+      </div>
+      <p className="lede"><Link href={`/carer?month=${day.slice(0, 7)}`}>← Back to the month</Link></p>
+      {shifts.length === 0 && <p className="empty">No shifts on this day.</p>}
+      {shifts.map((s) => (
+        <Link key={s.id} href={`/carer/shift/${s.id}`} className={`cshift ${s.cancelled ? "cancelled" : ""}`}>
+          <span className="when">{clockLabel(s.start_time)}–{clockLabel(s.end_time)}</span>
+          <span className="where">{s.place ?? "Shift"}</span>
+          {s.address_text && <span className="status muted">{s.address_text}</span>}
+          {status(s) && <span className={`status ${needsNote(s) ? "todo" : ""}`}>{status(s)}</span>}
+        </Link>
+      ))}
+    </>
   );
 }

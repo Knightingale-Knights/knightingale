@@ -38,6 +38,14 @@ export async function myShifts(carer: string, today: string): Promise<CarerShift
      order by s.date, s.start_time`;
 }
 
+/** The carer's shifts from `from` up to (not including) `to`. */
+export async function myShiftsBetween(carer: string, from: string, to: string): Promise<CarerShift[]> {
+  return sql<CarerShift[]>`
+    select ${shiftSelect()} from app.shifts s ${shiftJoins()}
+     where s.carer = ${carer} and s.date >= ${fromDay(from)} and s.date < ${fromDay(to)}
+     order by s.date, s.start_time`;
+}
+
 export async function myShift(carer: string, id: string, tx: Tx = sql): Promise<CarerShift | null> {
   const [s] = await tx<CarerShift[]>`select ${shiftSelect()} from app.shifts s ${shiftJoins()} where s.id = ${id} and s.carer = ${carer}`;
   return s ?? null;

@@ -6,23 +6,33 @@ import { attentionCount } from "@/lib/compliance/data";
 import { isoDate } from "@/lib/invoicing/rules";
 import { ViewAsBar } from "@/components/ViewAsBar";
 
-export async function CarerNav({ on, name }: { on: "shifts" | "availability" | "chats" | "documents"; name: string }) {
+type On = "shifts" | "availability" | "chats" | "documents";
+
+/** The carer's menu, down the left side like the admin pages. */
+export async function CarerNav({ on, name }: { on: On; name: string }) {
   const me = await currentUser();
   const [unread, docs] = me ? await Promise.all([unreadTotal(me), attentionCount(me.id, isoDate(new Date()))]) : [0, 0];
+  const items: { key: On; label: string; href: string; badge?: number }[] = [
+    { key: "shifts", label: "My Shifts", href: "/carer" },
+    { key: "availability", label: "Availability", href: "/carer/availability" },
+    { key: "chats", label: "Chats", href: "/carer/chats", badge: unread },
+    { key: "documents", label: "Documents", href: "/carer/documents", badge: docs },
+  ];
   return (
     <>
-    <ViewAsBar />
-    <header className="carer-top">
-      <span className="wordmark small">knightingale</span>
-      <span className="hello">Hi {name.split(" ")[0]}</span>
-      <nav>
-        <Link href="/carer" className={on === "shifts" ? "on" : ""}>My shifts</Link>
-        <Link href="/carer/availability" className={on === "availability" ? "on" : ""}>Availability</Link>
-        <Link href="/carer/chats" className={on === "chats" ? "on" : ""}>Chats{unread > 0 && <span className="badge">{unread}</span>}</Link>
-        <Link href="/carer/documents" className={on === "documents" ? "on" : ""}>Documents{docs > 0 && <span className="badge">{docs}</span>}</Link>
-        <form action={signOutAction}><button className="link">Sign out</button></form>
-      </nav>
-    </header>
+      <ViewAsBar />
+      <aside className="side">
+        <span className="wordmark small">knightingale</span>
+        <span className="side-hello">Hi {name.split(" ")[0]}</span>
+        <nav>
+          {items.map((i) => (
+            <Link key={i.key} href={i.href} className={`side-btn ${on === i.key ? "on" : ""}`}>
+              {i.label}{i.badge ? <span className="badge">{i.badge}</span> : null}
+            </Link>
+          ))}
+        </nav>
+        <form action={signOutAction}><button className="side-out">Logout</button></form>
+      </aside>
     </>
   );
 }
