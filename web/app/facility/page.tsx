@@ -30,7 +30,7 @@ export default async function FacilityHome({ searchParams }: { searchParams: Pro
     const st = status(b);
     return (
       <div key={b.id} className={`cshift ${b.cancelled ? "cancelled" : ""}`}>
-        <span className="when">{b.day === today ? "Today" : dayLabel(b.day)} · {clockLabel(b.start_time)}–{clockLabel(b.end_time)}</span>
+        <span className="when">{b.day === today ? "Today" : dayLabel(b.day)} · {clockLabel(b.start_time)} – {clockLabel(b.end_time)}</span>
         <span className="where">{b.roles?.[0] ? roleName(b.roles[0]) : "Shift"}</span>
         <span className={`status ${st.cls}`}>{st.text}</span>
       </div>

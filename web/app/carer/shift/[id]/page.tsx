@@ -41,7 +41,7 @@ export default async function Shift({ params, searchParams }: { params: Promise<
         )}
         <Link href="/carer" className="back">← My shifts</Link>
         <h1>{s.place ?? "Shift"}</h1>
-        <p className="when">{dayLabel(s.day)} · {clockLabel(s.start_time)}–{clockLabel(s.end_time)}</p>
+        <p className="when">{dayLabel(s.day)} · {clockLabel(s.start_time)} – {clockLabel(s.end_time)}</p>
         {s.address_text && <p>{maps ? <a href={maps} target="_blank" rel="noreferrer">{s.address_text}</a> : s.address_text}</p>}
         {s.notes && <p className="notes">{s.notes}</p>}
 

@@ -104,7 +104,7 @@ function Details({ s, close }: { s?: CarerShift; close: string }) {
       <Link href={close} className="modal-shade" aria-label="Close" />
       <div className="popup details-popup">
         <h2>{s.place ?? "Shift"}</h2>
-        <p className="when">{dayTitle(s.day)} · {clockLabel(s.start_time)}–{clockLabel(s.end_time)}</p>
+        <p className="when">{dayTitle(s.day)} · {clockLabel(s.start_time)} – {clockLabel(s.end_time)}</p>
         {s.address_text && <p className="hint">{s.address_text}</p>}
         <p className="hint">More details for this shift will appear here.</p>
         <Link href={close} className="button secondary popup-later">Close</Link>
@@ -130,7 +130,7 @@ function ShiftCard({ s, day }: { s: CarerShift; day: string }) {
       )}
       <dl className="shift-card-facts">
         <div><dt>Date</dt><dd>{day.slice(8)}/{day.slice(5, 7)}/{day.slice(2, 4)}</dd></div>
-        <div><dt>Time</dt><dd>{clockLabel(s.start_time)}–{clockLabel(s.end_time)}</dd></div>
+        <div><dt>Time</dt><dd>{clockLabel(s.start_time)} – {clockLabel(s.end_time)}</dd></div>
         {s.address_text && <div className="wide"><dt>Address</dt><dd>{s.address_text}</dd></div>}
       </dl>
       {status(s) && <p className={`status ${needsNote(s) ? "todo" : ""}`}>{status(s)}</p>}
