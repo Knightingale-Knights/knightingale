@@ -34,12 +34,12 @@ export default async function Shift({ params, searchParams }: { params: Promise<
 
   return (
     <div className="carer">
-      <CarerNav on="shifts" name={me.name} />
+      <CarerNav on="shifts" name={me.name} shiftsHref={`/carer?date=${s.day}`} />
       <main>
         {due && (
           <CheckPopup kind={due} shiftId={s.id} force={fromText} title={`${s.place ?? "Your shift"}, ${clockLabel(s.start_time)} – ${clockLabel(s.end_time)}`} detail={s.address_text ?? ""} />
         )}
-        <Link href="/carer" className="back">← My shifts</Link>
+        <Link href={`/carer?date=${s.day}`} className="back">← Back to the day</Link>
         <h1>{s.place ?? "Shift"}</h1>
         <p className="when">{dayLabel(s.day)} · {clockLabel(s.start_time)} – {clockLabel(s.end_time)}</p>
         {s.address_text && <p>{maps ? <a href={maps} target="_blank" rel="noreferrer">{s.address_text}</a> : s.address_text}</p>}
