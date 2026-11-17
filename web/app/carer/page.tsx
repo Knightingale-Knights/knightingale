@@ -40,7 +40,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
     <div className="carer with-side">
       <CarerNav on="shifts" name={me.name} />
       {due && (
-        <CheckPopup kind={due.kind!} shiftId={due.s.id} title={`${due.s.place ?? "Your shift"}, ${clockLabel(due.s.start_time)}–${clockLabel(due.s.end_time)}`} detail={due.s.address_text ?? ""} />
+        <CheckPopup kind={due.kind!} shiftId={due.s.id} title={`${due.s.place ?? "Your shift"}, ${clockLabel(due.s.start_time)} – ${clockLabel(due.s.end_time)}`} detail={due.s.address_text ?? ""} />
       )}
       <main className="carer-main">
         {!me.approved && <p className="banner ok">Thanks for applying! We&apos;re reviewing your application and will be in touch. Keep your documents up to date in the Documents tab.</p>}

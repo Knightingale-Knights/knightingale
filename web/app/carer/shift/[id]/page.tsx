@@ -37,7 +37,7 @@ export default async function Shift({ params, searchParams }: { params: Promise<
       <CarerNav on="shifts" name={me.name} />
       <main>
         {due && (
-          <CheckPopup kind={due} shiftId={s.id} force={fromText} title={`${s.place ?? "Your shift"}, ${clockLabel(s.start_time)}–${clockLabel(s.end_time)}`} detail={s.address_text ?? ""} />
+          <CheckPopup kind={due} shiftId={s.id} force={fromText} title={`${s.place ?? "Your shift"}, ${clockLabel(s.start_time)} – ${clockLabel(s.end_time)}`} detail={s.address_text ?? ""} />
         )}
         <Link href="/carer" className="back">← My shifts</Link>
         <h1>{s.place ?? "Shift"}</h1>
