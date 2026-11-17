@@ -26,7 +26,7 @@ export default async function Availability({ searchParams }: { searchParams: Pro
       <CarerNav on="availability" name={me.name} />
       <main>
         <h1>When can you work?</h1>
-        <p className="hint">Tap a time to say you&apos;re available. Tap again to remove it. Booked times can only be changed by the office.</p>
+        <p className="hint">Tap a time to say you&apos;re available. Tap again to remove it.</p>
         {sp.error && <p className="banner error">{sp.error}</p>}
         <div className="avail">
           {days.map((day) => (
