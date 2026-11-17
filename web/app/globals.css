@@ -497,3 +497,7 @@ form.inline { display: inline; }
 .shift-card .status { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; margin: 0; color: var(--ink-2); }
 .shift-card .status.todo { color: var(--alert); }
 .shift-card-pay { font-size: 20px; font-weight: 300; margin: 0; }
+.carer-cal .cal-cell .amt.pay { font-size: 13px; letter-spacing: 0.02em; }
+.carer-cal .cal-shifts { border: 1px solid var(--ink); padding: 3px 8px; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; }
+.carer-cal .cal-cell:hover .cal-shifts { background: var(--ink); color: var(--paper); }
+@media (max-width: 900px) { .carer-cal .cal-cell .amt.pay { font-size: 10px; } .carer-cal .cal-shifts { padding: 2px 4px; font-size: 8px; letter-spacing: 0.1em; } }

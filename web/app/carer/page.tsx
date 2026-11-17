@@ -70,8 +70,8 @@ function MonthCal({ month, from, to, today, shifts }: { month: string; from: str
           return (
             <Link key={d} href={`/carer?date=${d}`} className={`cal-cell ${d.startsWith(month) ? "" : "out"} ${list.length ? "has" : ""}`}>
               <span className={`num ${d === today ? "today" : ""}`}>{Number(d.slice(8))}</span>
-              {list.slice(0, 2).map((s) => <span key={s.id} className="amt">{clockLabel(s.start_time)}</span>)}
-              {list.length > 2 && <span className="amt">+{list.length - 2} more</span>}
+              {list.length > 0 && <span className="amt pay">{money(list.reduce((a, s) => a + (s.wage ?? 0), 0))}</span>}
+              {list.length > 0 && <span className="cal-shifts">{list.length === 1 ? "Shift" : "Shifts"}</span>}
               {list.some(needsNote) && <span className="open">Note due</span>}
             </Link>
           );
