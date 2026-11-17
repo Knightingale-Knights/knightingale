@@ -478,3 +478,9 @@ form.inline { display: inline; }
   .carer-cal .cal-grid { grid-auto-rows: minmax(64px, auto); }
   .carer-cal .cal-cell .num { font-size: 16px; padding: 4px 6px; }
 }
+.cshift-row { display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--line); }
+.cshift-row .cshift { flex: 1; border-bottom: 0; }
+.cshift-row.cancelled { opacity: 0.5; }
+.details-btn { display: grid; place-items: center; text-decoration: none; min-width: 96px; }
+.details-popup { position: relative; z-index: 1; }
+.details-popup .popup-later { display: grid; place-items: center; text-decoration: none; margin-top: 18px; }

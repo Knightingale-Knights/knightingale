@@ -22,7 +22,7 @@ function status(s: CarerShift) {
 }
 const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string }> }) {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; details?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -43,6 +43,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
         {!me.approved && <p className="banner ok">Thanks for applying! We&apos;re reviewing your application and will be in touch. Keep your documents up to date in the Documents tab.</p>}
         {day ? <DayList day={day} today={today} shifts={shifts} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
+      {day && sp.details && <Details s={shifts.find((s) => s.id === sp.details && s.kind === "ndis")} close={`/carer?date=${day}`} />}
     </div>
   );
 }
@@ -87,13 +88,33 @@ function DayList({ day, today, shifts }: { day: string; today: string; shifts: C
       <p className="lede"><Link href={`/carer?month=${day.slice(0, 7)}`}>← Back to the month</Link></p>
       {shifts.length === 0 && <p className="empty">No shifts on this day.</p>}
       {shifts.map((s) => (
-        <Link key={s.id} href={`/carer/shift/${s.id}`} className={`cshift ${s.cancelled ? "cancelled" : ""}`}>
-          <span className="when">{clockLabel(s.start_time)}–{clockLabel(s.end_time)}</span>
-          <span className="where">{s.place ?? "Shift"}</span>
-          {s.address_text && <span className="status muted">{s.address_text}</span>}
-          {status(s) && <span className={`status ${needsNote(s) ? "todo" : ""}`}>{status(s)}</span>}
-        </Link>
+        <div key={s.id} className={`cshift-row ${s.cancelled ? "cancelled" : ""}`}>
+          <Link href={`/carer/shift/${s.id}`} className="cshift">
+            <span className="when">{clockLabel(s.start_time)}–{clockLabel(s.end_time)}</span>
+            <span className="where">{s.place ?? "Shift"}</span>
+            {s.address_text && <span className="status muted">{s.address_text}</span>}
+            {status(s) && <span className={`status ${needsNote(s) ? "todo" : ""}`}>{status(s)}</span>}
+          </Link>
+          {s.kind === "ndis" && <Link href={`/carer?date=${day}&details=${s.id}`} className="button secondary details-btn">Details</Link>}
+        </div>
       ))}
     </>
+  );
+}
+
+/** NDIS shift details popup. Contents to come. */
+function Details({ s, close }: { s?: CarerShift; close: string }) {
+  if (!s) return null;
+  return (
+    <div className="popup-back">
+      <Link href={close} className="modal-shade" aria-label="Close" />
+      <div className="popup details-popup">
+        <h2>{s.place ?? "Shift"}</h2>
+        <p className="when">{dayTitle(s.day)} · {clockLabel(s.start_time)}–{clockLabel(s.end_time)}</p>
+        {s.address_text && <p className="hint">{s.address_text}</p>}
+        <p className="hint">More details for this shift will appear here.</p>
+        <Link href={close} className="button secondary popup-later">Close</Link>
+      </div>
+    </div>
   );
 }
