@@ -6,8 +6,11 @@ import { isoDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "./CarerNav";
 import { CheckPopup } from "./check";
 import { dueCheck } from "@/lib/carer/rules";
+import { requestSummaryAction } from "./actions";
+import { PendingButton } from "@/components/PendingButton";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 120; // the support summary takes a while to draft
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const dayTitle = (day: string) =>
@@ -22,7 +25,7 @@ function status(s: CarerShift) {
 }
 const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; details?: string; summary?: string }> }) {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; details?: string; summary?: string; sent?: string; summary_error?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -44,7 +47,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
         {day ? <DayList day={day} today={today} shifts={shifts} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
       {day && sp.details && <Details s={shifts.find((s) => s.id === sp.details && s.kind === "ndis")} close={`/carer?date=${day}`} />}
-      {day && sp.summary && <SummaryRequest s={shifts.find((s) => s.id === sp.summary && s.kind === "ndis")} email={me.email} close={`/carer?date=${day}`} />}
+      {day && sp.summary && <SummaryRequest s={shifts.find((s) => s.id === sp.summary && s.kind === "ndis")} email={me.email} close={`/carer?date=${day}`} day={day} sent={sp.sent} error={sp.summary_error} />}
     </div>
   );
 }
@@ -141,7 +144,7 @@ function ShiftCard({ s, day }: { s: CarerShift; day: string }) {
 }
 
 /** Asks for the participant's support summary to be emailed to the carer. */
-function SummaryRequest({ s, email, close }: { s?: CarerShift; email: string; close: string }) {
+function SummaryRequest({ s, email, close, day, sent, error }: { s?: CarerShift; email: string; close: string; day: string; sent?: string; error?: string }) {
   if (!s) return null;
   const first = (s.participant_name ?? s.place ?? "the participant").split(" ")[0];
   return (
@@ -153,7 +156,16 @@ function SummaryRequest({ s, email, close }: { s?: CarerShift; email: string; cl
         <p>We want to see you succeed. We hope this helps.</p>
         <p>It will be sent to your email: {email}.</p>
         <p>If you have any suggestions on how to make it better, please email <a href="mailto:care@knightingale.com.au">care@knightingale.com.au</a>. We love feedback. We love to improve.</p>
-        <button className="big" disabled title="Coming soon">Request {first}&apos;s summary</button>
+        {sent && <p className="banner ok">{sent}</p>}
+        {error && <p className="banner error">{error}</p>}
+        {!sent && (
+          <form action={requestSummaryAction}>
+            <input type="hidden" name="shift" value={s.id} />
+            <input type="hidden" name="date" value={day} />
+            <PendingButton className="big" pending="Putting the summary together…">Request {first}&apos;s summary</PendingButton>
+            <p className="hint">It takes about a minute to put together.</p>
+          </form>
+        )}
         <Link href={close} className="button secondary popup-later">Close</Link>
       </div>
     </div>

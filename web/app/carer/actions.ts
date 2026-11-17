@@ -1,4 +1,5 @@
 "use server";
+import { requestSummary } from "@/lib/carer/summary";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireCarer } from "@/lib/auth";
@@ -104,4 +105,19 @@ export async function receiptAction(f: FormData): Promise<ReceiptResult> {
   } catch (e) {
     return { ok: false, message: errMsg(e) };
   }
+}
+
+/** Emails the participant's support summary to the carer. */
+export async function requestSummaryAction(f: FormData) {
+  const me = await requireCarer();
+  const shift = String(f.get("shift") ?? "");
+  const day = String(f.get("date") ?? "");
+  const back = new URLSearchParams({ date: day, summary: shift });
+  try {
+    const first = await requestSummary(me, shift);
+    back.set("sent", `${first}'s summary is on its way to ${me.email}.`);
+  } catch (e) {
+    back.set("summary_error", (e as Error).message);
+  }
+  redirect(`/carer?${back}`);
 }
