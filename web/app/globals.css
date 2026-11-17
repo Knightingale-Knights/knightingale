@@ -484,3 +484,16 @@ form.inline { display: inline; }
 .details-btn { display: grid; place-items: center; text-decoration: none; min-width: 96px; }
 .details-popup { position: relative; z-index: 1; }
 .details-popup .popup-later { display: grid; place-items: center; text-decoration: none; margin-top: 18px; }
+.shift-card { border-top: 1px solid var(--ink); padding: 22px 0 26px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.shift-card.cancelled { opacity: 0.5; }
+.shift-card-name { font-family: var(--serif); font-weight: 300; font-size: 28px; text-decoration: none; }
+.shift-card-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.shift-card-actions .button { display: inline-grid; place-items: center; text-decoration: none; min-width: 180px; }
+.shift-card-actions .button.off { border-color: var(--line-2); color: var(--ink-4); cursor: default; }
+.shift-card-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 26px; margin: 0; width: 100%; max-width: 480px; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.shift-card-facts .wide { grid-column: 1 / -1; }
+.shift-card-facts dt { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-3); }
+.shift-card-facts dd { margin: 4px 0 0; font-size: 14px; }
+.shift-card .status { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; margin: 0; color: var(--ink-2); }
+.shift-card .status.todo { color: var(--alert); }
+.shift-card-pay { font-size: 20px; font-weight: 300; margin: 0; }

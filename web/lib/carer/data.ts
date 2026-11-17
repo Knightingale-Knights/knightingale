@@ -16,6 +16,7 @@ export type CarerShift = {
   kind: "ndis" | "residential"; place: string | null; address_text: string | null; address: { lat?: number; lng?: number } | null;
   notes: string | null; cancelled: boolean; attend_start: Date | null; attend_end: Date | null;
   note_id: string | null; note_submitted: boolean;
+  participant: string | null; participant_name: string | null; wage: number | null;
 };
 
 const shiftSelect = () => sql`
@@ -23,7 +24,8 @@ const shiftSelect = () => sql`
   case when s.participant is null then 'residential' else 'ndis' end as kind,
   coalesce(split_part(p.first_name, ' ', 1), l.name) as place,
   s.address->>'address' as address_text, s.address, s.notes, coalesce(s.cancelled, false) as cancelled,
-  s.attend_start, s.attend_end, n.id as note_id, coalesce(n.submit, false) as note_submitted`;
+  s.attend_start, s.attend_end, n.id as note_id, coalesce(n.submit, false) as note_submitted,
+  s.participant, nullif(trim(concat_ws(' ', p.first_name, p.last_name)), '') as participant_name, s.wage::float8 as wage`;
 
 const shiftJoins = () => sql`
   left join app.users p on p.id = s.participant

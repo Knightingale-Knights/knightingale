@@ -87,17 +87,7 @@ function DayList({ day, today, shifts }: { day: string; today: string; shifts: C
       </div>
       <p className="lede"><Link href={`/carer?month=${day.slice(0, 7)}`}>← Back to the month</Link></p>
       {shifts.length === 0 && <p className="empty">No shifts on this day.</p>}
-      {shifts.map((s) => (
-        <div key={s.id} className={`cshift-row ${s.cancelled ? "cancelled" : ""}`}>
-          <Link href={`/carer/shift/${s.id}`} className="cshift">
-            <span className="when">{clockLabel(s.start_time)}–{clockLabel(s.end_time)}</span>
-            <span className="where">{s.place ?? "Shift"}</span>
-            {s.address_text && <span className="status muted">{s.address_text}</span>}
-            {status(s) && <span className={`status ${needsNote(s) ? "todo" : ""}`}>{status(s)}</span>}
-          </Link>
-          {s.kind === "ndis" && <Link href={`/carer?date=${day}&details=${s.id}`} className="button secondary details-btn">Details</Link>}
-        </div>
-      ))}
+      {shifts.map((s) => <ShiftCard key={s.id} s={s} day={day} />)}
     </>
   );
 }
@@ -114,6 +104,36 @@ function Details({ s, close }: { s?: CarerShift; close: string }) {
         {s.address_text && <p className="hint">{s.address_text}</p>}
         <p className="hint">More details for this shift will appear here.</p>
         <Link href={close} className="button secondary popup-later">Close</Link>
+      </div>
+    </div>
+  );
+}
+
+const money = (n: number) => `$${n.toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/** One shift on the carer's day, laid out like the Bubble card. */
+function ShiftCard({ s, day }: { s: CarerShift; day: string }) {
+  const ndis = s.kind === "ndis";
+  const name = ndis ? s.participant_name ?? s.place : s.place;
+  return (
+    <div className={`shift-card ${s.cancelled ? "cancelled" : ""}`}>
+      <Link href={`/carer/shift/${s.id}`} className="shift-card-name">{name ?? "Shift"}</Link>
+      {ndis && s.participant && (
+        <div className="shift-card-actions">
+          <Link href={`/carer/chats/${s.participant}`} className="button secondary">Communication book</Link>
+          <span className="button secondary off" title="Coming soon">{name} support summary</span>
+        </div>
+      )}
+      <dl className="shift-card-facts">
+        <div><dt>Date</dt><dd>{day.slice(8)}/{day.slice(5, 7)}/{day.slice(2, 4)}</dd></div>
+        <div><dt>Time</dt><dd>{clockLabel(s.start_time)}–{clockLabel(s.end_time)}</dd></div>
+        {s.address_text && <div className="wide"><dt>Address</dt><dd>{s.address_text}</dd></div>}
+      </dl>
+      {status(s) && <p className={`status ${needsNote(s) ? "todo" : ""}`}>{status(s)}</p>}
+      {s.wage != null && <p className="shift-card-pay">{money(s.wage)}</p>}
+      <div className="shift-card-actions">
+        <Link href={`/carer/shift/${s.id}`} className="button secondary">Open shift</Link>
+        {ndis && <Link href={`/carer?date=${day}&details=${s.id}`} className="button">Details</Link>}
       </div>
     </div>
   );
