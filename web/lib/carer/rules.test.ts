@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CheckError, assertCanCheck, dueCheck, formatNoteField, haversineM, parseModelJson } from "./rules";
+import { CheckError, assertCanCheck, checkButton, dueCheck, formatNoteField, haversineM, parseModelJson } from "./rules";
 
 const home = { lat: -37.8548796, lng: 144.8790851 }; // 2 Wintringham Rd, Williamstown
 const start = new Date("2026-11-16T20:00:00Z"); // 7am Melbourne
@@ -17,8 +17,9 @@ describe("distance", () => {
 describe("check in and out", () => {
   it("allows checking in nearby, from 2h before to 6h after the start", () => {
     expect(assertCanCheck("in", shift(), here, at(start, -30))).toBe(0);
-    expect(() => assertCanCheck("in", shift(), here, at(start, -121))).toThrow(/too early/);
-    expect(() => assertCanCheck("in", shift(), here, at(start, 361))).toThrow(/too late/);
+    expect(() => assertCanCheck("in", shift(), here, at(start, -31))).toThrow(/too early/);
+    expect(assertCanCheck("in", shift(), here, at(end, 0))).toBe(0);
+    expect(() => assertCanCheck("in", shift(), here, at(end, 1))).toThrow(/too late/);
   });
   it("refuses when too far away or the location is imprecise", () => {
     expect(() => assertCanCheck("in", shift(), { lat: home.lat + 0.01, lng: home.lng, accuracy: 10 }, at(start, 0))).toThrow(/about 1112 m/);
@@ -54,11 +55,11 @@ describe("progress note fields", () => {
 describe("dueCheck", () => {
   const H = 3_600_000;
   const base = { start_at: new Date(10 * H), end_at: new Date(14 * H), cancelled: false, attend_start: null, attend_end: null, address: null, kind: "ndis" as const };
-  it("prompts check in from 30 minutes before the start until 6 hours after", () => {
+  it("prompts check in from 30 minutes before the start until the end", () => {
     expect(dueCheck(base, 9 * H)).toBeNull();
     expect(dueCheck(base, 9.5 * H)).toBe("in");
-    expect(dueCheck(base, 16 * H)).toBe("in");
-    expect(dueCheck(base, 16 * H + 1)).toBeNull();
+    expect(dueCheck(base, 14 * H)).toBe("in");
+    expect(dueCheck(base, 14 * H + 1)).toBeNull();
   });
   it("prompts NDIS check out from 15 minutes before the end, never for aged care", () => {
     const inn = { ...base, attend_start: new Date(10 * H) };
@@ -67,5 +68,22 @@ describe("dueCheck", () => {
     expect(dueCheck({ ...inn, kind: "residential" }, 14 * H)).toBeNull();
     expect(dueCheck({ ...inn, attend_end: new Date(14 * H) }, 14 * H)).toBeNull();
     expect(dueCheck({ ...base, cancelled: true }, 10 * H)).toBeNull();
+  });
+});
+
+describe("checkButton", () => {
+  const H = 3_600_000;
+  const base = { start_at: new Date(10 * H), end_at: new Date(14 * H), cancelled: false, attend_start: null, attend_end: null, address: null, kind: "ndis" as const };
+  it("shows check in from 30 minutes before the start until the end", () => {
+    expect(checkButton(base, 9.4 * H)).toBeNull();
+    expect(checkButton(base, 9.5 * H)).toBe("in");
+    expect(checkButton(base, 14 * H)).toBe("in");
+    expect(checkButton(base, 14 * H + 1)).toBeNull();
+  });
+  it("shows check out only for NDIS, after check in", () => {
+    const inn = { ...base, attend_start: new Date(10 * H) };
+    expect(checkButton(inn, 11 * H)).toBe("out");
+    expect(checkButton({ ...inn, kind: "residential" }, 11 * H)).toBeNull();
+    expect(checkButton({ ...inn, attend_end: new Date(14 * H) }, 15 * H)).toBeNull();
   });
 });

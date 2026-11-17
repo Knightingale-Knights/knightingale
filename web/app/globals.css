@@ -501,3 +501,6 @@ form.inline { display: inline; }
 .carer-cal .cal-shifts { border: 1px solid var(--ink); padding: 3px 8px; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; }
 .carer-cal .cal-cell:hover .cal-shifts { background: var(--ink); color: var(--paper); }
 @media (max-width: 900px) { .carer-cal .cal-cell .amt.pay { font-size: 10px; } .carer-cal .cal-shifts { padding: 2px 4px; font-size: 8px; letter-spacing: 0.1em; } }
+.shift-card .check { flex-direction: column; margin: 0; }
+.shift-card .check button { min-width: 370px; }
+@media (max-width: 480px) { .shift-card .check button { min-width: 0; width: 100%; } }

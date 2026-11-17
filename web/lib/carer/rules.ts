@@ -3,8 +3,7 @@
 
 export const RADIUS_M = 500; // must be within this distance of the shift address
 export const MAX_ACCURACY_M = 500; // phone location must be at least this precise
-export const CHECK_IN_EARLY_MS = 2 * 3600_000; // can check in up to 2h before the start
-export const CHECK_IN_LATE_MS = 6 * 3600_000; // ...and up to 6h after it
+export const CHECK_IN_EARLY_MS = 30 * 60_000; // can check in from 30 min before the start until the end
 export const CHECK_OUT_LATE_MS = 24 * 3600_000; // can check out up to 24h after the end
 
 const EARTH_RADIUS_M = 6371008.8;
@@ -37,7 +36,7 @@ export function assertCanCheck(kind: "in" | "out", s: ShiftForCheck, pos: Positi
   if (kind === "in") {
     if (s.attend_start) throw new CheckError("You're already checked in.");
     if (now < s.start_at.getTime() - CHECK_IN_EARLY_MS) throw new CheckError("It's too early to check in for this shift.");
-    if (now > s.start_at.getTime() + CHECK_IN_LATE_MS) throw new CheckError("It's too late to check in. Please contact the office.");
+    if (now > s.end_at.getTime()) throw new CheckError("It's too late to check in. Please contact the office.");
   } else {
     if (!s.attend_start) throw new CheckError("Check in first.");
     if (s.attend_end) throw new CheckError("You're already checked out.");
@@ -91,7 +90,15 @@ export function dueCheck(s: ShiftForCheck & { kind: "ndis" | "residential" }, no
   if (s.cancelled || !s.start_at || !s.end_at) return null;
   const start = s.start_at.getTime();
   const end = s.end_at.getTime();
-  if (!s.attend_start) return now >= start - POPUP_IN_BEFORE_MS && now <= start + CHECK_IN_LATE_MS ? "in" : null;
+  if (!s.attend_start) return now >= start - POPUP_IN_BEFORE_MS && now <= end ? "in" : null;
   if (!s.attend_end && s.kind === "ndis") return now >= end - POPUP_OUT_BEFORE_MS && now <= end + CHECK_OUT_LATE_MS ? "out" : null;
+  return null;
+}
+
+/** Which check button the shift card shows: check in from 30 min before the start until the end; check out (NDIS only) once checked in. */
+export function checkButton(s: ShiftForCheck & { kind: "ndis" | "residential" }, now = Date.now()): "in" | "out" | null {
+  if (s.cancelled || !s.start_at || !s.end_at) return null;
+  if (!s.attend_start) return now >= s.start_at.getTime() - CHECK_IN_EARLY_MS && now <= s.end_at.getTime() ? "in" : null;
+  if (s.kind === "ndis" && !s.attend_end && now <= s.end_at.getTime() + CHECK_OUT_LATE_MS) return "out";
   return null;
 }

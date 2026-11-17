@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireCarer } from "@/lib/auth";
 import { myShift } from "@/lib/carer/data";
 import { clockLabel } from "@/lib/roster/rules";
@@ -7,13 +7,10 @@ import { noteAction, removeTravelAction, travelAction } from "../../actions";
 import { AddressInput, ReceiptUpload } from "../../extras";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { CarerNav } from "../../CarerNav";
-import { CheckButton, CheckPopup } from "../../check";
-import { dueCheck } from "@/lib/carer/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 
 export const dynamic = "force-dynamic";
 
-const time = (d: Date) => new Intl.DateTimeFormat("en-AU", { hour: "numeric", minute: "2-digit", timeZone: "Australia/Melbourne" }).format(d);
 const dayLabel = (day: string) =>
   new Intl.DateTimeFormat("en-AU", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`));
 
@@ -23,39 +20,26 @@ export default async function Shift({ params, searchParams }: { params: Promise<
   const sp = await searchParams;
   const s = await myShift(me.id, id);
   if (!s) notFound();
-  const due = dueCheck(s);
+  // Check in and out happen on the day view.
+  if (sp.check === "in" || sp.check === "out") redirect(`/carer?date=${s.day}`);
   // Travel and receipts: NDIS shifts, on the day of the shift only (overnight shifts until they end).
   const nowD = new Date();
   const onDay = isoDate(nowD) === s.day || (s.start_at != null && s.end_at != null && nowD >= s.start_at && nowD <= s.end_at);
   const ndisOpen = s.kind === "ndis" && !s.cancelled && onDay;
   const [travel, receipts] = ndisOpen ? await Promise.all([shiftTravel(s.id), shiftReceipts(s.id)]) : [[], null];
-  const fromText = sp.check === "in" || sp.check === "out";
   const maps = s.address_text ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address_text)}` : null;
 
   return (
     <div className="carer">
       <CarerNav on="shifts" name={me.name} shiftsHref={`/carer?date=${s.day}`} />
       <main>
-        {due && (
-          <CheckPopup kind={due} shiftId={s.id} force={fromText} title={`${s.place ?? "Your shift"}, ${clockLabel(s.start_time)} – ${clockLabel(s.end_time)}`} detail={s.address_text ?? ""} />
-        )}
         <Link href={`/carer?date=${s.day}`} className="back">← Back to the day</Link>
         <h1>{s.place ?? "Shift"}</h1>
         <p className="when">{dayLabel(s.day)} · {clockLabel(s.start_time)} – {clockLabel(s.end_time)}</p>
         {s.address_text && <p>{maps ? <a href={maps} target="_blank" rel="noreferrer">{s.address_text}</a> : s.address_text}</p>}
         {s.notes && <p className="notes">{s.notes}</p>}
 
-        {s.cancelled ? (
-          <p className="banner warn">This shift has been cancelled.</p>
-        ) : (
-          <section className="block">
-            {s.attend_start && <p>Checked in at {time(s.attend_start)}{s.attend_end ? `, checked out at ${time(s.attend_end)}` : ""}.</p>}
-            {!s.attend_start && <CheckButton kind="in" shiftId={s.id} />}
-            {s.attend_start && !s.attend_end && <CheckButton kind="out" shiftId={s.id} />}
-            <p className="hint">You need to be within 500 m of the address, with location turned on.</p>
-          </section>
-        )}
-
+        {s.cancelled && <p className="banner warn">This shift has been cancelled.</p>}
         {ndisOpen && (
           <section className="block" id="extras">
             <h2>Travel</h2>

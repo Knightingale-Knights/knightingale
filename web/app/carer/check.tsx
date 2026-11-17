@@ -19,7 +19,7 @@ function useCheck({ kind, shiftId, token }: Props) {
         const r = token ? await linkCheckAction(token, pos) : await checkAction(kind, shiftId, pos);
         setResult(r);
         setBusy(false);
-        if (r.ok) setTimeout(() => window.location.replace(window.location.pathname), 1500);
+        if (r.ok) setTimeout(() => window.location.replace(window.location.pathname + window.location.search), 1500);
       },
       () => {
         setResult({ ok: false, message: "Please allow location access for this site, then try again." });

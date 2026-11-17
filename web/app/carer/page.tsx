@@ -4,8 +4,8 @@ import { myShifts, myShiftsBetween, type CarerShift } from "@/lib/carer/data";
 import { addDays, addMonths, clockLabel, monthGrid } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "./CarerNav";
-import { CheckPopup } from "./check";
-import { dueCheck } from "@/lib/carer/rules";
+import { CheckButton, CheckPopup } from "./check";
+import { checkButton, dueCheck } from "@/lib/carer/rules";
 import { requestSummaryAction } from "./actions";
 import { PendingButton } from "@/components/PendingButton";
 
@@ -25,7 +25,7 @@ function status(s: CarerShift) {
 }
 const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; details?: string; summary?: string; sent?: string; summary_error?: string }> }) {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; sent?: string; summary_error?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -44,9 +44,8 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
       )}
       <main className="carer-main">
         {!me.approved && <p className="banner ok">Thanks for applying! We&apos;re reviewing your application and will be in touch. Keep your documents up to date in the Documents tab.</p>}
-        {day ? <DayList day={day} today={today} shifts={shifts} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
+        {day ? <DayList day={day} today={today} shifts={shifts} now={now} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
-      {day && sp.details && <Details s={shifts.find((s) => s.id === sp.details && s.kind === "ndis")} close={`/carer?date=${day}`} />}
       {day && sp.summary && <SummaryRequest s={shifts.find((s) => s.id === sp.summary && s.kind === "ndis")} email={me.email} close={`/carer?date=${day}`} day={day} sent={sp.sent} error={sp.summary_error} />}
     </div>
   );
@@ -80,7 +79,7 @@ function MonthCal({ month, from, to, today, shifts }: { month: string; from: str
   );
 }
 
-function DayList({ day, today, shifts }: { day: string; today: string; shifts: CarerShift[] }) {
+function DayList({ day, today, shifts, now }: { day: string; today: string; shifts: CarerShift[]; now: number }) {
   return (
     <>
       <div className="cal-nav">
@@ -90,37 +89,21 @@ function DayList({ day, today, shifts }: { day: string; today: string; shifts: C
       </div>
       <p className="lede"><Link href={`/carer?month=${day.slice(0, 7)}`}>← Back to the month</Link></p>
       {shifts.length === 0 && <p className="empty">No shifts on this day.</p>}
-      {shifts.map((s) => <ShiftCard key={s.id} s={s} day={day} />)}
+      {shifts.map((s) => <ShiftCard key={s.id} s={s} day={day} now={now} />)}
     </>
-  );
-}
-
-/** NDIS shift details popup. Contents to come. */
-function Details({ s, close }: { s?: CarerShift; close: string }) {
-  if (!s) return null;
-  return (
-    <div className="popup-back">
-      <Link href={close} className="modal-shade" aria-label="Close" />
-      <div className="popup details-popup">
-        <h2>{s.place ?? "Shift"}</h2>
-        <p className="when">{dayTitle(s.day)} · {clockLabel(s.start_time)} – {clockLabel(s.end_time)}</p>
-        {s.address_text && <p className="hint">{s.address_text}</p>}
-        <p className="hint">More details for this shift will appear here.</p>
-        <Link href={close} className="button secondary popup-later">Close</Link>
-      </div>
-    </div>
   );
 }
 
 const money = (n: number) => `$${n.toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 /** One shift on the carer's day, laid out like the Bubble card. */
-function ShiftCard({ s, day }: { s: CarerShift; day: string }) {
+function ShiftCard({ s, day, now }: { s: CarerShift; day: string; now: number }) {
   const ndis = s.kind === "ndis";
+  const check = checkButton(s, now);
   const name = ndis ? s.participant_name ?? s.place : s.place;
   return (
     <div className={`shift-card ${s.cancelled ? "cancelled" : ""}`}>
-      <Link href={`/carer/shift/${s.id}`} className="shift-card-name">{name ?? "Shift"}</Link>
+      {ndis ? <Link href={`/carer/shift/${s.id}`} className="shift-card-name">{name ?? "Shift"}</Link> : <span className="shift-card-name">{name ?? "Shift"}</span>}
       {ndis && s.participant && (
         <div className="shift-card-actions">
           <Link href={`/carer/chats/${s.participant}`} className="button secondary">Communication book</Link>
@@ -134,10 +117,12 @@ function ShiftCard({ s, day }: { s: CarerShift; day: string }) {
       </dl>
       {status(s) && <p className={`status ${needsNote(s) ? "todo" : ""}`}>{status(s)}</p>}
       {s.wage != null && <p className="shift-card-pay">{money(s.wage)}</p>}
-      <div className="shift-card-actions">
-        <Link href={`/carer/shift/${s.id}`} className="button secondary">Open shift</Link>
-        {ndis && <Link href={`/carer?date=${day}&details=${s.id}`} className="button">Details</Link>}
-      </div>
+      {check && <CheckButton kind={check} shiftId={s.id} />}
+      {ndis && (
+        <div className="shift-card-actions">
+          <Link href={`/carer/shift/${s.id}`} className="button">Details</Link>
+        </div>
+      )}
     </div>
   );
 }
