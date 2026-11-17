@@ -509,3 +509,13 @@ form.inline { display: inline; }
 .logins > div:last-child { border-bottom: 1px solid var(--line); }
 .logins dt { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); align-self: center; }
 .logins dd { margin: 0; font-variant-numeric: tabular-nums; user-select: all; word-break: break-all; }
+/* Carer NDIS shift details popup */
+.popup.shift-details { max-width: 560px; max-height: calc(100vh - 24px); overflow-y: auto; text-align: center; }
+.shift-details h3 { margin: 18px 0 4px; font-family: var(--serif); font-weight: 300; font-size: 22px; text-transform: none; letter-spacing: -0.01em; color: var(--ink); border: 0; padding: 0; }
+.shift-details .sd-address { margin: 0 0 22px; color: var(--ink-2); }
+.sd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sd-btn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 0 12px; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); text-decoration: none; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
+.sd-btn:hover { background: var(--ink); color: var(--paper); }
+.shift-details .back { display: inline-block; margin-bottom: 8px; }
+.shift-details form, .shift-details .extras, .shift-details .check { text-align: left; }
+@media (max-width: 420px) { .sd-grid { grid-template-columns: 1fr; } }

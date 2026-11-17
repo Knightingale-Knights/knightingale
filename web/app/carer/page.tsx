@@ -8,6 +8,7 @@ import { CheckButton, CheckPopup } from "./check";
 import { checkButton, dueCheck, onShiftDay } from "@/lib/carer/rules";
 import { requestSummaryAction } from "./actions";
 import { PendingButton } from "@/components/PendingButton";
+import { ShiftDetails } from "./ShiftDetails";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // the support summary takes a while to draft
@@ -25,7 +26,7 @@ function status(s: CarerShift) {
 }
 const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; sent?: string; summary_error?: string }> }) {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; sent?: string; summary_error?: string; details?: string; tab?: string; saved?: string; error?: string; travel?: string; xerror?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -47,6 +48,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
         {!me.approved && <p className="banner ok">Thanks for applying! We&apos;re reviewing your application and will be in touch. Keep your documents up to date in the Documents tab.</p>}
         {day ? <DayList day={day} today={today} shifts={shifts} now={now} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
+      {day && sp.details && <ShiftDetails s={shifts.find((s) => s.id === sp.details)} day={day} tab={sp.tab} email={me.email} msgs={sp} />}
       {day && logins && <LoginsPopup s={shifts.find((s) => s.id === sp.logins)} logins={logins} close={`/carer?date=${day}`} />}
       {day && sp.summary && <SummaryRequest s={shifts.find((s) => s.id === sp.summary && s.kind === "ndis")} email={me.email} close={`/carer?date=${day}`} day={day} sent={sp.sent} error={sp.summary_error} />}
     </div>
@@ -105,7 +107,7 @@ function ShiftCard({ s, day, now }: { s: CarerShift; day: string; now: number })
   const name = ndis ? s.participant_name ?? s.place : s.place;
   return (
     <div className={`shift-card ${s.cancelled ? "cancelled" : ""}`}>
-      {ndis ? <Link href={`/carer/shift/${s.id}`} className="shift-card-name">{name ?? "Shift"}</Link> : <span className="shift-card-name">{name ?? "Shift"}</span>}
+      {ndis ? <Link href={`/carer?date=${day}&details=${s.id}`} className="shift-card-name">{name ?? "Shift"}</Link> : <span className="shift-card-name">{name ?? "Shift"}</span>}
       {ndis && s.participant && (
         <div className="shift-card-actions">
           <Link href={`/carer/chats/${s.participant}`} className="button secondary">Communication book</Link>
@@ -127,7 +129,7 @@ function ShiftCard({ s, day, now }: { s: CarerShift; day: string; now: number })
       )}
       {ndis && (
         <div className="shift-card-actions">
-          <Link href={`/carer/shift/${s.id}`} className="button">Details</Link>
+          <Link href={`/carer?date=${day}&details=${s.id}`} className="button">Details</Link>
         </div>
       )}
     </div>

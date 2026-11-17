@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { receiptAction, type ReceiptResult } from "./actions";
 
 /** An address box with suggestions from Google Places (fetched through our own server). */
@@ -44,6 +45,7 @@ export async function shrink(file: File): Promise<File> {
 
 export function ReceiptUpload({ shiftId }: { shiftId: string }) {
   const input = useRef<HTMLInputElement>(null);
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ReceiptResult | null>(null);
   const upload = async () => {
@@ -58,6 +60,7 @@ export function ReceiptUpload({ shiftId }: { shiftId: string }) {
     setResult(r);
     setBusy(false);
     if (input.current) input.current.value = "";
+    if (r.ok) router.refresh();
   };
   return (
     <div className="check">

@@ -3,7 +3,7 @@ import { requestSummary } from "@/lib/carer/summary";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireCarer } from "@/lib/auth";
-import { checkIn, checkOut, setAvailability, submitNote } from "@/lib/carer/data";
+import { checkIn, checkOut, myShift, setAvailability, submitNote } from "@/lib/carer/data";
 import { CheckError, type Position } from "@/lib/carer/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 
@@ -15,11 +15,11 @@ export async function checkAction(kind: "in" | "out", shiftId: string, pos: Posi
   try {
     if (kind === "in") {
       const r = await checkIn(me.id, shiftId, pos);
-      revalidatePath(`/carer/shift/${shiftId}`);
+      revalidatePath("/carer");
       return { ok: true, message: r.autoCheckedOut ? "You're checked in. Your check-out is recorded at the scheduled end." : "You're checked in. Have a great shift!" };
     }
     await checkOut(me.id, shiftId, pos);
-    revalidatePath(`/carer/shift/${shiftId}`);
+    revalidatePath("/carer");
     return { ok: true, message: "You're checked out. Thank you!" };
   } catch (e) {
     if (e instanceof CheckError) return { ok: false, message: e.message };
@@ -28,17 +28,24 @@ export async function checkAction(kind: "in" | "out", shiftId: string, pos: Posi
   }
 }
 
+/** Back to one view of the shift's Details popup on the day page. */
+async function detailsDest(carer: string, id: string, tab: string, q: Record<string, string>) {
+  const s = await myShift(carer, id);
+  const p = new URLSearchParams({ date: s?.day ?? isoDate(new Date()), details: id, tab, ...q });
+  return `/carer?${p}`;
+}
+
 export async function noteAction(f: FormData) {
   const me = await requireCarer();
   const id = String(f.get("id") ?? "");
-  let dest = `/carer/shift/${id}?saved=1`;
+  let q: Record<string, string> = { saved: "1" };
   try {
     await submitNote(me.id, id, String(f.get("summary") ?? ""));
   } catch (e) {
-    dest = `/carer/shift/${id}?error=${encodeURIComponent(String((e as Error).message ?? e))}`;
+    q = { error: String((e as Error).message ?? e) };
   }
-  revalidatePath(`/carer/shift/${id}`);
-  redirect(dest);
+  revalidatePath("/carer");
+  redirect(await detailsDest(me.id, id, "notes", q));
 }
 
 export async function availabilityAction(f: FormData) {
@@ -58,33 +65,32 @@ export async function availabilityAction(f: FormData) {
 // ---- travel and receipts ------------------------------------------------------
 import { addReceipt, addTravel, removeTravel, TravelError } from "@/lib/carer/travel";
 
-const shiftDest = (id: string, q: string) => `/carer/shift/${id}?${q}#extras`;
 const errMsg = (e: unknown) => (e instanceof TravelError ? e.message : (console.error(e), "Something went wrong. Please try again."));
 
 export async function travelAction(f: FormData) {
   const me = await requireCarer();
   const id = String(f.get("id") ?? "");
-  let dest = shiftDest(id, "travel=1");
+  let q: Record<string, string> = { travel: "1" };
   try {
     await addTravel(me.id, id, String(f.get("from") ?? ""), String(f.get("to") ?? ""));
   } catch (e) {
-    dest = shiftDest(id, `xerror=${encodeURIComponent(errMsg(e))}`);
+    q = { xerror: errMsg(e) };
   }
-  revalidatePath(`/carer/shift/${id}`);
-  redirect(dest);
+  revalidatePath("/carer");
+  redirect(await detailsDest(me.id, id, "trip", q));
 }
 
 export async function removeTravelAction(f: FormData) {
   const me = await requireCarer();
   const id = String(f.get("id") ?? "");
-  let dest = shiftDest(id, "removed=1");
+  let q: Record<string, string> = {};
   try {
     await removeTravel(me.id, String(f.get("log") ?? ""));
   } catch (e) {
-    dest = shiftDest(id, `xerror=${encodeURIComponent(errMsg(e))}`);
+    q = { xerror: errMsg(e) };
   }
-  revalidatePath(`/carer/shift/${id}`);
-  redirect(dest);
+  revalidatePath("/carer");
+  redirect(await detailsDest(me.id, id, "trip", q));
 }
 
 export type ReceiptResult = { ok: boolean; message: string };
@@ -97,7 +103,7 @@ export async function receiptAction(f: FormData): Promise<ReceiptResult> {
   if (!(file instanceof File)) return { ok: false, message: "Choose a receipt to upload." };
   try {
     const r = await addReceipt(me.id, id, { name: file.name, type: file.type, bytes: Buffer.from(await file.arrayBuffer()) });
-    revalidatePath(`/carer/shift/${id}`);
+    revalidatePath("/carer");
     const t = r.reading;
     if (t && !t.needsReview && t.total != null) return { ok: true, message: `Receipt added: $${t.total.toFixed(2)}${t.merchant ? ` at ${t.merchant}` : ""}.` };
     if (t?.reason === "not_a_receipt") return { ok: true, message: "Uploaded, but it doesn't look like a receipt. The office will check it." };
@@ -112,7 +118,7 @@ export async function requestSummaryAction(f: FormData) {
   const me = await requireCarer();
   const shift = String(f.get("shift") ?? "");
   const day = String(f.get("date") ?? "");
-  const back = new URLSearchParams({ date: day, summary: shift });
+  const back = new URLSearchParams(f.get("in") === "details" ? { date: day, details: shift, tab: "summary" } : { date: day, summary: shift });
   try {
     const first = await requestSummary(me, shift);
     back.set("sent", `${first}'s summary is on its way to ${me.email}.`);
