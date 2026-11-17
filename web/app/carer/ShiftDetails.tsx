@@ -26,7 +26,6 @@ const TABS: { key: string; label: string; icon: ReactNode }[] = [
   { key: "risk", label: "Risk", icon: I(<path d="M13 2 4 14h7l-1 8 9-12h-7z" />) },
   { key: "support", label: "Support", icon: I(<><circle cx="13" cy="4" r="1.6" /><path d="m9 21 3-7 3 3v4M7 12l3-5 4 1 2 4M12 14l-1-4" /></>) },
   { key: "consent", label: "Consent", icon: I(<path d="M7 19.5c1.3-2.5 2-5.2 2-7.5a3 3 0 0 1 6 0c0 1.2-.1 2.4-.4 3.5M11.5 21c1-2.6 1.5-5.6 1.5-9M5 16c.7-1.3 1-2.7 1-4a6 6 0 0 1 10.6-3.8M17.5 18c.6-1.8 1-3.8 1-6 0-.7 0-1.3-.2-2M15 21c.3-.6.6-1.3.8-2" />) },
-  { key: "uploads", label: "Intake", icon: I(<><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5" /><path d="M5 13v6.5h14V13" /></>) },
   { key: "emergency", label: "Emergency", icon: I(<><path d="M7 15.5a4.5 4.5 0 0 1-.4-9A6 6 0 0 1 18 8a3.8 3.8 0 0 1-.5 7.5H7z" /><path d="m10 17-1.5 3M14 17l-1.5 3M12.5 13 11 16h3l-1.5 3" /></>) },
 ];
 
