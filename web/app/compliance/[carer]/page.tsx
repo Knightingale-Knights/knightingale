@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewAsButton } from "@/components/ViewAsButton";
 import { notFound } from "next/navigation";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
@@ -24,7 +25,7 @@ export default async function CarerCompliance({ params, searchParams }: { params
       <TopBar section="/carers" email={staff.email}><CarerTabs on="/compliance" /></TopBar>
       <main className="narrow">
         <Link href="/compliance" className="back">← Compliance</Link>
-        <h1>{u.name}</h1>
+        <div className="title-row"><h1>{u.name}</h1><ViewAsButton user={carer} back={`/compliance/${carer}`} /></div>
         <p className="lede">{[u.phone, u.email].filter(Boolean).join(" · ")}</p>
         {sp.error && <p className="banner error">{sp.error}</p>}
         {sp.saved && <p className="banner ok">Saved.</p>}

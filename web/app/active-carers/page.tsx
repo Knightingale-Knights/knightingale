@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewAsButton } from "@/components/ViewAsButton";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { CarerTabs } from "@/components/CarerTabs";
@@ -36,7 +37,7 @@ export default async function ActiveCarers({ searchParams }: { searchParams: Pro
         ) : (
           <div className="table-wrap">
             <table className="grid people">
-              <thead><tr><th></th><th>Name</th><th>Role</th><th>Phone</th><th>Email</th><th className="num">Last 7 days</th></tr></thead>
+              <thead><tr><th></th><th>Name</th><th>Role</th><th>Phone</th><th>Email</th><th className="num">Last 7 days</th><th></th></tr></thead>
               <tbody>
                 {rows.map((r) => {
                   const name = [r.first_name, r.last_name].filter(Boolean).join(" ") || "(no name)";
@@ -48,6 +49,7 @@ export default async function ActiveCarers({ searchParams }: { searchParams: Pro
                       <td>{r.phone ? <a href={`tel:${r.phone}`}>{r.phone}</a> : ""}</td>
                       <td>{r.email ? <a href={`mailto:${r.email}`}>{r.email}</a> : ""}</td>
                       <td className="num">{hoursLabel(r.hours7)}</td>
+                      <td><ViewAsButton user={r.id} back="/active-carers" /></td>
                     </tr>
                   );
                 })}

@@ -4,11 +4,14 @@ import { currentUser } from "@/lib/auth";
 import { unreadTotal } from "@/lib/chats/data";
 import { attentionCount } from "@/lib/compliance/data";
 import { isoDate } from "@/lib/invoicing/rules";
+import { ViewAsBar } from "@/components/ViewAsBar";
 
 export async function CarerNav({ on, name }: { on: "shifts" | "availability" | "chats" | "documents"; name: string }) {
   const me = await currentUser();
   const [unread, docs] = me ? await Promise.all([unreadTotal(me), attentionCount(me.id, isoDate(new Date()))]) : [0, 0];
   return (
+    <>
+    <ViewAsBar />
     <header className="carer-top">
       <span className="wordmark small">knightingale</span>
       <span className="hello">Hi {name.split(" ")[0]}</span>
@@ -20,5 +23,6 @@ export async function CarerNav({ on, name }: { on: "shifts" | "availability" | "
         <form action={signOutAction}><button className="link">Sign out</button></form>
       </nav>
     </header>
+    </>
   );
 }

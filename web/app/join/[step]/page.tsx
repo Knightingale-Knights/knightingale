@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewAsBar } from "@/components/ViewAsBar";
 import { notFound } from "next/navigation";
 import { requireApplicant } from "@/lib/auth";
 import { applicant, progress, SIGNUP_DOCS, SIGNUP_ROLES, SKILLS } from "@/lib/onboarding/data";
@@ -40,6 +41,7 @@ export default async function JoinStep({ params, searchParams }: { params: Promi
 
   return (
     <div className="carer">
+      <ViewAsBar />
       <header className="carer-top">
         <span className="wordmark small">knightingale</span>
         <span className="hello">Your application</span>

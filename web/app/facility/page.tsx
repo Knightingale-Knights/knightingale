@@ -1,4 +1,5 @@
 import { requireFacility } from "@/lib/auth";
+import { ViewAsBar } from "@/components/ViewAsBar";
 import { facilityFor, facilityShifts, type Booking } from "@/lib/facility/data";
 import { roleName } from "@/lib/facility/rules";
 import { clockLabel } from "@/lib/roster/rules";
@@ -37,6 +38,7 @@ export default async function FacilityHome({ searchParams }: { searchParams: Pro
   };
   return (
     <div className="carer">
+      <ViewAsBar />
       <header className="carer-top">
         <span className="wordmark small">knightingale</span>
         <span className="hello">{facility?.name ?? me.name}</span>

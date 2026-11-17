@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewAsButton } from "@/components/ViewAsButton";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { applications } from "@/lib/onboarding/data";
@@ -19,6 +20,7 @@ export default async function Applicants({ searchParams }: { searchParams: Promi
       <td>{(a.roles ?? []).map((r) => roleLabel([r])).join(", ")}</td>
       <td>{a.phone ?? ""}</td>
       <td>{auDate(isoDate(a.created_at))}</td>
+      <td><ViewAsButton user={a.id} back="/applicants" /></td>
       <td>{canApprove && <form action={approveAction}><input type="hidden" name="id" value={a.id} /><button className="secondary">Approve</button></form>}</td>
     </tr>
   );

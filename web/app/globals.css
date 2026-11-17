@@ -454,3 +454,11 @@ table.people .num { text-align: right; white-space: nowrap; }
 .metric-day dd { margin: 0; text-align: right; white-space: nowrap; }
 .metric-day .strong { font-weight: 600; color: var(--ink); }
 @media (max-width: 1200px) { .metric-day dl { grid-template-columns: 1fr; } .metric-day dd { text-align: left; } }
+
+/* View as */
+.view-as-bar { position: sticky; top: 0; z-index: 70; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 26px; background: var(--ink); color: var(--paper); font-size: 12px; }
+.view-as-bar strong { font-weight: 600; }
+.view-as-bar button { background: var(--paper); color: var(--ink); border-color: var(--paper); min-height: 30px; }
+.view-as-bar button:hover { background: var(--desk); color: var(--ink); }
+form.inline { display: inline; }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
