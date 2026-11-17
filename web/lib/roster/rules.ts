@@ -134,3 +134,16 @@ export function monthGrid(day: string): [string, string] {
   const last = addDays(addMonths(first, 1), -1);
   return [weekStart(first), addDays(weekStart(last), 7)];
 }
+
+/** Knightingale's pay week runs Wednesday to Tuesday: the Wednesday on or before `day`. */
+export function payWeekStart(day: string) {
+  const dow = new Date(`${day}T00:00:00Z`).getUTCDay(); // 0 Sun .. 3 Wed
+  return addDays(day, -((dow - 3 + 7) % 7));
+}
+
+/** Pay weeks covering day's month: [first Wednesday shown, the Wednesday after the last week]. */
+export function payMonthGrid(day: string): [string, string] {
+  const first = `${day.slice(0, 7)}-01`;
+  const last = addDays(addMonths(first, 1), -1);
+  return [payWeekStart(first), addDays(payWeekStart(last), 7)];
+}

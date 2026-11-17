@@ -2,13 +2,14 @@ import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { dailyMetrics, periodTotals, type Totals } from "@/lib/metrics/data";
-import { addDays, addMonths, monthGrid } from "@/lib/roster/rules";
+import { addDays, addMonths, payMonthGrid } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 
 export const dynamic = "force-dynamic";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const money = (n: number) => `$${n.toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const shortDay = (d: string) => `${Number(d.slice(8))} ${MONTHS[Number(d.slice(5, 7)) - 1].slice(0, 3)}`;
 const EMPTY: Totals = { ndis: 0, aged: 0, profit: 0, revenue: 0, shifts: 0, carers: 0 };
 
 export default async function Metrics({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
@@ -17,7 +18,7 @@ export default async function Metrics({ searchParams }: { searchParams: Promise<
   const today = isoDate(new Date());
   const month = /^\d{4}-\d{2}$/.test(sp.month ?? "") ? sp.month! : today.slice(0, 7);
   const first = `${month}-01`;
-  const [from, to] = monthGrid(first);
+  const [from, to] = payMonthGrid(first); // pay weeks, Wednesday to Tuesday
   const next = addMonths(first, 1);
   const weeks: string[] = [];
   for (let d = from; d < to; d = addDays(d, 7)) weeks.push(d);
@@ -50,7 +51,7 @@ export default async function Metrics({ searchParams }: { searchParams: Promise<
         </div>
 
         <div className="metrics">
-          <div className="metrics-head">{["M", "T", "W", "T", "F", "S", "S", "Week"].map((d, i) => <span key={i}>{d}</span>)}</div>
+          <div className="metrics-head">{["W", "T", "F", "S", "S", "M", "T", "Pay week"].map((d, i) => <span key={i}>{d}</span>)}</div>
           {weeks.map((w, wi) => (
             <div key={w} className="metrics-week">
               {Array.from({ length: 7 }, (_, i) => addDays(w, i)).map((day) => {
@@ -67,7 +68,7 @@ export default async function Metrics({ searchParams }: { searchParams: Promise<
                 );
               })}
               <div className="metric-day week">
-                <span className="num">Week {wi + 1}</span>
+                <span className="num">{shortDay(w)} – {shortDay(addDays(w, 6))}</span>
                 <Cells t={weekTotals[wi]} />
               </div>
             </div>
