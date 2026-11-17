@@ -1,7 +1,6 @@
 // Declarative participant forms (intake, staff questions): one list of fields drives the page,
 // the save to our database, and the copy sent to Bubble.
 import { sql } from "@/lib/db";
-import { fromDay } from "@/lib/roster/queries";
 
 export type Field =
   | { col: string; label: string; kind: "text" | "area" | "yesno" | "address" | "date" | "signature" | "planManager" | "check" }
@@ -27,6 +26,16 @@ export async function planManagers() {
   return sql<{ id: string; name: string }[]>`select id, coalesce(name, '(no name)') as name from app.plan_managers order by name`;
 }
 
+/** Midnight at the start of a Melbourne day, as Bubble stores dates. */
+export function melbMidnight(day: string) {
+  const noon = new Date(`${day}T12:00:00Z`);
+  const off = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Melbourne", timeZoneName: "longOffset" })
+    .formatToParts(noon).find((p) => p.type === "timeZoneName")?.value ?? "GMT+10:00";
+  const m = off.match(/GMT([+-])(\d{2}):?(\d{2})?/);
+  const mins = m ? (m[1] === "-" ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3] ?? 0)) : 600;
+  return new Date(Date.parse(`${day}T00:00:00Z`) - mins * 60_000);
+}
+
 /** Reads the posted form into column values. Unknown or blank fields become null. */
 export function readForm(sections: Section[], f: FormData) {
   const v: Record<string, unknown> = {};
@@ -37,7 +46,7 @@ export function readForm(sections: Section[], f: FormData) {
       case "multi": v[fld.col] = raw; break;
       case "check": v[fld.col] = one === "on" || one === "true"; break;
       case "address": v[fld.col] = one ? { address: one } : null; break;
-      case "date": v[fld.col] = /^\d{4}-\d{2}-\d{2}$/.test(one) ? fromDay(one) : null; break;
+      case "date": v[fld.col] = /^\d{4}-\d{2}-\d{2}$/.test(one) ? melbMidnight(one) : null; break;
       case "signature": {
         // Keep the saved signature unless a new one was drawn or it was cleared.
         if (f.get(`${fld.col}__clear`) === "1") v[fld.col] = null;

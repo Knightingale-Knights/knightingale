@@ -14,7 +14,7 @@ const MENU: { label: string; href?: string; section?: string }[] = [
   { label: "Participants", href: "/participants", section: "/participants" },
   { label: "Invoicing", href: "/invoicing", section: "/invoicing" },
   { label: "Map", href: "/map", section: "/map" },
-  { label: "Timesheets" },
+  { label: "Timesheets", href: "/timesheets", section: "/timesheets" },
   { label: "Group Chats", href: "/chats", section: "/chats" },
   { label: "Metrics" },
   { label: "Guru Email" },

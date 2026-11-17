@@ -406,3 +406,27 @@ table.people .num { text-align: right; white-space: nowrap; }
 .map-box { width: 100%; height: calc(100dvh - 260px); min-height: 420px; border: 1px solid var(--line); }
 .map-info { display: flex; flex-direction: column; gap: 2px; font-family: var(--font-ui); font-size: 12px; color: #1a1917; }
 .map-info a, .map-info strong { font-size: 14px; font-weight: 500; }
+
+/* Timesheets */
+.sheet { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; border-top: 1px solid var(--ink); margin-bottom: 26px; }
+.sheet-totals { padding: 18px 26px 18px 0; border-right: 1px solid var(--line); }
+.sheet-totals h2 { font-family: var(--serif); font-weight: 300; font-size: 28px; margin: 0 0 4px; }
+.sheet-totals h2 a { text-decoration: none; }
+.sheet-totals h3 { font-size: 9px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); margin: 18px 0 6px; }
+.sheet-totals .lines { margin-bottom: 0; }
+.sheet-totals .lines td { padding: 8px 6px; }
+.sheet-figure { margin: 0; font-size: 18px; font-weight: 300; }
+.sheet-figure span { font-size: 11px; color: var(--ink-3); margin-left: 8px; }
+.sheet-none { margin: 0; color: var(--ink-3); }
+.sheet-shifts { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+.sheet-shift { padding: 16px 18px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.sheet-shift p { margin: 0; }
+.sheet-shift .role { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); }
+.sheet-shift .who { font-size: 12px; color: var(--ink-2); }
+.sheet-shift .tick { font-size: 12px; }
+.sheet-shift .tick.no { color: var(--alert); }
+.sheet-shift .when { font-size: 12px; font-weight: 500; margin-top: 6px; }
+.sheet-shift .actual { font-size: 20px; font-weight: 300; letter-spacing: 0.02em; }
+.sheet-shift .planned { font-size: 11px; color: var(--ink-3); }
+.sheet-shift .button { margin-top: auto; display: grid; place-items: center; text-decoration: none; }
+@media (max-width: 900px) { .sheet { grid-template-columns: 1fr; } .sheet-totals { border-right: 0; padding-right: 0; } }
