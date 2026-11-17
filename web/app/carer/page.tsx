@@ -72,7 +72,6 @@ function MonthCal({ month, from, to, today, shifts }: { month: string; from: str
               <span className={`num ${d === today ? "today" : ""}`}>{Number(d.slice(8))}</span>
               {list.length > 0 && <span className="amt pay">{money(list.reduce((a, s) => a + (s.wage ?? 0), 0))}</span>}
               {list.length > 0 && <span className="cal-shifts">{list.length === 1 ? "Shift" : "Shifts"}</span>}
-              {list.some(needsNote) && <span className="open">Note due</span>}
             </Link>
           );
         })}
