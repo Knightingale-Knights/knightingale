@@ -543,3 +543,12 @@ form.inline { display: inline; }
 .receipt-grid figcaption { display: flex; flex-direction: column; gap: 4px; padding: 10px; font-size: 13px; }
 .receipt-grid figcaption span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .receipt-grid figcaption .link { align-self: flex-start; padding: 0; }
+.record-in-popup { text-align: left; }
+.record-in-popup .form-grid { grid-template-columns: 1fr; }
+.incident-form .form-section { display: flex; flex-direction: column; gap: 14px; }
+.incident-form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ticks { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.ticks legend { width: 100%; margin-bottom: 8px; padding: 0; }
+.ticks label { display: inline-flex; flex-direction: row; align-items: center; gap: 6px; border: 1px solid var(--line-2); padding: 6px 10px; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--ink); cursor: pointer; }
+.ticks input { width: auto; margin: 0; accent-color: var(--ink); }
+.ticks label:has(input:checked) { background: var(--ink); color: var(--paper); border-color: var(--ink); }

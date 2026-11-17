@@ -3,13 +3,18 @@ import type { ReactNode } from "react";
 import type { CarerShift } from "@/lib/carer/data";
 import { onShiftDay } from "@/lib/carer/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
-import { removeReceiptAction, removeTravelAction, requestSummaryAction, travelAction } from "./actions";
+import { carerIntakeAction, incidentAction, removeReceiptAction, removeTravelAction, requestSummaryAction, travelAction } from "./actions";
 import { ReceiptDrop } from "./extras";
 import { TripPlanner } from "./TripPlanner";
 import { PendingButton } from "@/components/PendingButton";
 import { NoteSteps } from "./NoteSteps";
+import { RecordFields } from "@/components/RecordForm";
+import { INTAKE, intakeFor } from "@/lib/participants/intake";
+import { loadOptions, planManagers, readRecord } from "@/lib/forms/fields";
+import { INCIDENT_HARM, INCIDENT_TYPES, INJURY_LOCATION, INJURY_NATURE, NOT_NDIS, REPORTABLE_TYPES } from "@/lib/participants/incident";
+import { isoDate } from "@/lib/invoicing/rules";
 
-export type DetailsMsgs = { view?: string; saved?: string; error?: string; travel?: string; xerror?: string; sent?: string; summary_error?: string };
+export type DetailsMsgs = { done?: string; view?: string; saved?: string; error?: string; travel?: string; xerror?: string; sent?: string; summary_error?: string };
 
 const I = (d: ReactNode) => (
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>
@@ -29,6 +34,28 @@ const TABS: { key: string; label: string; icon: ReactNode }[] = [
   { key: "emergency", label: "Emergency", icon: I(<><path d="M7 15.5a4.5 4.5 0 0 1-.4-9A6 6 0 0 1 18 8a3.8 3.8 0 0 1-.5 7.5H7z" /><path d="m10 17-1.5 3M14 17l-1.5 3M12.5 13 11 16h3l-1.5 3" /></>) },
 ];
 
+const TITLES: Record<string, (n: string) => string> = {
+  notes: (n) => `${n}'s progress note`,
+  receipts: (n) => `${n} receipts`,
+  intake: (n) => `${n} intake form`,
+  incident: (n) => `${n}'s incident report`,
+};
+
+const Sel = ({ name, label, options, required, hint }: { name: string; label: string; options: string[]; required?: boolean; hint?: string }) => (
+  <label>{label}
+    <select name={name} defaultValue="" required={required}>
+      <option value="">{hint ?? "Choose…"}</option>
+      {options.map((o) => <option key={o} value={o}>{o}</option>)}
+    </select>
+  </label>
+);
+const Ticks = ({ name, label, options }: { name: string; label: string; options: string[] }) => (
+  <fieldset className="ticks">
+    <legend>{label}</legend>
+    {options.map((o) => <label key={o}><input type="checkbox" name={name} value={o} /><span>{o}</span></label>)}
+  </fieldset>
+);
+
 /** The NDIS shift details popup: a grid of buttons, each opening its own view inside the popup. */
 export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShift; day: string; tab?: string; email: string; msgs: DetailsMsgs }) {
   if (!s || s.kind !== "ndis") return null;
@@ -45,6 +72,7 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
           <>
             <h2>{name}</h2>
             {msgs.saved && <p className="banner ok">Thanks, your progress note is in.</p>}
+            {msgs.done && <p className="banner ok">{msgs.done}</p>}
             {s.address_text && (
               <>
                 <h3>Address</h3>
@@ -60,7 +88,7 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
         ) : (
           <>
             <Link href={home} className="back">← Back to shift details</Link>
-            <h2>{open.key === "notes" ? `${name}'s progress note` : open.key === "receipts" ? `${name} receipts` : open.label}</h2>
+            <h2>{TITLES[open.key]?.(name) ?? open.label}</h2>
             <Section s={s} day={day} tab={open.key} first={name.split(" ")[0]} email={email} msgs={msgs} />
           </>
         )}
@@ -170,6 +198,55 @@ async function Section({ s, day, tab, first, email, msgs }: { s: CarerShift; day
           </div>
         )}
       </>
+    );
+  }
+
+  if (tab === "intake") {
+    if (!s.participant) return <p className="hint">This shift has no participant.</p>;
+    const cur = await intakeFor(s.participant);
+    const [values, options, pms] = await Promise.all([readRecord("intakes", cur?.id ?? null), loadOptions(INTAKE), planManagers()]);
+    return (
+      <form action={carerIntakeAction} className="stack record-in-popup">
+        <input type="hidden" name="id" value={s.id} />
+        {msgs.error && <p className="banner error">{msgs.error}</p>}
+        <RecordFields sections={INTAKE} values={values} options={options} planManagers={pms} />
+        <PendingButton className="big" pending="Saving…">Save intake</PendingButton>
+      </form>
+    );
+  }
+
+  if (tab === "incident") {
+    return (
+      <form action={incidentAction} className="stack record-in-popup incident-form">
+        <input type="hidden" name="id" value={s.id} />
+        {msgs.error && <p className="banner error">{msgs.error}</p>}
+        <fieldset className="form-section">
+          <legend>Incident details</legend>
+          <Sel name="incident_type" label="Type of incident" options={INCIDENT_TYPES} required />
+          <Sel name="incident_harm" label="Harm" options={INCIDENT_HARM} hint="Select if one applies" />
+          <div className="two">
+            <label>Date of incident<input type="date" name="day" defaultValue={isoDate(new Date())} required /></label>
+            <label>Time<input type="time" name="time" required /></label>
+          </div>
+          <label>Location of incident<input name="incident_location" placeholder="Bedroom / Living room / Shopping centre / Car" maxLength={300} /></label>
+          <Sel name="reportable_yes_no" label="Reportable incident?" options={["YES", "NO"]} required hint="Yes / No" />
+          <Sel name="reportable_type" label="If reportable, which one" options={REPORTABLE_TYPES} hint="Select if one applies" />
+          <Sel name="not_ndis" label="Non NDIS incident?" options={NOT_NDIS} hint="Select if one applies" />
+          <label>Describe the incident
+            <textarea name="incident_description" rows={7} required minLength={20} maxLength={6000}
+              placeholder={"Please include a detailed description of the incident, including:\nWho was involved\nWhat and how it occurred or was alleged to have occurred\nWhy it occurred (if known)"} />
+          </label>
+          <Ticks name="injury_nature" label="Nature of injury (select all that apply)" options={INJURY_NATURE} />
+          <Ticks name="injury_location" label="Location of injury (select all that apply)" options={INJURY_LOCATION} />
+          <label>Actions to make the situation safe
+            <textarea name="safety_actions" rows={4} maxLength={6000} placeholder="Immediate actions taken to make the situation safe (including any medical treatment received, or assistance provided or offered)" />
+          </label>
+          <label>Witnesses to incident
+            <textarea name="witnesses" rows={3} maxLength={2000} placeholder={"Witness name:\nWitness phone number:\nWitness email:"} />
+          </label>
+        </fieldset>
+        <PendingButton className="big" pending="Sending…">Submit incident report</PendingButton>
+      </form>
     );
   }
 

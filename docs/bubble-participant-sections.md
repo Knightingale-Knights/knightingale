@@ -81,3 +81,11 @@ home safety notes; Home Safety selects {safe|unsafe|n/a}: bathroom access, bathr
 Risk multi-tags (each with "None" + options and an "other" text): accidental movement (Bumping|Falling|Grabbing|Holding|Leaning...), environmental (Absconding|Electrocution|Fire|Poisons...), financial (Challenges Budgeting|Debt|Financially Exploited...), manual handling (Mobility|Moving In Bed|Personal Care|Transfers...), mental health (ABI|...), nutrition/eating (Alertness|Allergies|Behaviours|Choking...), personal care (Bathing|...), medical (Allergies|Arthritis|...), social (Anti-Social Peers|Criminal Behaviour|...), substance use (Alcohol|Drugs|Medication Misuse|Smoking...).
 Text: health/safety impact, other risks, personal contact, persons involved, physical mobility, provider timing, reliance, sole worker, supervision timing, communication; a checkbox; date (Today); "Save staff questions".
 These map onto the Risk Assessment and home_safety records.
+
+## Carer incident report (shift Details popup > Incident, observed 17 Nov 2026)
+Opens a blank "<name>'s Incident Report" with today's date. Report Details (participant, carer + role, incident manager, notification date, notified via email), participant details (name, DOB, address, phone, email), then:
+Type of Incident {Acts, omissions, events occurring in relation to providing supports | Acts by person with a disability | Have or could have caused harm | Have caused serious harm or risk of harm to another person} (Bubble splits the first and last over two options),
+Harm {Incident that resulted in harm or risk of harm to a Participant | Incident caused by Participant resulting in serious harm or risk of serious harm to another person},
+Date & Time, Location (placeholder "Bedroom / Living Room / Shopping Center / Car"), Reportable? {YES|NO}, Reportable type {7 NDIS reportable incident types}, Non NDIS {Work Health & Safety Incident|Infection|Hazardous Exposure|Child Safety|Other|N/A},
+Describe the Incident (area), Nature of Injury (multi, 12), Location of Injury (multi, 16), Actions to Make Situation Safe (area), Witnesses (area), SAVE.
+Bubble stores multi values as ", " joined text. Columns: app.incidents.

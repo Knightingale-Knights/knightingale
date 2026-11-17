@@ -141,3 +141,45 @@ export async function requestSummaryAction(f: FormData) {
   }
   redirect(`/carer?${back}`);
 }
+
+// ---- participant forms from the Details popup -----------------------------------
+import { saveIntake } from "@/lib/participants/intake";
+import { createIncident, IncidentError } from "@/lib/participants/incident";
+
+/** The participant on one of this carer's NDIS shifts, or null. */
+async function shiftParticipant(carer: string, shiftId: string) {
+  const s = await myShift(carer, shiftId);
+  return s && s.kind === "ndis" && s.participant ? s.participant : null;
+}
+
+export async function carerIntakeAction(f: FormData) {
+  const me = await requireCarer();
+  const id = String(f.get("id") ?? "");
+  let tab = "", q: Record<string, string> = { done: "Intake saved." };
+  try {
+    const p = await shiftParticipant(me.id, id);
+    if (!p) throw new Error("We couldn't find this shift.");
+    await saveIntake(p, f, me.id);
+  } catch (e) {
+    console.error("carer intake save failed", e);
+    tab = "intake";
+    q = { error: (e as Error).message };
+  }
+  revalidatePath("/carer");
+  redirect(await detailsDest(me.id, id, tab, q));
+}
+
+export async function incidentAction(f: FormData) {
+  const me = await requireCarer();
+  const id = String(f.get("id") ?? "");
+  let tab = "", q: Record<string, string> = { done: "Incident report sent. Thank you." };
+  try {
+    await createIncident(me, id, f);
+  } catch (e) {
+    if (!(e instanceof IncidentError)) console.error("incident save failed", e);
+    tab = "incident";
+    q = { error: e instanceof IncidentError ? e.message : "Something went wrong. Please try again." };
+  }
+  revalidatePath("/carer");
+  redirect(await detailsDest(me.id, id, tab, q));
+}
