@@ -39,7 +39,14 @@ export async function addressSuggestions(q: string): Promise<string[]> {
   const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
     method: "POST",
     headers: { "Content-Type": "application/json", "X-Goog-Api-Key": env.googleMapsKey, "X-Goog-FieldMask": "suggestions.placePrediction.text.text" },
-    body: JSON.stringify({ input: q.trim().slice(0, 200), includedRegionCodes: ["au"], languageCode: "en-AU" }),
+    body: JSON.stringify({
+      input: q.trim().slice(0, 200),
+      includedRegionCodes: ["au"],
+      languageCode: "en-AU",
+      // Prefer places around Melbourne first (50 km is the largest bias Google allows).
+      locationBias: { circle: { center: { latitude: -37.8136, longitude: 144.9631 }, radius: 50000 } },
+      origin: { latitude: -37.8136, longitude: 144.9631 },
+    }),
     cache: "no-store",
   });
   if (!res.ok) return [];
