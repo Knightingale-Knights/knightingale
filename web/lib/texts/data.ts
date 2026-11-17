@@ -21,7 +21,7 @@ const select = () => sql`
   case when s.participant is null then 'residential' else 'ndis' end as track,
   s.carer, c.first_name, c.phone_number as phone, p.first_name as participant,
   coalesce(l.name, s.address->>'address') as place, s.attend_start, s.attend_end,
-  (s.progress_note is not null or exists (select 1 from app.progress_notes pn where pn.shift = s.id and pn.submit)) as has_note`;
+  (s.progress_note is not null or exists (select 1 from app.progress_notes pn where pn.shift = s.id and (pn.submit or coalesce(length(trim(pn.summary)), 0) > 0))) as has_note`;
 
 const joins = () => sql`
   join app.users c on c.id = s.carer

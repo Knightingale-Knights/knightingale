@@ -51,7 +51,7 @@ async function participantNotes(participant: string) {
     select n.id, to_char(n.date at time zone 'Australia/Melbourne', 'YYYY-MM-DD') as day, c.first_name as carer,
            n.summary, n.comms, n.best_day
       from app.progress_notes n left join app.users c on c.id = n.carer
-     where n.participant = ${participant} and coalesce(n.submit, false)
+     where n.participant = ${participant} and (coalesce(n.submit, false) or coalesce(length(trim(n.summary)), 0) > 0)
      order by n.date desc nulls last, n.created_at desc limit 300`;
 }
 const dm = (d: string) => `${d.slice(8)}/${d.slice(5, 7)}`;

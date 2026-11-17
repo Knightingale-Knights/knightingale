@@ -24,7 +24,7 @@ const shiftSelect = () => sql`
   case when s.participant is null then 'residential' else 'ndis' end as kind,
   coalesce(split_part(p.first_name, ' ', 1), l.name) as place,
   s.address->>'address' as address_text, s.address, s.notes, coalesce(s.cancelled, false) as cancelled,
-  s.attend_start, s.attend_end, n.id as note_id, coalesce(n.submit, false) as note_submitted,
+  s.attend_start, s.attend_end, n.id as note_id, (coalesce(n.submit, false) or coalesce(length(trim(n.summary)), 0) > 0) as note_submitted,
   s.participant, nullif(trim(concat_ws(' ', p.first_name, p.last_name)), '') as participant_name, s.wage::float8 as wage,
   exists (select 1 from app.location_logins ll where ll.location = s.location) as has_logins`;
 
