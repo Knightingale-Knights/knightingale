@@ -22,7 +22,7 @@ function status(s: CarerShift) {
 }
 const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; details?: string }> }) {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; details?: string; summary?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -44,6 +44,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
         {day ? <DayList day={day} today={today} shifts={shifts} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
       {day && sp.details && <Details s={shifts.find((s) => s.id === sp.details && s.kind === "ndis")} close={`/carer?date=${day}`} />}
+      {day && sp.summary && <SummaryRequest s={shifts.find((s) => s.id === sp.summary && s.kind === "ndis")} email={me.email} close={`/carer?date=${day}`} />}
     </div>
   );
 }
@@ -121,7 +122,7 @@ function ShiftCard({ s, day }: { s: CarerShift; day: string }) {
       {ndis && s.participant && (
         <div className="shift-card-actions">
           <Link href={`/carer/chats/${s.participant}`} className="button secondary">Communication book</Link>
-          <span className="button secondary off" title="Coming soon">{name} support summary</span>
+          <Link href={`/carer?date=${day}&summary=${s.id}`} className="button secondary">{name} support summary</Link>
         </div>
       )}
       <dl className="shift-card-facts">
@@ -134,6 +135,26 @@ function ShiftCard({ s, day }: { s: CarerShift; day: string }) {
       <div className="shift-card-actions">
         <Link href={`/carer/shift/${s.id}`} className="button secondary">Open shift</Link>
         {ndis && <Link href={`/carer?date=${day}&details=${s.id}`} className="button">Details</Link>}
+      </div>
+    </div>
+  );
+}
+
+/** Asks for the participant's support summary to be emailed to the carer. */
+function SummaryRequest({ s, email, close }: { s?: CarerShift; email: string; close: string }) {
+  if (!s) return null;
+  const first = (s.participant_name ?? s.place ?? "the participant").split(" ")[0];
+  return (
+    <div className="popup-back">
+      <Link href={close} className="modal-shade" aria-label="Close" />
+      <div className="popup details-popup">
+        <h2>Request {first}&apos;s summary</h2>
+        <p>If you are new to working with {first} please request a summary. It will help you know what to do on your shift, how to provide which supports, and also give you insight into their personality.</p>
+        <p>We want to see you succeed. We hope this helps.</p>
+        <p>It will be sent to your email: {email}.</p>
+        <p>If you have any suggestions on how to make it better, please email <a href="mailto:care@knightingale.com.au">care@knightingale.com.au</a>. We love feedback. We love to improve.</p>
+        <button className="big" disabled title="Coming soon">Request {first}&apos;s summary</button>
+        <Link href={close} className="button secondary popup-later">Close</Link>
       </div>
     </div>
   );
