@@ -430,3 +430,27 @@ table.people .num { text-align: right; white-space: nowrap; }
 .sheet-shift .planned { font-size: 11px; color: var(--ink-3); }
 .sheet-shift .button { margin-top: auto; display: grid; place-items: center; text-decoration: none; }
 @media (max-width: 900px) { .sheet { grid-template-columns: 1fr; } .sheet-totals { border-right: 0; padding-right: 0; } }
+.sheet-shift { position: relative; }
+.sheet-delete { position: absolute; top: 10px; right: 12px; text-align: right; }
+.sheet-delete summary { list-style: none; cursor: pointer; color: var(--ink-3); font-size: 14px; }
+.sheet-delete summary::-webkit-details-marker { display: none; }
+.sheet-delete[open] { background: var(--paper); padding: 6px 8px; border: 1px solid var(--alert); z-index: 2; }
+
+/* Metrics */
+.metrics { border: 1px solid var(--line); background: var(--paper); }
+.metrics-head, .metrics-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) minmax(0, 1.1fr); }
+.metrics-head span { text-align: center; font-family: var(--serif); font-weight: 300; font-size: 20px; padding: 8px 0; border-bottom: 1px solid var(--ink); }
+.metrics-week { border-bottom: 1px solid var(--line); }
+.metrics-week:last-child { border-bottom: 0; }
+.metric-day { display: flex; flex-direction: column; align-items: stretch; padding: 10px; border-right: 1px solid var(--line); text-decoration: none; color: var(--ink); min-width: 0; transition: background 160ms; }
+.metric-day:hover { background: #efece6; }
+.metric-day.out { color: var(--ink-4); }
+.metric-day.week { border-right: 0; background: var(--desk); }
+.metric-day .num { align-self: center; min-width: 44px; padding: 6px 10px; text-align: center; font-family: var(--serif); font-weight: 300; font-size: 22px; margin-bottom: 8px; }
+.metric-day.week .num { font-family: var(--font-ui); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); padding-top: 12px; }
+.metric-day.today .num { outline: 1px solid var(--ink); outline-offset: 2px; }
+.metric-day dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 6px; margin: 0; font-size: 11px; }
+.metric-day dt { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2); align-self: center; }
+.metric-day dd { margin: 0; text-align: right; white-space: nowrap; }
+.metric-day .strong { font-weight: 600; color: var(--ink); }
+@media (max-width: 1200px) { .metric-day dl { grid-template-columns: 1fr; } .metric-day dd { text-align: left; } }

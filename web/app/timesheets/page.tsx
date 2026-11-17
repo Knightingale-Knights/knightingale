@@ -4,6 +4,7 @@ import { TopBar } from "@/components/TopBar";
 import { timesheets, type PayLine, type SheetShift } from "@/lib/timesheets/data";
 import { addDays, clockLabel, weekStart } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
+import { deleteTimesheetShiftAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ const dayLabel = (day: string) =>
 const clock = (d: Date | null) =>
   d ? new Intl.DateTimeFormat("en-AU", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Australia/Melbourne" }).format(new Date(d)) : "";
 
-export default async function Timesheets({ searchParams }: { searchParams: Promise<{ from?: string; to?: string; q?: string }> }) {
+export default async function Timesheets({ searchParams }: { searchParams: Promise<{ from?: string; to?: string; q?: string; msg?: string; warn?: string; error?: string }> }) {
   const staff = await requireStaff();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -35,6 +36,9 @@ export default async function Timesheets({ searchParams }: { searchParams: Promi
       </TopBar>
       <main className="page wide">
         <h1>Timesheets</h1>
+        {sp.msg && <p className="banner ok">{sp.msg}</p>}
+        {sp.warn && <p className="banner warn">{sp.warn}</p>}
+        {sp.error && <p className="banner error">{sp.error}</p>}
         <form className="row filters">
           <label>From<input type="date" name="from" defaultValue={from} /></label>
           <label>To<input type="date" name="to" defaultValue={to} /></label>
@@ -57,7 +61,7 @@ export default async function Timesheets({ searchParams }: { searchParams: Promi
               <p className="sheet-figure">{money(s.travel)} <span>{Number(s.travelKm.toFixed(1))} km</span></p>
             </div>
             <div className="sheet-shifts">
-              {s.shifts.map((x) => <ShiftCard key={x.id} s={x} />)}
+              {s.shifts.map((x) => <ShiftCard key={x.id} s={x} keep={{ from, to, q }} />)}
             </div>
           </section>
         ))}
@@ -88,10 +92,20 @@ function Lines({ title, lines }: { title: string; lines: PayLine[] }) {
   );
 }
 
-function ShiftCard({ s }: { s: SheetShift }) {
+function ShiftCard({ s, keep }: { s: SheetShift; keep: { from: string; to: string; q: string } }) {
   const actual = s.in_at || s.out_at ? `${clock(s.in_at)} – ${clock(s.out_at)}` : "–";
   return (
     <div className={`sheet-shift ${s.kind}`}>
+      <details className="sheet-delete">
+        <summary aria-label="Delete shift">✕</summary>
+        <form action={deleteTimesheetShiftAction}>
+          <input type="hidden" name="id" value={s.id} />
+          <input type="hidden" name="from" value={keep.from} />
+          <input type="hidden" name="to" value={keep.to} />
+          {keep.q && <input type="hidden" name="q" value={keep.q} />}
+          <button className="link danger">Delete this shift</button>
+        </form>
+      </details>
       <p className="role">{(s.roles ?? []).map((r) => r.toUpperCase()).join(", ")} · {s.kind === "ndis" ? "NDIS" : "Residential"}</p>
       <p className="who">{s.who ?? ""}</p>
       <p className={s.has_note ? "tick" : "tick no"}>{s.has_note ? "✓" : "✗"} Progress note</p>
