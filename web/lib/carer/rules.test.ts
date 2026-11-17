@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CheckError, assertCanCheck, checkButton, dueCheck, formatNoteField, haversineM, parseModelJson } from "./rules";
+import { CheckError, assertCanCheck, checkButton, onShiftDay, dueCheck, formatNoteField, haversineM, parseModelJson } from "./rules";
 
 const home = { lat: -37.8548796, lng: 144.8790851 }; // 2 Wintringham Rd, Williamstown
 const start = new Date("2026-11-16T20:00:00Z"); // 7am Melbourne
@@ -85,5 +85,15 @@ describe("checkButton", () => {
     expect(checkButton(inn, 11 * H)).toBe("out");
     expect(checkButton({ ...inn, kind: "residential" }, 11 * H)).toBeNull();
     expect(checkButton({ ...inn, attend_end: new Date(14 * H) }, 15 * H)).toBeNull();
+  });
+});
+
+describe("onShiftDay", () => {
+  it("is true on the Melbourne date and through an overnight shift", () => {
+    const night = { day: "2026-11-17", start_at: new Date("2026-11-17T11:00:00Z"), end_at: new Date("2026-11-17T20:15:00Z") };
+    expect(onShiftDay(night, new Date("2026-11-16T13:30:00Z"))).toBe(true); // 00:30 on the 17th
+    expect(onShiftDay(night, new Date("2026-11-17T19:00:00Z"))).toBe(true); // 06:00 on the 18th, still on shift
+    expect(onShiftDay(night, new Date("2026-11-17T21:00:00Z"))).toBe(false);
+    expect(onShiftDay(night, new Date("2026-11-16T12:30:00Z"))).toBe(false); // 23:30 on the 16th
   });
 });

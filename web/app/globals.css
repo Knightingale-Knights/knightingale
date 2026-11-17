@@ -504,3 +504,8 @@ form.inline { display: inline; }
 .shift-card .check { flex-direction: column; margin: 0; }
 .shift-card .check button { min-width: 370px; }
 @media (max-width: 480px) { .shift-card .check button { min-width: 0; width: 100%; } }
+.logins { display: flex; flex-direction: column; gap: 0; margin: 8px 0 18px; }
+.logins > div { display: grid; grid-template-columns: 110px 1fr; gap: 6px 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+.logins > div:last-child { border-bottom: 1px solid var(--line); }
+.logins dt { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); align-self: center; }
+.logins dd { margin: 0; font-variant-numeric: tabular-nums; user-select: all; word-break: break-all; }

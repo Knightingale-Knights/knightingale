@@ -102,3 +102,9 @@ export function checkButton(s: ShiftForCheck & { kind: "ndis" | "residential" },
   if (s.kind === "ndis" && !s.attend_end && now <= s.end_at.getTime() + CHECK_OUT_LATE_MS) return "out";
   return null;
 }
+
+/** True on the shift's date (Melbourne), or while an overnight shift is still running. */
+export function onShiftDay(s: { day: string; start_at: Date | null; end_at: Date | null }, now = new Date()) {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Melbourne", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+  return today === s.day || (s.start_at != null && s.end_at != null && now >= s.start_at && now <= s.end_at);
+}

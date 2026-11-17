@@ -2,7 +2,7 @@
 import { sql } from "@/lib/db";
 import { addDays, slotsFor, SLOTS } from "@/lib/roster/rules";
 import { fromDay, melbDay } from "@/lib/roster/queries";
-import { CheckError, NOTE_FIELDS, assertCanCheck, type Position } from "./rules";
+import { CheckError, NOTE_FIELDS, assertCanCheck, onShiftDay, type Position } from "./rules";
 import { fillNoteFields } from "./noteFields";
 
 type Tx = typeof sql;
@@ -16,7 +16,7 @@ export type CarerShift = {
   kind: "ndis" | "residential"; place: string | null; address_text: string | null; address: { lat?: number; lng?: number } | null;
   notes: string | null; cancelled: boolean; attend_start: Date | null; attend_end: Date | null;
   note_id: string | null; note_submitted: boolean;
-  participant: string | null; participant_name: string | null; wage: number | null;
+  participant: string | null; participant_name: string | null; wage: number | null; has_logins: boolean;
 };
 
 const shiftSelect = () => sql`
@@ -25,7 +25,8 @@ const shiftSelect = () => sql`
   coalesce(split_part(p.first_name, ' ', 1), l.name) as place,
   s.address->>'address' as address_text, s.address, s.notes, coalesce(s.cancelled, false) as cancelled,
   s.attend_start, s.attend_end, n.id as note_id, coalesce(n.submit, false) as note_submitted,
-  s.participant, nullif(trim(concat_ws(' ', p.first_name, p.last_name)), '') as participant_name, s.wage::float8 as wage`;
+  s.participant, nullif(trim(concat_ws(' ', p.first_name, p.last_name)), '') as participant_name, s.wage::float8 as wage,
+  exists (select 1 from app.location_logins ll where ll.location = s.location) as has_logins`;
 
 const shiftJoins = () => sql`
   left join app.users p on p.id = s.participant
@@ -51,6 +52,19 @@ export async function myShiftsBetween(carer: string, from: string, to: string): 
 export async function myShift(carer: string, id: string, tx: Tx = sql): Promise<CarerShift | null> {
   const [s] = await tx<CarerShift[]>`select ${shiftSelect()} from app.shifts s ${shiftJoins()} where s.id = ${id} and s.carer = ${carer}`;
   return s ?? null;
+}
+
+export type LeecareLogin = { id: string; username: string | null; password: string | null };
+
+/** Leecare logins for the location of one of the carer's residential shifts, on the day of that shift only. */
+export async function myLeecareLogins(carer: string, id: string, now = new Date()): Promise<LeecareLogin[]> {
+  const s = await myShift(carer, id);
+  if (!s || s.kind !== "residential" || s.cancelled || !onShiftDay(s, now)) return [];
+  return sql<LeecareLogin[]>`
+    select ll.id, ll.username, ll.password from app.location_logins ll
+      join app.shifts sh on sh.location = ll.location
+     where sh.id = ${id} and sh.carer = ${carer}
+     order by ll.username`;
 }
 
 // ---- check in / out ---------------------------------------------------------

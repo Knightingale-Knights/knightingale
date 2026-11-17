@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { requireCarer } from "@/lib/auth";
-import { myShifts, myShiftsBetween, type CarerShift } from "@/lib/carer/data";
+import { myLeecareLogins, myShifts, myShiftsBetween, type CarerShift, type LeecareLogin } from "@/lib/carer/data";
 import { addDays, addMonths, clockLabel, monthGrid } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "./CarerNav";
 import { CheckButton, CheckPopup } from "./check";
-import { checkButton, dueCheck } from "@/lib/carer/rules";
+import { checkButton, dueCheck, onShiftDay } from "@/lib/carer/rules";
 import { requestSummaryAction } from "./actions";
 import { PendingButton } from "@/components/PendingButton";
 
@@ -25,7 +25,7 @@ function status(s: CarerShift) {
 }
 const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; sent?: string; summary_error?: string }> }) {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; sent?: string; summary_error?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -34,6 +34,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
   const [from, to] = monthGrid(`${month}-01`);
   const [near, shifts] = await Promise.all([myShifts(me.id, today), myShiftsBetween(me.id, day ?? from, day ? addDays(day, 1) : to)]);
   const now = Date.now();
+  const logins = day && sp.logins ? await myLeecareLogins(me.id, sp.logins) : null;
   const due = near.map((s) => ({ s, kind: dueCheck(s, now) })).find((d) => d.kind);
 
   return (
@@ -46,6 +47,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
         {!me.approved && <p className="banner ok">Thanks for applying! We&apos;re reviewing your application and will be in touch. Keep your documents up to date in the Documents tab.</p>}
         {day ? <DayList day={day} today={today} shifts={shifts} now={now} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
+      {day && logins && <LoginsPopup s={shifts.find((s) => s.id === sp.logins)} logins={logins} close={`/carer?date=${day}`} />}
       {day && sp.summary && <SummaryRequest s={shifts.find((s) => s.id === sp.summary && s.kind === "ndis")} email={me.email} close={`/carer?date=${day}`} day={day} sent={sp.sent} error={sp.summary_error} />}
     </div>
   );
@@ -118,11 +120,42 @@ function ShiftCard({ s, day, now }: { s: CarerShift; day: string; now: number })
       {status(s) && <p className={`status ${needsNote(s) ? "todo" : ""}`}>{status(s)}</p>}
       {s.wage != null && <p className="shift-card-pay">{money(s.wage)}</p>}
       {check && <CheckButton kind={check} shiftId={s.id} />}
+      {!ndis && !s.cancelled && s.has_logins && onShiftDay(s, new Date(now)) && (
+        <div className="shift-card-actions">
+          <Link href={`/carer?date=${day}&logins=${s.id}`} className="button secondary">Leecare logins</Link>
+        </div>
+      )}
       {ndis && (
         <div className="shift-card-actions">
           <Link href={`/carer/shift/${s.id}`} className="button">Details</Link>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Leecare logins for the facility, shown on the day of the shift. */
+function LoginsPopup({ s, logins, close }: { s?: CarerShift; logins: LeecareLogin[]; close: string }) {
+  if (!s) return null;
+  return (
+    <div className="popup-back">
+      <Link href={close} className="modal-shade" aria-label="Close" />
+      <div className="popup details-popup">
+        <h2>{s.place ?? "Leecare"} logins</h2>
+        {logins.length === 0 ? (
+          <p className="hint">Logins are only shown on the day of your shift.</p>
+        ) : (
+          <dl className="logins">
+            {logins.map((l) => (
+              <div key={l.id}>
+                <dt>Username</dt><dd>{l.username ?? "–"}</dd>
+                <dt>Password</dt><dd>{l.password ?? "–"}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        <Link href={close} className="button secondary popup-later">Close</Link>
+      </div>
     </div>
   );
 }
