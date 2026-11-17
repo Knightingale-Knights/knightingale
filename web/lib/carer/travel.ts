@@ -106,6 +106,26 @@ export async function addReceipt(
   });
 }
 
+/** A carer can delete their own receipt until the shift has been invoiced. Takes its amount off the shift's total. */
+export async function removeReceipt(carer: string, id: string) {
+  return sql.begin(async (txx) => {
+    const tx = txx as unknown as Tx;
+    const [f] = await tx<{ shift: string; total: number | null; needs_review: boolean; invoiced: boolean }[]>`
+      select r.shift, r.total::float8 as total, coalesce(r.needs_review, true) as needs_review,
+             (coalesce(s.invoiced, false) or s.invoice is not null) as invoiced
+        from app.receipt_files r join app.shifts s on s.id = r.shift
+       where r.id = ${id} and r.carer = ${carer}
+       for update of r`;
+    if (!f) throw new TravelError("We couldn't find that receipt.");
+    if (f.invoiced) throw new TravelError("This shift has been invoiced. Please contact the office.");
+    await tx`delete from app.receipt_files where id = ${id}`;
+    if (f.total != null && !f.needs_review) {
+      await tx`update app.shifts set receipts_total = greatest(0, round((coalesce(receipts_total, 0) - ${f.total})::numeric, 2)) where id = ${f.shift}`;
+    }
+    return f.shift;
+  });
+}
+
 /** For the file route: the receipt, if this person may see it (its carer, or staff). */
 export async function receiptFile(id: string, viewer: { id: string; role: string }) {
   const [f] = await sql<{ file_name: string; mime: string; bytes: Buffer; carer: string | null }[]>`

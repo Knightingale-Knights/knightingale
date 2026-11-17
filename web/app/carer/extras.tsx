@@ -73,3 +73,41 @@ export function ReceiptUpload({ shiftId }: { shiftId: string }) {
     </div>
   );
 }
+
+/** Big drop zone for receipts: drop files or tap to choose. Uploads one by one and reads each total. */
+export function ReceiptDrop({ shiftId }: { shiftId: string }) {
+  const input = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const [over, setOver] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [results, setResults] = useState<ReceiptResult[]>([]);
+  const send = async (files: File[]) => {
+    if (!files.length) return;
+    const out: ReceiptResult[] = [];
+    for (const [i, f] of files.entries()) {
+      setBusy(files.length > 1 ? `Reading receipt ${i + 1} of ${files.length}…` : "Reading receipt…");
+      const fd = new FormData();
+      fd.set("id", shiftId);
+      fd.set("file", await shrink(f));
+      out.push(await receiptAction(fd).catch(() => ({ ok: false, message: `${f.name}: upload failed. Please try again.` })));
+      setResults([...out]);
+    }
+    setBusy(null);
+    if (input.current) input.current.value = "";
+    if (out.some((r) => r.ok)) router.refresh();
+  };
+  return (
+    <div className="receipt-drop-wrap">
+      <label
+        className={`receipt-drop ${over ? "over" : ""} ${busy ? "busy" : ""}`}
+        onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+        onDragLeave={() => setOver(false)}
+        onDrop={(e) => { e.preventDefault(); setOver(false); if (!busy) send(Array.from(e.dataTransfer.files)); }}
+      >
+        <input ref={input} type="file" accept="image/*,application/pdf" multiple hidden disabled={!!busy} onChange={(e) => send(Array.from(e.target.files ?? []))} />
+        <span>{busy ?? "Drop receipts or browse files"}</span>
+      </label>
+      {results.map((r, i) => <p key={i} className={`banner ${r.ok ? "ok" : "error"}`}>{r.message}</p>)}
+    </div>
+  );
+}

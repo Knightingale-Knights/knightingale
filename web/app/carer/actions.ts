@@ -64,7 +64,7 @@ export async function availabilityAction(f: FormData) {
 }
 
 // ---- travel and receipts ------------------------------------------------------
-import { addReceipt, addTravel, removeTravel, TravelError } from "@/lib/carer/travel";
+import { addReceipt, addTravel, removeReceipt, removeTravel, TravelError } from "@/lib/carer/travel";
 
 const errMsg = (e: unknown) => (e instanceof TravelError ? e.message : (console.error(e), "Something went wrong. Please try again."));
 
@@ -112,6 +112,19 @@ export async function receiptAction(f: FormData): Promise<ReceiptResult> {
   } catch (e) {
     return { ok: false, message: errMsg(e) };
   }
+}
+
+export async function removeReceiptAction(f: FormData) {
+  const me = await requireCarer();
+  const id = String(f.get("id") ?? "");
+  let q: Record<string, string> = { view: "1" };
+  try {
+    await removeReceipt(me.id, String(f.get("receipt") ?? ""));
+  } catch (e) {
+    q = { view: "1", xerror: errMsg(e) };
+  }
+  revalidatePath("/carer");
+  redirect(await detailsDest(me.id, id, "receipts", q));
 }
 
 /** Emails the participant's support summary to the carer. */

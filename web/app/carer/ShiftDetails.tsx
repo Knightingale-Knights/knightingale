@@ -3,13 +3,13 @@ import type { ReactNode } from "react";
 import type { CarerShift } from "@/lib/carer/data";
 import { onShiftDay } from "@/lib/carer/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
-import { removeTravelAction, requestSummaryAction, travelAction } from "./actions";
-import { ReceiptUpload } from "./extras";
+import { removeReceiptAction, removeTravelAction, requestSummaryAction, travelAction } from "./actions";
+import { ReceiptDrop } from "./extras";
 import { TripPlanner } from "./TripPlanner";
 import { PendingButton } from "@/components/PendingButton";
 import { NoteSteps } from "./NoteSteps";
 
-export type DetailsMsgs = { saved?: string; error?: string; travel?: string; xerror?: string; sent?: string; summary_error?: string };
+export type DetailsMsgs = { view?: string; saved?: string; error?: string; travel?: string; xerror?: string; sent?: string; summary_error?: string };
 
 const I = (d: ReactNode) => (
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>
@@ -61,7 +61,7 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
         ) : (
           <>
             <Link href={home} className="back">← Back to shift details</Link>
-            <h2>{open.key === "notes" ? `${name}'s progress note` : open.label}</h2>
+            <h2>{open.key === "notes" ? `${name}'s progress note` : open.key === "receipts" ? `${name} receipts` : open.label}</h2>
             <Section s={s} day={day} tab={open.key} first={name.split(" ")[0]} email={email} msgs={msgs} />
           </>
         )}
@@ -135,22 +135,41 @@ async function Section({ s, day, tab, first, email, msgs }: { s: CarerShift; day
   }
 
   if (tab === "receipts") {
-    if (!onDay) return <p className="hint">Receipts can be added on the day of the shift.</p>;
     const receipts = await shiftReceipts(s.id);
+    const base = `/carer?date=${day}&details=${s.id}&tab=receipts`;
+    const view = msgs.view === "1";
     return (
       <>
-        {receipts.files.length > 0 && (
-          <ul className="extras">
+        <div className="receipt-tabs">
+          <Link href={base} className={!view ? "on" : ""}>Upload</Link>
+          <Link href={`${base}&view=1`} className={view ? "on" : ""}>View</Link>
+          <span>Total = ${Number(receipts.total ?? 0).toFixed(2)}</span>
+        </div>
+        {msgs.xerror && <p className="banner error">{msgs.xerror}</p>}
+        {!view ? (
+          onDay ? <ReceiptDrop shiftId={s.id} /> : <p className="hint">Receipts can be added on the day of the shift.</p>
+        ) : receipts.files.length === 0 ? (
+          <p className="hint">No receipts on this shift yet.</p>
+        ) : (
+          <div className="receipt-grid">
             {receipts.files.map((r) => (
-              <li key={r.id}>
-                <a href={`/receipts/${r.id}`} target="_blank" rel="noreferrer">{r.merchant ?? r.file_name}</a>
-                <strong>{r.total != null && !r.needs_review ? `$${Number(r.total).toFixed(2)}` : "Office to check"}</strong>
-              </li>
+              <figure key={r.id}>
+                <a href={`/receipts/${r.id}`} target="_blank" rel="noreferrer">
+                  {/\.pdf$/i.test(r.file_name) ? <span className="receipt-pdf">PDF</span> : <img src={`/receipts/${r.id}`} alt={r.merchant ?? "Receipt"} />}
+                </a>
+                <figcaption>
+                  <span>{r.merchant ?? r.file_name}</span>
+                  <strong>{r.total != null && !r.needs_review ? `$${Number(r.total).toFixed(2)}` : "Office to check"}</strong>
+                  <form action={removeReceiptAction}>
+                    <input type="hidden" name="id" value={s.id} />
+                    <input type="hidden" name="receipt" value={r.id} />
+                    <button className="link danger">Delete</button>
+                  </form>
+                </figcaption>
+              </figure>
             ))}
-          </ul>
+          </div>
         )}
-        {receipts.total != null && Number(receipts.total) > 0 && <p className="hint">Receipts total ${Number(receipts.total).toFixed(2)}</p>}
-        <ReceiptUpload shiftId={s.id} />
       </>
     );
   }

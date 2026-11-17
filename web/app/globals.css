@@ -529,3 +529,17 @@ form.inline { display: inline; }
 .trip { display: flex; flex-direction: column; gap: 16px; text-align: left; margin-top: 8px; }
 .trip-map { width: 100%; aspect-ratio: 1 / 1; max-height: 340px; border: 1px solid var(--line); background: var(--desk); }
 .trip-pay { margin: 4px 0; text-align: center; font-variant-numeric: tabular-nums; }
+.receipt-tabs { display: flex; align-items: baseline; gap: 28px; border-bottom: 1px solid var(--line-2); padding: 14px 4px 10px; margin: 6px 0 20px; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
+.receipt-tabs a { text-decoration: none; color: var(--ink-3); }
+.receipt-tabs a.on { color: var(--ink); border-bottom: 1px solid var(--ink); padding-bottom: 9px; margin-bottom: -11px; }
+.receipt-tabs span { margin-left: auto; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.receipt-drop { display: grid; place-items: center; min-height: 380px; border: 1px dashed var(--line-2); background: var(--desk); cursor: pointer; color: var(--ink-3); text-decoration: underline; text-underline-offset: 3px; }
+.receipt-drop.over { border-color: var(--ink); color: var(--ink); }
+.receipt-drop.busy { cursor: progress; text-decoration: none; }
+.receipt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; text-align: left; }
+.receipt-grid figure { margin: 0; border: 1px solid var(--line); background: var(--paper); }
+.receipt-grid img, .receipt-pdf { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; background: var(--desk); }
+.receipt-pdf { display: grid; place-items: center; color: var(--ink-3); letter-spacing: 0.14em; }
+.receipt-grid figcaption { display: flex; flex-direction: column; gap: 4px; padding: 10px; font-size: 13px; }
+.receipt-grid figcaption span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.receipt-grid figcaption .link { align-self: flex-start; padding: 0; }
