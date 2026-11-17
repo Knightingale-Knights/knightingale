@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { receiptAction, type ReceiptResult } from "./actions";
 
 /** An address box with suggestions from Google Places (fetched through our own server). */
-export function AddressInput({ name, label, defaultValue, listId }: { name: string; label: string; defaultValue?: string; listId: string }) {
+export function AddressInput({ name, label, defaultValue, listId, onValue }: { name: string; label: string; defaultValue?: string; listId: string; onValue?: (v: string) => void }) {
   const [q, setQ] = useState(defaultValue ?? "");
+  useEffect(() => { onValue?.(q); }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
   const [options, setOptions] = useState<string[]>([]);
   useEffect(() => {
     if (q.trim().length < 3 || options.includes(q)) return;

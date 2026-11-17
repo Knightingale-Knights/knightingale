@@ -43,7 +43,6 @@ export function NoteSteps({ shiftId, error }: { shiftId: string; error?: string 
 
       <fieldset hidden={step !== 0}>
         <h3>Summary</h3>
-        <p>Please enter any additional notes you took during the shift. For example:</p>
         <p className="eg">{SUMMARY_EG}</p>
         <textarea name="summary" rows={10} value={summary} onChange={(e) => setSummary(e.target.value)} placeholder={SUMMARY_EG} maxLength={8000} />
         {msg && <p className="banner error">{msg}</p>}

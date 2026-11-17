@@ -17,6 +17,22 @@ export async function drivingKm(from: string, to: string): Promise<number> {
   return Math.round(el.distance.value / 100) / 10;
 }
 
+export type Route = { km: number; polyline: string | null };
+
+/** Driving route: km from the Distance Matrix (as Bubble did), plus the line to draw from Directions when available. */
+export async function drivingRoute(from: string, to: string): Promise<Route> {
+  const [km, polyline] = await Promise.all([drivingKm(from, to), routeLine(from, to).catch(() => null)]);
+  return { km, polyline };
+}
+
+async function routeLine(from: string, to: string): Promise<string | null> {
+  const u = new URL("https://maps.googleapis.com/maps/api/directions/json");
+  u.search = new URLSearchParams({ origin: from, destination: to, mode: "driving", region: "au", key: env.googleMapsKey }).toString();
+  const res = await fetch(u, { cache: "no-store" });
+  const j = (await res.json().catch(() => ({}))) as { status?: string; routes?: { overview_polyline?: { points?: string } }[] };
+  return j.status === "OK" ? j.routes?.[0]?.overview_polyline?.points ?? null : null;
+}
+
 /** Address suggestions in Australia for the From and To boxes. */
 export async function addressSuggestions(q: string): Promise<string[]> {
   if (!env.googleMapsKey || q.trim().length < 3) return [];

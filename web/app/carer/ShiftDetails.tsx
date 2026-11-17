@@ -4,7 +4,8 @@ import type { CarerShift } from "@/lib/carer/data";
 import { onShiftDay } from "@/lib/carer/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { removeTravelAction, requestSummaryAction, travelAction } from "./actions";
-import { AddressInput, ReceiptUpload } from "./extras";
+import { ReceiptUpload } from "./extras";
+import { TripPlanner } from "./TripPlanner";
 import { PendingButton } from "@/components/PendingButton";
 import { NoteSteps } from "./NoteSteps";
 
@@ -17,7 +18,7 @@ const I = (d: ReactNode) => (
 const TABS: { key: string; label: string; icon: ReactNode }[] = [
   { key: "summary", label: "Support summary", icon: I(<><path d="M8 6h12M8 12h12M8 18h12" /><circle cx="4" cy="6" r=".6" /><circle cx="4" cy="12" r=".6" /><circle cx="4" cy="18" r=".6" /></>) },
   { key: "notes", label: "Notes", icon: I(<><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></>) },
-  { key: "trip", label: "Add trip", icon: I(<><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 11-5.7" /><circle cx="12" cy="10" r="2.5" /><path d="M19 3v6M16 6h6" /></>) },
+  { key: "trip", label: "Add travel", icon: I(<><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 11-5.7" /><circle cx="12" cy="10" r="2.5" /><path d="M19 3v6M16 6h6" /></>) },
   { key: "receipts", label: "Receipts", icon: I(<path d="M16 7.5c-.6-1.4-2-2.2-4-2.2-2.4 0-4 1.2-4 3s1.6 2.5 4 3c2.6.5 4 1.3 4 3.2s-1.7 3.2-4 3.2c-2.1 0-3.6-.9-4.2-2.4M12 3v2.3M12 18.7V21" />) },
   { key: "intake", label: "Intake", icon: I(<><rect x="5" y="4" width="14" height="17" rx="1.5" /><path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4" /></>) },
   { key: "agreement", label: "Agreement", icon: I(<><circle cx="10" cy="8" r="3.5" /><path d="M3.5 20c.6-3.5 3.2-5.5 6.5-5.5 1.4 0 2.6.3 3.6.9M14 19l2 2 4.5-4.5" /></>) },
@@ -59,7 +60,7 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
           </>
         ) : (
           <>
-            <Link href={home} className="back">← {name}</Link>
+            <Link href={home} className="back">← Back to shift details</Link>
             <h2>{open.key === "notes" ? `${name}'s progress note` : open.label}</h2>
             <Section s={s} day={day} tab={open.key} first={name.split(" ")[0]} email={email} msgs={msgs} />
           </>
@@ -108,29 +109,27 @@ async function Section({ s, day, tab, first, email, msgs }: { s: CarerShift; day
       <>
         {msgs.xerror && <p className="banner error">{msgs.xerror}</p>}
         {msgs.travel && <p className="banner ok">Trip added.</p>}
+        <TripPlanner shiftId={s.id} to={s.address_text ?? ""} mapsKey={process.env.GOOGLE_MAPS_BROWSER_KEY || process.env.GOOGLE_MAPS_API_KEY || ""} />
         {travel.length > 0 && (
-          <ul className="extras">
-            {travel.map((t) => (
-              <li key={t.id}>
-                <span>{t.from ?? "?"} → {t.to ?? "?"}</span>
-                <strong>{Number(t.km).toFixed(1)} km</strong>
-                {!t.invoiced && (
-                  <form action={removeTravelAction}>
-                    <input type="hidden" name="id" value={s.id} />
-                    <input type="hidden" name="log" value={t.id} />
-                    <button className="link danger">Remove</button>
-                  </form>
-                )}
-              </li>
-            ))}
-          </ul>
+          <>
+            <h3>Trips on this shift</h3>
+            <ul className="extras">
+              {travel.map((t) => (
+                <li key={t.id}>
+                  <span>{t.from ?? "?"} → {t.to ?? "?"}</span>
+                  <strong>{Number(t.km).toFixed(1)} km · ${Number(t.km).toFixed(2)}</strong>
+                  {!t.invoiced && (
+                    <form action={removeTravelAction}>
+                      <input type="hidden" name="id" value={s.id} />
+                      <input type="hidden" name="log" value={t.id} />
+                      <button className="link danger">Remove</button>
+                    </form>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
         )}
-        <form action={travelAction} className="stack">
-          <input type="hidden" name="id" value={s.id} />
-          <AddressInput name="from" label="From" listId="from-list" />
-          <AddressInput name="to" label="To" listId="to-list" defaultValue={s.address_text ?? ""} />
-          <button type="submit" className="big">Add trip</button>
-        </form>
       </>
     );
   }
