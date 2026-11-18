@@ -18,7 +18,7 @@ async function who(carerField: FormDataEntryValue | null) {
 }
 
 const pathFor = (role: string, carer: string, back?: string) =>
-  role === "admin" ? `/compliance/${carer}` : back && /^\/join\/[a-z]+$/.test(back) ? back : "/carer/documents";
+  role === "admin" ? `/compliance/${carer}` : back && /^\/(join\/[a-z]+|carer\/account\/[a-z]+)$/.test(back) ? back : "/carer/account";
 
 export async function uploadDocAction(f: FormData): Promise<DocResult> {
   const { me, carer } = await who(f.get("carer"));
@@ -28,6 +28,7 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
   try {
     const r = await uploadDoc(carer, key, { name: file.name, type: file.type, bytes: Buffer.from(await file.arrayBuffer()) }, me.id, isoDate(new Date()));
     revalidatePath(pathFor(me.role, carer));
+    revalidatePath("/carer/account", "layout");
     revalidatePath("/join/[step]", "page");
     const label = docDef(key)?.label ?? "Document";
     if (r.reading?.reason === "document_type_mismatch") {

@@ -593,3 +593,19 @@ a.policy-btn.featured:hover { background: var(--ink-hover); }
 .sig-row { display: flex; justify-content: space-between; align-items: center; margin: 6px 0 16px; }
 .sig-img { display: block; max-width: 320px; width: 100%; background: #fff; border: 1px solid var(--line); }
 .contract .big, .contract a.button { width: 100%; }
+
+/* Carer Account: profile head and a list of sections with a tick and an arrow */
+.acct-head { display: flex; flex-direction: column; align-items: center; text-align: center; padding-bottom: 26px; border-bottom: 1px solid var(--line-2); }
+.acct-head .portrait { width: 96px; height: 96px; font-size: 36px; }
+.acct-head h1 { margin: 16px 0 4px; font-size: 32px; }
+.acct-role { margin: 0; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-2); }
+.acct-list { list-style: none; margin: 20px auto 0; padding: 0; max-width: 360px; }
+.acct-list a { display: flex; align-items: center; gap: 16px; padding: 12px 4px; text-decoration: none; border-bottom: 1px solid var(--line); }
+.acct-list a:hover .acct-label { color: var(--ink); }
+.acct-label { flex: 1; font-family: var(--serif); font-size: 18px; font-weight: 300; color: var(--ink); }
+.acct-mark { flex: none; width: 22px; height: 22px; fill: none; stroke-width: 1.4; }
+.acct-mark.done { stroke: var(--gold); }
+.acct-mark.todo { stroke: var(--line-2); }
+.acct-go { flex: none; width: 22px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 1.2; }
+.acct-out { text-align: center; margin-top: 30px; }
+.acct-out .link { color: var(--alert); font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; background: none; border: 0; cursor: pointer; }
