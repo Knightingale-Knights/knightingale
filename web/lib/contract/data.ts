@@ -1,0 +1,34 @@
+// Signing the employment contract. The signature PNG is kept as a compliance file and
+// its link saved in users.contract_signature (as Bubble did), with the date in contract_date.
+import { sql } from "@/lib/db";
+
+/** Carers must sign before using the app. Set to false to stop asking. */
+export const CONTRACT_GATE = true;
+
+export type ContractState = { signature: string | null; date: Date | null };
+
+export async function contractState(userId: string): Promise<ContractState> {
+  const [r] = await sql<{ signature: string | null; date: Date | null }[]>`
+    select contract_signature as signature, contract_date as date from app.users where id = ${userId}`;
+  return r ?? { signature: null, date: null };
+}
+
+const MAX_SIG_BYTES = 400 * 1024;
+
+export async function signContract(userId: string, dataUrl: string) {
+  const m = /^data:image\/png;base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl);
+  if (!m) throw new Error("Please sign in the box first.");
+  const bytes = Buffer.from(m[1], "base64");
+  if (bytes.length < 200) throw new Error("Please sign in the box first.");
+  if (bytes.length > MAX_SIG_BYTES) throw new Error("That signature is too large. Please clear it and sign again.");
+  await sql.begin(async (txx) => {
+    const tx = txx as unknown as typeof sql;
+    const [u] = await tx<{ signed: boolean }[]>`select contract_signature is not null as signed from app.users where id = ${userId} for update`;
+    if (!u) throw new Error("We couldn't find your account.");
+    if (u.signed) return; // already signed (double tap)
+    const [f] = await tx<{ id: string }[]>`
+      insert into app.compliance_files (carer, doc, file_name, mime, bytes, uploaded_by)
+      values (${userId}, 'contract_signature', 'contract-signature.png', 'image/png', ${bytes}, ${userId}) returning id`;
+    await tx`update app.users set contract_signature = ${`/files/${f.id}`}, contract_date = now() where id = ${userId}`;
+  });
+}

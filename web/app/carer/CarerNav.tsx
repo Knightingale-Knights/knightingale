@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { CONTRACT_GATE, contractState } from "@/lib/contract/data";
 import { signOutAction } from "@/app/invoicing/actions";
 import { currentUser } from "@/lib/auth";
 import { unreadTotal } from "@/lib/chats/data";
@@ -11,6 +13,8 @@ type On = "shifts" | "availability" | "chats" | "documents" | "policies";
 /** The carer's menu, down the left side like the admin pages. */
 export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; name: string; shiftsHref?: string }) {
   const me = await currentUser();
+  // An unsigned carer signs the employment contract before anything else (an admin viewing as them is not stopped).
+  if (CONTRACT_GATE && me?.role === "carer" && !me.viewAs && !(await contractState(me.id)).signature) redirect("/carer/contract");
   const [unread, docs] = me ? await Promise.all([unreadTotal(me), attentionCount(me.id, isoDate(new Date()))]) : [0, 0];
   const items: { key: On; label: string; href: string; badge?: number }[] = [
     { key: "shifts", label: "My Shifts", href: shiftsHref },
