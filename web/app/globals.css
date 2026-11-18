@@ -559,10 +559,13 @@ form.inline { display: inline; }
 .note-view h3 { text-align: left; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
 .note-view p { white-space: pre-line; }
 
-/* Carer policies list */
-.policy-list { list-style: none; margin: 28px 0 0; padding: 0; border-top: 1px solid var(--ink); }
-.policy-list li { border-bottom: 1px solid var(--line); }
-.policy-list a { display: block; padding: 16px 0; text-decoration: none; }
-.policy-list a:hover .policy-title { text-decoration: underline; text-decoration-color: var(--line-2); }
-.policy-title { display: block; font-family: var(--serif); font-size: 20px; font-weight: 300; color: var(--ink); }
-.policy-blurb { display: block; color: var(--ink-2); font-size: 12px; margin-top: 2px; }
+/* Knightingale Policies: one button per document */
+.policy-btns { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 32px; }
+.policy-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 100%; max-width: 320px; min-height: 46px; padding: 10px 16px; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); text-decoration: none; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; text-align: center; transition: background 160ms, color 160ms; }
+a.policy-btn:hover { background: var(--ink); color: var(--paper); }
+.policy-btn.featured { background: var(--ink); color: var(--paper); }
+a.policy-btn.featured:hover { background: var(--ink-hover); }
+.policy-btn.ask { max-width: 200px; margin-bottom: 18px; }
+.policy-btn.soon { border-color: var(--line-2); color: var(--ink-3); cursor: default; }
+.policy-btn.soon.featured { background: var(--desk); color: var(--ink-2); border-color: var(--line-2); }
+.policy-btn small { font-size: 8px; letter-spacing: 0.22em; color: var(--ink-4); }

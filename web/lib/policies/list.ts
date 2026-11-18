@@ -1,10 +1,21 @@
-// Company policies and guides carers can read. The PDFs live in public/docs/policies (no participant data in them).
-export type Policy = { slug: string; title: string; blurb: string };
+// Knightingale Policies: the documents carers read. PDFs live in public/docs/policies (no participant data in them).
+// A policy without `ready` shows as "Coming soon" until its PDF is added.
+export type Policy = { slug: string; title: string; ready?: boolean; featured?: boolean };
 
 export const POLICIES: Policy[] = [
-  { slug: "shift-policy", title: "Shift Policy", blurb: "What we expect before, during and after every shift." },
-  { slug: "incident-management-policy", title: "Incident Management Policy", blurb: "How to report, record and respond to incidents." },
-  { slug: "progress-note-guide", title: "Progress Note Guide", blurb: "How to write a note that passes review the first time." },
+  { slug: "culture-of-care", title: "Culture of Care", featured: true },
+  { slug: "emergency-policy", title: "Emergency Policy" },
+  { slug: "employment-contract", title: "Employment Contract" },
+  { slug: "first-shift-aged-care", title: "First Shift (Aged Care)" },
+  { slug: "first-shift-community", title: "First Shift (Community)" },
+  { slug: "handbook", title: "Handbook" },
+  { slug: "hr-policy", title: "HR Policy", ready: true },
+  { slug: "incident-management-policy", title: "Incident Report Policy", ready: true },
+  { slug: "progress-note-guide", title: "Progress Notes Guide", ready: true },
+  { slug: "shift-policy", title: "Shift Policy", ready: true },
 ];
 
 export const policyHref = (slug: string) => `/docs/policies/${slug}.pdf`;
+
+/** Klarra, the carer help desk, answers by text. */
+export const KLARRA_SMS = "sms:+61483931556";
