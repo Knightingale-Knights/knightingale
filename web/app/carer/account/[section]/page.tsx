@@ -67,7 +67,6 @@ export default async function AccountSection({ params, searchParams }: { params:
                 <button className="secondary">I have insurance now</button>
               </form>
             ) : !file && <div className="no-ins"><NoInsurance /></div>)}
-            )}
             {!(s.key === "insurance" && noInsurance) && <DocList docs={[doc]} back={back} />}
           </>
         )}
