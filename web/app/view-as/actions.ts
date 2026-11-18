@@ -27,5 +27,7 @@ export async function stopViewAsAction() {
   if (me?.role !== "admin") redirect("/login");
   const v = await viewAsSession(me.email);
   await stopViewAs(v?.session ?? null);
-  redirect(v ? `/compliance/${v.target}` : "/roster");
+  if (!v) redirect("/roster");
+  const [t] = await sql<{ account_type: string | null }[]>`select account_type from app.users where id = ${v.target}`;
+  redirect(t?.account_type === "resident" ? "/coordinators" : `/compliance/${v.target}`);
 }

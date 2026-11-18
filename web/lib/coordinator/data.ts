@@ -83,3 +83,20 @@ export async function noteEmailsOn(coordinator: string) {
 export async function setNoteEmails(coordinator: string, on: boolean) {
   await sql`update app.users set progress_note = ${on}, updated_at = now() where id = ${coordinator}`;
 }
+
+export type CoordinatorRow = {
+  id: string; name: string; photo: string | null; phone: string | null; email: string | null; participants: number;
+};
+
+/** Admin list of support coordinators (Bubble profile "resident"), with how many participants each has. */
+export async function coordinators(q: string): Promise<CoordinatorRow[]> {
+  const like = q ? `%${q.toLowerCase()}%` : null;
+  return sql<CoordinatorRow[]>`
+    select c.id, trim(concat_ws(' ', c.first_name, c.last_name)) as name, c.profile_photo as photo,
+           c.phone_number as phone, c.email,
+           (select count(*)::int from app.users p where p.coordinator_2 = c.id) as participants
+      from app.users c
+     where c.account_type = 'resident' and c.active is not false
+       and (${like}::text is null or lower(concat_ws(' ', c.first_name, c.last_name, c.email, c.phone_number)) like ${like})
+     order by c.first_name, c.last_name`;
+}

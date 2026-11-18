@@ -12,6 +12,7 @@ const MENU: { label: string; href?: string; section?: string }[] = [
   { label: "Create Event", href: "/roster?event=new" },
   { label: "Ask Klarra" },
   { label: "Participants", href: "/participants", section: "/participants" },
+  { label: "Support Coordinators", href: "/coordinators", section: "/coordinators" },
   { label: "Invoicing", href: "/invoicing", section: "/invoicing" },
   { label: "Map", href: "/map", section: "/map" },
   { label: "Timesheets", href: "/timesheets", section: "/timesheets" },
