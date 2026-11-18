@@ -774,3 +774,14 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
   .slip { box-shadow: none; max-width: none; }
   .slip-x, .slip-pdf { display: none !important; }
 }
+
+/* Carer away (holiday or sick) on the Availability page */
+.away { margin-top: 34px; padding-top: 24px; border-top: 1px solid var(--line); }
+.away h2 { margin: 0 0 6px; font-size: 22px; }
+.away-list { list-style: none; padding: 0; margin: 14px 0; border-top: 1px solid var(--line); }
+.away-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.away-form { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+.away-reasons { display: flex; gap: 22px; }
+.away-reason { flex-direction: row; align-items: center; gap: 8px; font-size: 11px; color: var(--ink); }
+.away-days { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+

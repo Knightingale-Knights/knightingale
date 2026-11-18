@@ -187,3 +187,30 @@ export async function incidentAction(f: FormData) {
   revalidatePath("/carer");
   redirect(await detailsDest(me.id, id, tab, q));
 }
+
+// ---- away (holiday or sick) --------------------------------------------------
+import { addAway, AwayError, removeAway } from "@/lib/carer/away";
+
+export async function awayAction(f: FormData) {
+  const me = await requireCarer();
+  let dest = "/carer/availability?away=saved";
+  if (me.viewAs) redirect("/carer/availability?error=" + encodeURIComponent("Only the carer can mark themselves away."));
+  try {
+    const clash = await addAway(me, {
+      from: String(f.get("from_day") ?? ""), to: String(f.get("to_day") ?? ""),
+      reason: String(f.get("reason") ?? ""), note: String(f.get("note") ?? ""),
+    }, isoDate(new Date()));
+    if (clash) dest = `/carer/availability?away=rostered&n=${clash}`;
+  } catch (e) {
+    dest = "/carer/availability?error=" + encodeURIComponent(e instanceof AwayError ? e.message : (console.error(e), "Something went wrong. Please try again."));
+  }
+  revalidatePath("/carer/availability");
+  redirect(dest);
+}
+
+export async function removeAwayAction(f: FormData) {
+  const me = await requireCarer();
+  if (!me.viewAs) await removeAway(me.id, String(f.get("id") ?? ""));
+  revalidatePath("/carer/availability");
+  redirect("/carer/availability");
+}

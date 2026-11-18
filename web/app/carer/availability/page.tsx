@@ -3,7 +3,8 @@ import { requireCarer } from "@/lib/auth";
 import { myAvailability } from "@/lib/carer/data";
 import { SLOTS, addDays } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
-import { availabilityAction } from "../actions";
+import { availabilityAction, awayAction, removeAwayAction } from "../actions";
+import { dayLabel as awayLabel, myAway, REASONS } from "@/lib/carer/away";
 import { CarerNav } from "../CarerNav";
 
 export const dynamic = "force-dynamic";
@@ -12,12 +13,12 @@ const DAYS = 14;
 const dayLabel = (day: string) =>
   new Intl.DateTimeFormat("en-AU", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`));
 
-export default async function Availability({ searchParams }: { searchParams: Promise<{ from?: string; error?: string }> }) {
+export default async function Availability({ searchParams }: { searchParams: Promise<{ from?: string; error?: string; away?: string; n?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());
   const from = sp.from && /^\d{4}-\d{2}-\d{2}$/.test(sp.from) && sp.from >= today ? sp.from : today;
-  const slots = await myAvailability(me.id, from, DAYS);
+  const [slots, away] = await Promise.all([myAvailability(me.id, from, DAYS), myAway(me.id, today)]);
   const days = Array.from({ length: DAYS }, (_, i) => addDays(from, i));
   const find = (day: string, slot: string) => slots.find((s) => s.day === day && s.slot === slot);
 
@@ -28,6 +29,8 @@ export default async function Availability({ searchParams }: { searchParams: Pro
         <h1>When can you work?</h1>
         <p className="hint">Tap a time to say you&apos;re available. Tap again to remove it.</p>
         {sp.error && <p className="banner error">{sp.error}</p>}
+        {sp.away === "saved" && <p className="banner ok">Thanks for letting us know.</p>}
+        {sp.away === "rostered" && <p className="banner ok">Thanks for letting us know. You&apos;re rostered on {sp.n === "1" ? "a shift" : "some shifts"} in that time, so we&apos;ll sort out cover and be in touch.</p>}
         <div className="avail">
           {days.map((day) => (
             <div key={day} className="avail-row">
@@ -50,6 +53,32 @@ export default async function Availability({ searchParams }: { searchParams: Pro
             </div>
           ))}
         </div>
+        <section className="away">
+          <h2>Going away or unwell?</h2>
+          <p className="hint">Let us know the days you can&apos;t work. If you&apos;re rostered on, we&apos;ll find cover.</p>
+          {away.length > 0 && (
+            <ul className="away-list">
+              {away.map((a) => (
+                <li key={a.id}>
+                  <span><strong>{REASONS[a.reason]}</strong> {a.from_day === a.to_day ? awayLabel(a.from_day) : `${awayLabel(a.from_day)} to ${awayLabel(a.to_day)}`}{a.note ? ` · ${a.note}` : ""}</span>
+                  <form action={removeAwayAction}><input type="hidden" name="id" value={a.id} /><button className="link danger">Remove</button></form>
+                </li>
+              ))}
+            </ul>
+          )}
+          <form action={awayAction} className="away-form">
+            <div className="away-reasons">
+              <label className="away-reason"><input type="radio" name="reason" value="holiday" defaultChecked /> Holiday</label>
+              <label className="away-reason"><input type="radio" name="reason" value="sick" /> Sick</label>
+            </div>
+            <div className="away-days">
+              <label>First day<input type="date" name="from_day" min={today} defaultValue={today} required /></label>
+              <label>Last day<input type="date" name="to_day" min={today} defaultValue={today} required /></label>
+            </div>
+            <label>Note (optional)<input name="note" maxLength={500} placeholder="Anything we should know" /></label>
+            <button>I&apos;m away these days</button>
+          </form>
+        </section>
         <div className="row tight">
           {from > today && <Link href={`/carer/availability?from=${addDays(from, -DAYS) < today ? today : addDays(from, -DAYS)}`}>← Earlier</Link>}
           <Link href={`/carer/availability?from=${addDays(from, DAYS)}`}>Later →</Link>
