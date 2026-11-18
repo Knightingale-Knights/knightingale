@@ -6,7 +6,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { logViewAsAction, viewAsSession } from "@/lib/viewAs";
 
 export type Staff = { id: string; email: string; name: string };
-export type Role = "admin" | "carer" | "facility" | "applicant";
+export type Role = "admin" | "carer" | "facility" | "applicant" | "coordinator";
 export type AppUser = Staff & {
   role: Role; roles: string[] | null; phone: string | null; approved: boolean;
   viewAs?: { session: string; admin: Staff }; // set while an admin is viewing as this user
@@ -23,7 +23,8 @@ function roleOf(u: UserRow): Role | null {
     ? "admin"
     : u.account_type === "carer" && u.active ? "carer"
     : u.account_type === "location" && u.active !== false ? "facility"
-    : u.account_type === "carer" && !u.active && !u.account_status ? "applicant" : null;
+    : u.account_type === "carer" && !u.active && !u.account_status ? "applicant"
+    : u.account_type === "resident" && u.active !== false ? "coordinator" : null;
 }
 
 const toAppUser = (u: UserRow, role: Role): AppUser =>
@@ -45,6 +46,7 @@ async function loadUser(by: { email: string } | { id: string }) {
  * Admin = account type "admin" or listed in ADMIN_EMAILS. Carer = active account type "carer".
  * Facility = account type "location" (shown as Client in Bubble), unless made inactive.
  * Applicant = a carer who hasn't finished signing up (not active, never approved).
+ * Coordinator = an NDIS support coordinator (Bubble profile "resident").
  * Anyone else (participants, locations, inactive carers) gets no access yet.
  */
 export const signedInUser = cache(async (): Promise<AppUser | null> => {
@@ -93,6 +95,13 @@ export async function requireCarer(): Promise<AppUser> {
   return u;
 }
 
+export async function requireCoordinator(): Promise<AppUser> {
+  const u = await currentUser();
+  if (!u) redirect("/login");
+  if (u.role !== "coordinator") redirect(homePath(u.role));
+  return u;
+}
+
 export async function requireFacility(): Promise<AppUser> {
   const u = await currentUser();
   if (!u) redirect("/login");
@@ -108,7 +117,7 @@ export async function requireApplicant(): Promise<AppUser> {
 }
 
 export const homePath = (role: Role) =>
-  role === "carer" ? "/carer" : role === "facility" ? "/facility" : role === "applicant" ? "/join/details" : "/roster";
+  role === "carer" ? "/carer" : role === "facility" ? "/facility" : role === "applicant" ? "/join/details" : role === "coordinator" ? "/coordinator" : "/roster";
 
 /** Where someone lands after signing in. */
 export async function homeFor(): Promise<string> {

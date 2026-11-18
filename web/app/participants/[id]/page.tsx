@@ -4,6 +4,7 @@ import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { Portrait } from "@/components/CarerCells";
 import { participant } from "@/lib/participants/data";
+import { ViewAsButton } from "@/components/ViewAsButton";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export default async function Participant({ params }: { params: Promise<{ id: st
           <div>
             <h1>{name}</h1>
             <p className="lede">{[p.email, p.phone, p.coordinator ? `Coordinator: ${p.coordinator}` : null].filter(Boolean).join(" · ")}</p>
+            {p.coordinator_id && <ViewAsButton user={p.coordinator_id} back={`/participants/${id}`} label="View as coordinator" />}
           </div>
         </div>
         <nav className="section-grid">

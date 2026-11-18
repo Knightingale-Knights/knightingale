@@ -3,12 +3,12 @@ import { sql } from "@/lib/db";
 
 export type ParticipantRow = {
   id: string; first_name: string | null; last_name: string | null; photo: string | null;
-  phone: string | null; email: string | null; coordinator: string | null; active: boolean;
+  phone: string | null; email: string | null; coordinator: string | null; coordinator_id: string | null; active: boolean;
 };
 
 const BASE = sql`
   select p.id, p.first_name, p.last_name, p.profile_photo as photo, p.phone_number as phone, p.email,
-         nullif(trim(concat_ws(' ', c.first_name, c.last_name)), '') as coordinator, coalesce(p.active, false) as active
+         nullif(trim(concat_ws(' ', c.first_name, c.last_name)), '') as coordinator, c.id as coordinator_id, coalesce(p.active, false) as active
     from app.users p left join app.users c on c.id = p.coordinator_2`;
 
 /** Users marked as participants. */
