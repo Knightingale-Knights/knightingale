@@ -6,6 +6,7 @@ import { requireCarer } from "@/lib/auth";
 import { checkIn, checkOut, myShift, setAvailability, submitNote } from "@/lib/carer/data";
 import { CheckError, type Position } from "@/lib/carer/rules";
 import { isoDate } from "@/lib/invoicing/rules";
+import { accountNag } from "@/lib/account/nag";
 
 export type CheckResult = { ok: true; message: string } | { ok: false; message: string };
 
@@ -13,6 +14,9 @@ export type CheckResult = { ok: true; message: string } | { ok: false; message: 
 export async function checkAction(kind: "in" | "out", shiftId: string, pos: Position): Promise<CheckResult> {
   const me = await requireCarer();
   try {
+    if (kind === "in" && !me.viewAs && (await accountNag(me.id, isoDate(new Date()), false)).blocked) {
+      return { ok: false, message: "Please finish the items in your Account first. As soon as they're done, you can check in." };
+    }
     if (kind === "in") {
       const r = await checkIn(me.id, shiftId, pos);
       revalidatePath("/carer");

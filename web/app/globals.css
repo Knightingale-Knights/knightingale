@@ -653,3 +653,19 @@ button.secondary.is-saving::after, .outline-btn.is-saving::after { background: r
 button.is-done::after, .button.is-done::after { animation: none; width: 100%; transition: width 220ms ease-out; }
 @keyframes save-fill { from { width: 0; } to { width: 88%; } }
 @media (prefers-reduced-motion: reduce) { button.is-saving::after { animation-duration: 0.01s; } }
+
+/* Account reminder popup */
+.nag-backdrop { position: fixed; inset: 0; z-index: 80; background: rgba(26, 25, 23, 0.42); display: flex; align-items: center; justify-content: center; padding: 18px; animation: fade 200ms ease-out; }
+.nag { width: 100%; max-width: 460px; max-height: 92vh; overflow: auto; background: var(--paper); padding: 30px 28px 26px; box-shadow: var(--shadow-sheet); animation: rise 320ms var(--ease); }
+.nag h2 { font-family: var(--serif); font-weight: 300; font-size: 28px; line-height: 1.1; margin: 4px 0 12px; padding: 0; border: 0; text-transform: none; letter-spacing: -0.01em; }
+.nag .label { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-2); margin: 0; }
+.nag-list { list-style: none; padding: 0; margin: 16px 0; border-top: 1px solid var(--ink); }
+.nag-list a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+.nag-item { font-family: var(--serif); font-size: 17px; }
+.nag-why { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); text-align: right; }
+.nag-why.over { color: var(--alert); }
+.nag-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.nag-actions .button { display: flex; align-items: center; justify-content: center; }
+.nag-actions .secondary { min-height: 44px; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.no-ins { margin: 4px 0 16px; } .no-ins .secondary { width: 100%; min-height: 44px; }

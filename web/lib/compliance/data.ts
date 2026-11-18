@@ -35,21 +35,19 @@ async function current(d: DocDef, carer: string, tx: Tx = sql): Promise<DocRecor
 
 /** The documents for one Account section, in the order given (office documents and the Account-only parts). */
 export async function accountDocs(carer: string, keys: (DocKey | AccountDocKey)[], today: string): Promise<DocState[]> {
-  const out: DocState[] = [];
-  for (const k of keys) {
+  const one = async (k: DocKey | AccountDocKey): Promise<DocState | null> => {
     const def = docDef(k);
-    if (!def) continue;
+    if (!def) return null;
     if (def.key === "resume") {
       const [u] = await sql<{ resume: string | null }[]>`select nullif(resume, '') as resume from app.users where id = ${carer}`;
       const files = u?.resume ? [u.resume] : [];
       const r: DocRecord = { record: carer, has_record: true, has_file: files.length > 0, files, expiry: null, number: null, extra: {} };
-      out.push({ ...r, def, status: statusOf(def, r, today) });
-      continue;
+      return { ...r, def, status: statusOf(def, r, today) };
     }
     const r = await current(def, carer);
-    out.push({ ...r, def, status: statusOf(def, r, today) });
-  }
-  return out;
+    return { ...r, def, status: statusOf(def, r, today) };
+  };
+  return (await Promise.all(keys.map(one))).filter((x): x is DocState => x !== null);
 }
 
 export async function carerDocs(carer: string, today: string): Promise<DocState[]> {

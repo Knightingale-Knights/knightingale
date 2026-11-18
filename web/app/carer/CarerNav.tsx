@@ -7,6 +7,8 @@ import { unreadTotal } from "@/lib/chats/data";
 import { attentionCount } from "@/lib/compliance/data";
 import { isoDate } from "@/lib/invoicing/rules";
 import { ViewAsBar } from "@/components/ViewAsBar";
+import { AccountNag } from "@/components/AccountNag";
+import { accountNag } from "@/lib/account/nag";
 
 type On = "shifts" | "availability" | "chats" | "account" | "policies";
 
@@ -15,7 +17,13 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
   const me = await currentUser();
   // An unsigned carer signs the employment contract before anything else (an admin viewing as them is not stopped).
   if (CONTRACT_GATE && me?.role === "carer" && !me.viewAs && !(await contractState(me.id)).signature) redirect("/carer/contract");
-  const [unread, docs] = me ? await Promise.all([unreadTotal(me), attentionCount(me.id, isoDate(new Date()))]) : [0, 0];
+  const today = isoDate(new Date());
+  const [unread, docs, nag] = me
+    ? await Promise.all([unreadTotal(me), attentionCount(me.id, today), me.role === "carer" ? accountNag(me.id, today, !me.viewAs) : null])
+    : [0, 0, null];
+  // Past the two weeks' grace: the carer can only use their Account and Availability until it's sorted. The office is never stopped.
+  const free = on === "account" || on === "availability";
+  if (nag?.blocked && !me!.viewAs && !free) redirect("/carer/account");
   const items: { key: On; label: string; href: string; badge?: number }[] = [
     { key: "shifts", label: "My Shifts", href: shiftsHref },
     { key: "availability", label: "Availability", href: "/carer/availability" },
@@ -26,6 +34,10 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
   return (
     <>
       <ViewAsBar />
+      {nag && nag.items.length > 0 && (
+        <AccountNag nag={nag} closable={!nag.blocked || Boolean(me!.viewAs) || free}
+          storeKey={`nag:${today}:${nag.blocked ? "b" : "s"}:${nag.items.map((i) => i.key).join(",")}`} />
+      )}
       <aside className="side">
         <span className="wordmark small">knightingale</span>
         <span className="side-hello">Hi {name.split(" ")[0]}</span>
