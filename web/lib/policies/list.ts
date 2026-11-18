@@ -20,3 +20,4 @@ export const hrefOf = (p: Policy) => p.href ?? policyHref(p.slug);
 
 /** Klarra, the carer help desk, answers by text. */
 export const KLARRA_SMS = "sms:+61483931556";
+export const KLARRA_CHAT = "/carer/chats/klarra";

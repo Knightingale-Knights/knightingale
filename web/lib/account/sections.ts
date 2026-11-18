@@ -18,7 +18,7 @@ export const SECTIONS: Section[] = ([] as Section[]).concat([
   doc("first-aid", "First Aid", "first_aid"),
   { key: "contract", label: "Employment Contract", kind: "link", href: "/carer/contract" },
   { key: "handbook", label: "Handbook", kind: "link", href: "/docs/policies/handbook.pdf", external: true },
-  doc("passport", "Passport", "passport"),
+  doc("right-to-work", "Right to Work", "passport"),
   doc("licence", "Licence", "licence"),
   doc("insurance", "Insurance", "insurance"),
   doc("ndis", "NDIS Worker Screening", "ndis_screening"),

@@ -670,3 +670,14 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 .no-ins { margin: 4px 0 16px; } .no-ins .secondary { width: 100%; min-height: 44px; }
 .no-ins > .secondary, .no-ins > form .secondary { width: 100%; min-height: 44px; }
+
+/* Chats: red unread circle; Klarra chat */
+.badge.dot { min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--alert); color: #fff; line-height: 17px; font-size: 9px; }
+.side-btn.on .badge.dot, .side-btn:hover .badge.dot { background: var(--alert); color: #fff; }
+.klarra-row { margin-bottom: 18px; }
+.msg.pending { opacity: 0.6; }
+.msg.typing { display: flex; gap: 4px; padding: 12px 14px; }
+.msg.typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); animation: typing 1.2s infinite ease-in-out; }
+.msg.typing span:nth-child(2) { animation-delay: 0.15s; }
+.msg.typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes typing { 0%, 60%, 100% { opacity: 0.25; transform: none; } 30% { opacity: 1; transform: translateY(-3px); } }

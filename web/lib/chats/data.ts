@@ -3,6 +3,7 @@
 // from 30 days ago to 4 weeks ahead.
 import { sql } from "@/lib/db";
 import type { AppUser } from "@/lib/auth";
+import { klarraUnread } from "@/lib/klarra/chat";
 
 type Tx = typeof sql;
 type Who = Pick<AppUser, "id" | "name" | "role">;
@@ -47,8 +48,8 @@ export async function chatList(u: Who, now = new Date()): Promise<ChatSummary[]>
 }
 
 export async function unreadTotal(u: Who, now = new Date()) {
-  const list = await chatList(u, now);
-  return list.reduce((n, c) => n + c.unread, 0);
+  const [list, klarra] = await Promise.all([chatList(u, now), u.role === "carer" ? klarraUnread(u.id) : 0]);
+  return list.reduce((n, c) => n + c.unread, 0) + klarra;
 }
 
 /** The participant's chat, made the first time someone needs it (as Bubble does when a shift is created). */

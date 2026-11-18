@@ -48,8 +48,9 @@ export const DOCS: DocDef<DocKey>[] = [
 
 /** The Account page splits I.D and qualifications into their parts. Same tables, so the office view still sees them. */
 export const ACCOUNT_DOCS: DocDef<AccountDocKey>[] = [
-  { key: "passport", label: "Passport", table: "identity_documents", fileCols: ["passport"], uploadCol: "passport", uploadIsArray: false,
-    expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null, hint: "The photo page of your passport." },
+  { key: "passport", label: "Right to Work", table: "identity_documents", fileCols: ["passport"], uploadCol: "passport", uploadIsArray: false,
+    expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null,
+    hint: "A photo of your passport, visa or birth certificate, showing you can work in Australia." },
   { key: "licence", label: "Licence", table: "identity_documents", fileCols: ["license"], uploadCol: "license", uploadIsArray: false,
     expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null, hint: "The front of your driver licence." },
   // The resume is kept on the user, as in Bubble (uploaded through the profile-file path, not a compliance table).

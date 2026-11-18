@@ -44,7 +44,7 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
         <nav>
           {items.map((i) => (
             <Link key={i.key} href={i.href} className={`side-btn ${on === i.key ? "on" : ""}`}>
-              {i.label}{i.badge ? <span className="badge">{i.badge}</span> : null}
+              {i.label}{i.badge ? <span className={i.key === "chats" ? "badge dot" : "badge"}>{i.badge}</span> : null}
             </Link>
           ))}
         </nav>
