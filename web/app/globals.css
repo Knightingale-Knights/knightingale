@@ -806,4 +806,9 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 .coord-detail { margin: 0; font-size: 12px; color: var(--ink-2); white-space: pre-line; }
 .coord-shift-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 8px; }
 .coord-shift-btns .button { display: inline-flex; align-items: center; min-height: 40px; padding: 0 22px; text-decoration: none; }
+/* Admin participant calendar (same marks as the coordinator calendar) */
+.pcal { max-width: 620px; margin-top: 34px; }
+.cal-more { width: 100%; text-align: left; border-top: 1px solid var(--line); padding-top: 8px; }
+.cal-more summary { cursor: pointer; text-align: center; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2); padding: 6px 0; }
+.cal-more[open] summary { color: var(--ink); }
 

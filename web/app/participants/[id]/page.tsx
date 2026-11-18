@@ -5,6 +5,7 @@ import { TopBar } from "@/components/TopBar";
 import { Portrait } from "@/components/CarerCells";
 import { participant } from "@/lib/participants/data";
 import { ViewAsButton } from "@/components/ViewAsButton";
+import { ParticipantCalendar } from "@/components/ParticipantCalendar";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +17,10 @@ const SECTIONS = [
   "Support Plan", "Survey",
 ];
 
-export default async function Participant({ params }: { params: Promise<{ id: string }> }) {
+export default async function Participant({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ view?: string; d?: string }> }) {
   const staff = await requireStaff();
   const { id } = await params;
+  const sp = await searchParams;
   const p = await participant(id);
   if (!p) notFound();
   const name = [p.first_name, p.last_name].filter(Boolean).join(" ") || "(no name)";
@@ -41,6 +43,7 @@ export default async function Participant({ params }: { params: Promise<{ id: st
             ? <Link key={s} href={`/participants/${id}/${BUILT[s]}`} className="side-btn">{s}</Link>
             : <span key={s} className="side-btn off" title="Not built yet">{s}</span>)}
         </nav>
+        <ParticipantCalendar participant={id} view={sp.view === "day" ? "day" : "month"} day={sp.d} base={`/participants/${id}`} />
       </main>
     </div>
   );
