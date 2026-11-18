@@ -609,3 +609,24 @@ a.policy-btn.featured:hover { background: var(--ink-hover); }
 .acct-go { flex: none; width: 22px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 1.2; }
 .acct-out { text-align: center; margin-top: 30px; }
 .acct-out .link { color: var(--alert); font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; background: none; border: 0; cursor: pointer; }
+
+/* Personal Details and About You */
+.details-form { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
+.details-form label { display: flex; flex-direction: column; gap: 4px; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); }
+.details-form label .opt { text-transform: none; letter-spacing: 0; color: var(--ink-3); }
+.details-form input:not([type="radio"]) { font-size: 15px; letter-spacing: 0.02em; text-transform: none; color: var(--ink); }
+.details-form .hint { margin: -8px 0 0; }
+.details-form h2 { margin-top: 18px; }
+.radio-row { border: 0; padding: 0; margin: 4px 0 0; display: flex; gap: 18px; flex-wrap: wrap; }
+.radio-row legend { width: 100%; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px; }
+.radio-row label { flex-direction: row; align-items: center; gap: 6px; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--ink); }
+.about-btn { display: block; text-align: center; margin-top: 18px; }
+.about-steps { margin-top: 10px; }
+.about-intro p { font-family: var(--serif); font-size: 17px; font-weight: 300; line-height: 1.55; }
+.about-steps fieldset { border: 0; padding: 0; margin: 0; }
+.about-steps h2 { margin-top: 6px; }
+.about-count { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-3); margin: 0; }
+.about-steps label { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; font-family: var(--serif); font-size: 16px; font-weight: 300; }
+.about-steps textarea { width: 100%; font-size: 15px; }
+.about-nav { display: flex; gap: 10px; margin-top: 22px; }
+.about-nav .big { flex: 1; }
