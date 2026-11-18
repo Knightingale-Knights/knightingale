@@ -639,3 +639,16 @@ a.policy-btn.featured:hover { background: var(--ink-hover); }
 .doc-preview { text-align: center; margin: 8px 0 10px; }
 .doc-preview img { display: block; max-width: 100%; max-height: 420px; margin: 0 auto; border: 1px solid var(--line); background: #fff; }
 .doc-exp { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-2); margin-top: 12px; }
+
+/* Save progress: the button that sent a form fills from left to right until the save finishes */
+button.is-saving, .button.is-saving { position: relative; overflow: hidden; }
+button.is-saving:disabled { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+button.secondary.is-saving:disabled { background: transparent; color: var(--ink); }
+button.is-saving::after, .button.is-saving::after {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 0; background: rgba(246, 244, 240, 0.26); pointer-events: none;
+  animation: save-fill 2.4s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+button.secondary.is-saving::after, .outline-btn.is-saving::after { background: rgba(26, 25, 23, 0.14); }
+button.is-done::after, .button.is-done::after { animation: none; width: 100%; transition: width 220ms ease-out; }
+@keyframes save-fill { from { width: 0; } to { width: 88%; } }
+@media (prefers-reduced-motion: reduce) { button.is-saving::after { animation-duration: 0.01s; } }

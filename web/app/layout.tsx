@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Suspense } from "react";
 import "./globals.css";
+import { SaveProgress } from "@/components/SaveProgress";
 
 // Paper design system: Helvetica Neue (system) for UI text, Newsreader for titles.
 const serif = localFont({
@@ -18,7 +20,7 @@ export const metadata: Metadata = { title: "Knightingale", robots: { index: fals
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-AU" className={serif.variable}>
-      <body>{children}</body>
+      <body>{children}<Suspense fallback={null}><SaveProgress /></Suspense></body>
     </html>
   );
 }
