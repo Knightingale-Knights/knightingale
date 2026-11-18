@@ -8,6 +8,7 @@ import { isNurse, sectionOf } from "@/lib/account/sections";
 import { auDate, isoDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "../../CarerNav";
 import { DocList } from "../../documents/DocList";
+import { PdfPreview } from "@/components/PdfPreview";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,7 @@ export default async function AccountSection({ params, searchParams }: { params:
             {file && (
               <div className="doc-preview">
                 {pdf
-                  ? <a className="button" href={fileHref(file)} target="_blank" rel="noreferrer">View PDF</a>
+                  ? <PdfPreview src={fileHref(file)} alt={doc.def.label} />
                   : <a href={fileHref(file)} target="_blank" rel="noreferrer"><img src={fileHref(file)} alt={doc.def.label} /></a>}
                 <p className="doc-exp">{doc.expiry ? `Expires ${auDate(doc.expiry)}` : STATUS_LABEL[doc.status]}</p>
               </div>
