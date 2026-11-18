@@ -620,7 +620,8 @@ a.policy-btn.featured:hover { background: var(--ink-hover); }
 .radio-row { border: 0; padding: 0; margin: 4px 0 0; display: flex; gap: 18px; flex-wrap: wrap; }
 .radio-row legend { width: 100%; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px; }
 .radio-row label { flex-direction: row; align-items: center; gap: 6px; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--ink); }
-.about-btn { display: block; text-align: center; margin-top: 18px; }
+.outline-btn { display: flex; align-items: center; justify-content: center; min-height: 46px; margin-top: 10px; border: 1px solid var(--ink); background: transparent; color: var(--ink); text-decoration: none; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; transition: background 160ms, color 160ms; }
+.outline-btn:hover { background: var(--ink); color: var(--paper); }
 .about-steps { margin-top: 10px; }
 .about-intro p { font-family: var(--serif); font-size: 17px; font-weight: 300; line-height: 1.55; }
 .about-steps fieldset { border: 0; padding: 0; margin: 0; }

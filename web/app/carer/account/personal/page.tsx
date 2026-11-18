@@ -38,9 +38,9 @@ export default async function PersonalDetails({ searchParams }: { searchParams: 
           <label>Name<input name="em_name" defaultValue={d.em_name} maxLength={100} /></label>
           <label>Relationship<input name="em_relationship" defaultValue={d.em_relationship} maxLength={60} placeholder="e.g. Partner, Parent" /></label>
           <label>Phone<input name="em_phone" type="tel" defaultValue={d.em_phone} /></label>
+          <Link className="outline-btn" href="/carer/account/about">{about.why_care ? "Edit About You" : "About You"}</Link>
           <button className="big">Save</button>
         </form>
-        <Link className="big button about-btn" href="/carer/account/about">{about.why_care ? "Edit About You" : "About You"}</Link>
       </main>
     </div>
   );
