@@ -10,7 +10,7 @@ export type Section =
 
 const doc = (key: string, label: string, k: Key, extra: { nurses?: true } = {}): Section => ({ key, label, kind: "docs", docs: [k], ...extra });
 
-export const SECTIONS: Section[] = [
+export const SECTIONS: Section[] = ([] as Section[]).concat([
   { key: "personal", label: "Personal Details", kind: "link", href: "/carer/account/personal" },
   { key: "availability", label: "Availability", kind: "link", href: "/carer/availability" },
   { key: "bank", label: "Bank Details", kind: "link", href: "/carer/account/bank" },
@@ -29,8 +29,9 @@ export const SECTIONS: Section[] = [
   doc("ahpra", "AHPRA", "ahpra", { nurses: true }),
   { key: "super", label: "Superannuation", kind: "link", href: "/carer/account/super" },
   { key: "tfn", label: "Tax File Number", kind: "link", href: "/carer/account/tfn" },
-  { key: "vaccinations", label: "Vaccinations", kind: "docs", docs: ["flu", "covid"], tick: ["flu"] },
-];
+  doc("influenza", "Influenza", "flu"),
+  doc("covid", "COVID-19", "covid"),
+] as Section[]).sort((a, b) => a.label.localeCompare(b.label, "en", { sensitivity: "base" }));
 
 /** EN and RN carers see AHPRA. */
 export const isNurse = (roles: string[] | null) => (roles ?? []).some((r) => r === "en" || r === "rn");
