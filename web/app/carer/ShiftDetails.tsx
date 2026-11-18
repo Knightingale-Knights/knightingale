@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { CarerShift } from "@/lib/carer/data";
-import { onShiftDay } from "@/lib/carer/rules";
+import { NOTE_CLOSED, noteOpen, onShiftDay } from "@/lib/carer/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { carerIntakeAction, incidentAction, removeReceiptAction, removeTravelAction, requestSummaryAction, travelAction } from "./actions";
 import { ReceiptDrop } from "./extras";
@@ -163,6 +163,7 @@ async function Section({ s, day, tab, first, email, msgs }: { s: CarerShift; day
 
   if (tab === "notes") {
     if (s.note_submitted) return <p className="banner ok">Your progress note has been submitted.</p>;
+    if (!noteOpen(s)) return <p className="hint">{NOTE_CLOSED} If you missed it, text Klarra on 0483 931 556.</p>;
     return <NoteSteps shiftId={s.id} error={msgs.error} />;
   }
 

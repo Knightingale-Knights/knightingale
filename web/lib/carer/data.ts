@@ -2,7 +2,7 @@
 import { sql } from "@/lib/db";
 import { addDays, slotsFor, SLOTS } from "@/lib/roster/rules";
 import { fromDay, melbDay } from "@/lib/roster/queries";
-import { CheckError, NOTE_FIELDS, assertCanCheck, onShiftDay, type Position } from "./rules";
+import { CheckError, NOTE_CLOSED, NOTE_FIELDS, assertCanCheck, noteOpen, onShiftDay, type Position } from "./rules";
 import { fillNoteFields } from "./noteFields";
 
 type Tx = typeof sql;
@@ -151,6 +151,7 @@ export async function submitNote(carer: string, id: string, summary: string, ext
     if (s.kind !== "ndis") throw new Error("Progress notes are only needed for NDIS shifts.");
     if (s.cancelled) throw new Error("This shift has been cancelled.");
     if (s.note_submitted) throw new Error("A progress note has already been submitted for this shift.");
+    if (!noteOpen(s)) throw new Error(NOTE_CLOSED);
     const [row] = await t<{ id: string }[]>`
       insert into app.progress_notes (carer, participant, coordinator, shift, date, summary, comms, best_day, submit, created_by)
       select ${carer}, s.participant, s.coordinator, s.id, s.date, ${text}, ${comms}, ${bestDay}, true, ${carer} from app.shifts s where s.id = ${id}
