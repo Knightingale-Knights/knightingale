@@ -57,6 +57,12 @@ export default async function CoordinatorCalendar({ searchParams }: { searchPara
       ) : <div className="coord-carer muted">Carer to be confirmed</div>}
       {s.carer_phone && <a className="coord-phone" href={`tel:${s.carer_phone}`}>{s.carer_phone}</a>}
       <p className="coord-time">{clockLabel(s.start_time)} - {clockLabel(s.end_time)}</p>
+      {(s.note_id || s.appt_id) && (
+        <div className="coord-shift-btns">
+          {s.note_id && <Link className="button" href={`/coordinator/participants/${s.participant_id}/notes/${s.note_id}`}>Progress Note</Link>}
+          {s.appt_id && <Link className="button secondary" href={`/coordinator/appointments/${s.appt_id}`}>Appointment</Link>}
+        </div>
+      )}
     </article>
   );
 
@@ -113,11 +119,11 @@ export default async function CoordinatorCalendar({ searchParams }: { searchPara
               <section className="coord-shifts appt">
                 <h2>Appointments</h2>
                 {appts.map((a) => (
-                  <article key={a.id} className="coord-shift">
+                  <Link key={a.id} href={`/coordinator/appointments/${a.id}`} className="coord-shift link">
                     <h3>{a.participant}</h3>
                     {a.time && <p className="coord-time">{a.time}</p>}
                     {a.details && <p className="coord-detail">{a.details}</p>}
-                  </article>
+                  </Link>
                 ))}
               </section>
             )}

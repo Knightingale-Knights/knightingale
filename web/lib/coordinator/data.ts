@@ -29,15 +29,25 @@ export async function myParticipant(coordinator: string, id: string): Promise<My
 
 export type CoordShift = {
   id: string; day: string; start_time: number | null; end_time: number | null;
-  participant: string; carer_first: string | null; carer_photo: string | null; carer_phone: string | null;
+  participant: string; participant_id: string; carer_first: string | null; carer_photo: string | null; carer_phone: string | null;
+  note_id: string | null; appt_id: string | null;
 };
 
 /** Shifts between two days (inclusive), optionally for one participant. Cancelled shifts are left out. */
 export async function coordShifts(coordinator: string, from: string, to: string, participant: string | null): Promise<CoordShift[]> {
   return sql<CoordShift[]>`
     select s.id, ${melbDay("s.date")} as day, s.start_time, s.end_time,
-           trim(concat_ws(' ', p.first_name, p.last_name)) as participant,
-           split_part(c.first_name, ' ', 1) as carer_first, c.profile_photo as carer_photo, c.phone_number as carer_phone
+           trim(concat_ws(' ', p.first_name, p.last_name)) as participant, p.id as participant_id,
+           split_part(c.first_name, ' ', 1) as carer_first, c.profile_photo as carer_photo, c.phone_number as carer_phone,
+           coalesce(
+             (select n.id from app.progress_notes n where n.id = s.progress_note and n.participant = s.participant),
+             (select n.id from app.progress_notes n where n.shift = s.id order by n.created_at desc limit 1)
+           ) as note_id,
+           (select e.id from app.events e
+             where e.shift = s.id
+                or (e.participant = s.participant
+                    and (e.date at time zone 'Australia/Melbourne')::date = (s.date at time zone 'Australia/Melbourne')::date)
+             order by (e.shift = s.id) desc nulls last, e.date limit 1) as appt_id
       from app.shifts s
       join app.users p on p.id = s.participant
       left join app.users c on c.id = s.carer
@@ -146,4 +156,19 @@ export async function coordNotes(coordinator: string, from: string, to: string, 
        and coalesce(n.date, n.created_at) >= ${fromDay(from)} and coalesce(n.date, n.created_at) < ${fromDay(addDays(to, 1))}
        and (${participant}::uuid is null or n.participant = ${participant}::uuid)
      order by coalesce(n.date, n.created_at)`;
+}
+
+export type AppointmentDetail = Appointment & { notes: string | null; carer: string | null; address: string | null; done: boolean };
+
+/** One appointment, only if it is for one of this coordinator's participants. */
+export async function coordAppointment(coordinator: string, id: string): Promise<AppointmentDetail | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const [a] = await sql<AppointmentDetail[]>`
+    select e.id, ${melbDay("e.date")} as day, nullif(e.time, '') as time,
+           trim(concat_ws(' ', p.first_name, p.last_name)) as participant, nullif(trim(e.details), '') as details,
+           nullif(trim(e.notes), '') as notes, nullif(trim(concat_ws(' ', c.first_name, c.last_name)), '') as carer,
+           e.address->>'address' as address, coalesce(e.done, false) as done
+      from app.events e join app.users p on p.id = e.participant left join app.users c on c.id = e.carer
+     where e.id = ${id} and p.coordinator_2 = ${coordinator}`;
+  return a ?? null;
 }

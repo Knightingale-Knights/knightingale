@@ -804,4 +804,6 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 .coord-shift.link { color: var(--ink); text-decoration: none; }
 .coord-shift.link:hover { border-color: var(--ink-3); }
 .coord-detail { margin: 0; font-size: 12px; color: var(--ink-2); white-space: pre-line; }
+.coord-shift-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 8px; }
+.coord-shift-btns .button { display: inline-flex; align-items: center; min-height: 40px; padding: 0 22px; text-decoration: none; }
 
