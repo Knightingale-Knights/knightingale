@@ -4,7 +4,7 @@ export type Policy = { slug: string; title: string; ready?: boolean; featured?: 
 
 export const POLICIES: Policy[] = [
   { slug: "culture-of-care", title: "Culture of Care", featured: true },
-  { slug: "emergency-policy", title: "Emergency Policy" },
+  { slug: "emergency-policy", title: "Emergency Policy", ready: true },
   { slug: "employment-contract", title: "Employment Contract", ready: true, href: "/carer/contract" },
   { slug: "first-shift", title: "Your First Shift", ready: true },
   { slug: "handbook", title: "Handbook", ready: true },
