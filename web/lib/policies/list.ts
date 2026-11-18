@@ -12,6 +12,7 @@ export const POLICIES: Policy[] = [
   { slug: "incident-management-policy", title: "Incident Report Policy", ready: true },
   { slug: "progress-note-guide", title: "Progress Notes Guide", ready: true },
   { slug: "shift-policy", title: "Shift Policy", ready: true },
+  { slug: "casual-employment-information-statement", title: "Casual Employment Information Statement", ready: true },
 ];
 
 export const policyHref = (slug: string) => `/docs/policies/${slug}.pdf`;

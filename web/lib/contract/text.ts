@@ -70,7 +70,7 @@ export const CONTRACT: Block[] = [
     "NDIS/Community: you check in, check out and write a progress note.",
   ], after: ["You acknowledge and agree that each Assignment is regarded as a separate and distinct work shift, meaning that Knightingale shall not pay to you (nor is legally obliged to pay to you):"] },
   { list: ["A wage for time spent travelling to and from each Assignment; and", "Any vehicle (or similar) allowance for kilometres travelled by you to and from each Assignment."] },
-  { h: "Superannuation", p: ["Superannuation contributions are those contributions which Knightingale is required to make to satisfy its superannuation obligations in respect of you under the Superannuation Guarantee (Administration) Act 1992, and will be paid by Knightingale into the employer fund or such other superannuation fund as may be nominated by you."] },
+  { h: "Superannuation", p: ["Superannuation contributions are those contributions which Knightingale is required to make to satisfy its superannuation obligations in respect of you under the Superannuation Guarantee (Administration) Act 1992, and will be paid by Knightingale into the employer fund or such other superannuation fund as may be nominated by you.", "Under Payday Super, which started on 1 July 2026, Knightingale pays super at the same time as your wages, so that contributions reach your super fund within 7 business days of payday."] },
   { h: "Method of Payment", p: ["Your wage and other benefits will be paid by way of direct deposit to a bank account nominated by you."] },
   { h: "Expenses", p: ["You must ensure that any business expense has been approved prior to the expenditure being incurred, and that you have detailed tax receipts for the expenses incurred."] },
   { h: "Deductions", p: ["We are entitled to deduct from your wage or any termination payment any overpayment of wages or other benefits."] },
@@ -89,7 +89,7 @@ export const CONTRACT: Block[] = [
   ], after: ["You agree that you may be required to attend conferences, trade shows and other functions on behalf of Knightingale as directed by Knightingale from time to time and, in such an event, you shall be paid for all time spent in attending that event."] },
   { h: "Our Property", p: [
     "You may at any time be required to return any or all Knightingale property which may be in your possession, including any Confidential Information, documents, equipment or software (including any computer information) and keys.",
-    "You agree and undertake not to retain copies of any such confidential information. To assist Knightingale in ensuring that you fulfil your obligations, you shall provide for inspection and make available to Knightingale to inspect all laptop computers, all notebooks and other electronic devices that store electronic data.",
+    "You agree and undertake not to retain copies of any such confidential information.",
   ] },
   { h: "Leave Generally", p: [
     "The rules set out in the Fair Work Act 2009 in relation to the taking of compassionate leave, carer's leave and parental leave will apply in conjunction with this agreement.",
