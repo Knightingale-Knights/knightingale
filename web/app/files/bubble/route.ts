@@ -15,13 +15,13 @@ export async function GET(req: Request) {
   if (!me || !isBubbleFile(url)) return new Response("Not found", { status: 404 });
   if (me.role !== "admin" && !(await ownsFile(me.id, url))) return new Response("Not found", { status: 404 });
   const c = await copied(url);
-  if (c?.mime !== PHOTO_MIME && (await isProfilePhoto(url))) {
+  if (!c?.path.startsWith("photos/") && (await isProfilePhoto(url))) {
     const small = await shrinkBubblePhoto(url, c);
     if (small) return new Response(new Uint8Array(small), { headers: PHOTO_HEADERS });
   }
   const res = c ? await fromStorage(c.path) : null;
   if (!res) return NextResponse.redirect(url); // not copied yet: Bubble still has it
   return new Response(res.body, {
-    headers: c!.mime === PHOTO_MIME ? PHOTO_HEADERS : { "Content-Type": c!.mime ?? "application/octet-stream", "Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff" },
+    headers: c!.path.startsWith("photos/") ? PHOTO_HEADERS : { "Content-Type": c!.mime ?? "application/octet-stream", "Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff" },
   });
 }
