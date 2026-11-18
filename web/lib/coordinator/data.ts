@@ -100,3 +100,22 @@ export async function coordinators(q: string): Promise<CoordinatorRow[]> {
        and (${like}::text is null or lower(concat_ws(' ', c.first_name, c.last_name, c.email, c.phone_number)) like ${like})
      order by c.first_name, c.last_name`;
 }
+
+export type DocKey = "notes" | "carers" | "intake" | "risk" | "agreement" | "points" | "support" | "medication" | "emergency" | "consent";
+
+/** Which of the participant's documents exist, as Bubble checked the participant's own fields. */
+export async function participantDocs(participant: string): Promise<Record<DocKey, boolean>> {
+  const [r] = await sql<Record<DocKey, boolean>[]>`
+    select exists (select 1 from app.progress_notes n where n.participant = u.id) as notes,
+           exists (select 1 from app.users_carers c where c.owner_id = u.id) as carers,
+           exists (select 1 from app.intakes x where x.id = u.intake_form) as intake,
+           exists (select 1 from app.risk_assessments x where x.id = u.risk_assessment) as risk,
+           exists (select 1 from app.service_agreements x where x.id = u.service_agreement) as agreement,
+           exists (select 1 from app.users_shift_duties d where d.users_id = u.id) as points,
+           exists (select 1 from app.support_plans x where x.id = u.support_plan) as support,
+           exists (select 1 from app.medication_charts x where x.id = u.medication_chart) as medication,
+           exists (select 1 from app.emergency_plans x where x.id = u.emergency_plan) as emergency,
+           exists (select 1 from app.consents x where x.id = u.consent) as consent
+      from app.users u where u.id = ${participant}`;
+  return r;
+}
