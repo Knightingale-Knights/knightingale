@@ -10,6 +10,7 @@ export type DocDef<K extends string = DocKey | AccountDocKey> = {
   fileCols: string[]; // a record "has a file" when any of these is set ("[]" marks a list column)
   uploadCol: string | null; // where a new upload goes (null: no file, details only)
   uploadIsArray: boolean;
+  fileOptional?: boolean; // details alone count as on file (the picture is extra)
   expiryCol: string | null;
   numberCol: string | null;
   numberLabel: string | null;
@@ -31,9 +32,9 @@ export const DOCS: DocDef<DocKey>[] = [
   { key: "wwcc", label: "Working with Children Check", table: "wwcc_checks", fileCols: ["image"], uploadCol: "image", uploadIsArray: false,
     expiryCol: "expiry", numberCol: "card_number", numberLabel: "Card number", ai: { label: "Working with Children Check card", fallbackMonths: null }, roster: "all",
     hint: "A photo of your WWCC card." },
-  { key: "ndis_screening", label: "NDIS worker screening", table: "ndis_screening_checks", fileCols: [], uploadCol: null, uploadIsArray: false,
-    expiryCol: "expiry_date", numberCol: "id_number", numberLabel: "Screening ID", ai: null, roster: "ndis",
-    hint: "Your NDIS Worker Screening ID and its expiry date." },
+  { key: "ndis_screening", label: "NDIS worker screening", table: "ndis_screening_checks", fileCols: ["image"], uploadCol: "image", uploadIsArray: false,
+    fileOptional: true, expiryCol: "expiry_date", numberCol: "id_number", numberLabel: "Screening ID", ai: null, roster: "ndis",
+    hint: "Your NDIS Worker Screening ID and its expiry date. A picture of your clearance is helpful too." },
   { key: "flu", label: "Flu vaccination", table: "vaccinations", fileCols: ["flu", "influenza[]"], uploadCol: "influenza", uploadIsArray: true,
     expiryCol: "expiry", numberCol: null, numberLabel: null, ai: { label: "Influenza (flu) vaccination record", fallbackMonths: 12 }, roster: null,
     hint: "Your flu vaccination record or immunisation history statement." },
@@ -74,7 +75,8 @@ export type Status = "ok" | "soon" | "expired" | "missing" | "check";
 
 /** missing: nothing on file. check: on file but no expiry date yet (for a document that has one). */
 export function statusOf(d: DocDef, r: { has_file: boolean; has_record: boolean; expiry: string | null; number: string | null } | undefined, today: string): Status {
-  const onFile = d.uploadCol ? Boolean(r?.has_file) : Boolean(r?.has_record && (r.number || r.expiry));
+  const typed = Boolean(r?.has_record && (r.number || r.expiry));
+  const onFile = d.uploadCol && !d.fileOptional ? Boolean(r?.has_file) : Boolean(r?.has_file) || typed;
   if (!onFile) return "missing";
   if (!d.expiryCol) return "ok";
   if (!r?.expiry) return "check";
