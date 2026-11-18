@@ -17,7 +17,7 @@ export async function accountOverview(carer: string, today: string) {
              exists (select 1 from app.availability a where a.carer = u.id and coalesce(a.available, false)) as avail,
              exists (select 1 from app.bank_details b where b.carer = u.id and b.acc_no is not null and b.bsb_no is not null) as bank,
              exists (select 1 from app.superannuation s where s.carer = u.id and s.fund_name is not null and s.member_no is not null) as super,
-             exists (select 1 from app.tfn_declarations t where t.carer = u.id and t.tax_file_number is not null) as tfn,
+             exists (select 1 from app.tfn_declarations t where t.carer = u.id and t.tax_file_number is not null and nullif(t.signature, '') is not null) as tfn,
              exists (select 1 from app.identity_documents i where i.carer = u.id and i.insurance is not null) as insurance
         from app.users u where u.id = ${carer}`;
   const sections = sectionsFor(u.roles);

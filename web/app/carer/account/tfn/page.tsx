@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireCarer } from "@/lib/auth";
 import { RESIDENCY, tfnOf } from "@/lib/account/money";
 import { fileHref } from "@/lib/files";
+import { auDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "../../CarerNav";
 import { SignaturePad } from "../../contract/SignaturePad";
 import { tfnAction } from "../actions";
@@ -46,13 +47,16 @@ export default async function TaxFileNumber({ searchParams }: { searchParams: Pr
             <legend>Do you have a student debt (HELP, VSL, SFSS, SSL or TSL)?</legend>
             <YesNo name="student_debt" value={v.student_debt} />
           </fieldset>
-          {v.signature && (
-            <div>
-              <p className="hint">Your current signature</p>
+          {v.signature ? (
+            <div className="contract-sign">
+              <p className="label">Your signature</p>
               <img className="sig-img" src={fileHref(v.signature)} alt="Your signature" />
+              {v.signed_at && <p>Signed {auDate(v.signed_at)}</p>}
+              <p className="hint">To change any details, sign again below.</p>
             </div>
+          ) : (
+            <p className="banner error">Not signed yet. Please sign below to declare these details are true and correct.</p>
           )}
-          <p className="hint">Please sign below to declare these details are true and correct.</p>
           <SignaturePad disabled={Boolean(me.viewAs)} label="Done" />
         </form>
       </main>

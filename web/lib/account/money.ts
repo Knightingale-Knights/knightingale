@@ -4,7 +4,7 @@ import { sql } from "@/lib/db";
 export class MoneyError extends Error {}
 
 export type Super = { fund_name: string; fund_abn: string; fund_usi: string; member_no: string };
-export type Tfn = { tfn: string; residency: string; threshold: boolean | null; student_debt: boolean | null; signature: string | null };
+export type Tfn = { tfn: string; residency: string; threshold: boolean | null; student_debt: boolean | null; signature: string | null; signed_at?: Date | null };
 
 export const RESIDENCY = ["An Australian resident for tax purposes", "A Foreign resident for tax purposes", "A Working Holiday Maker"] as const;
 
@@ -41,7 +41,7 @@ export async function saveSuper(carer: string, i: Super) {
 export async function tfnOf(carer: string): Promise<Tfn> {
   const [r] = await sql<Tfn[]>`
     select coalesce(tax_file_number, '') as tfn, coalesce(working_rights, '') as residency, tax_free_threshold as threshold,
-           student_loan_debt as student_debt, signature
+           student_loan_debt as student_debt, nullif(signature, '') as signature, updated_at as signed_at
       from app.tfn_declarations where carer = ${carer} order by updated_at desc nulls last limit 1`;
   return r ?? { tfn: "", residency: "", threshold: null, student_debt: null, signature: null };
 }
