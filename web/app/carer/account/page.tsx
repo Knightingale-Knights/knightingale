@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { requireCarer } from "@/lib/auth";
 import { accountOverview } from "@/lib/account/data";
-import { SECTIONS } from "@/lib/account/sections";
 import { positionOf } from "@/lib/contract/text";
 import { isoDate } from "@/lib/invoicing/rules";
 import { Portrait } from "@/components/CarerCells";
@@ -32,7 +31,7 @@ export default async function Account() {
           <p className="acct-role">{positionOf(a.roles)}</p>
         </div>
         <ul className="acct-list">
-          {SECTIONS.map((s) => {
+          {a.sections.map((s) => {
             const href = s.kind === "link" ? s.href : `/carer/account/${s.key}`;
             const ext = s.kind === "link" && s.external;
             return (

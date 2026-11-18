@@ -27,7 +27,8 @@ export default async function AccountSection({ params, searchParams }: { params:
   const s = sectionOf(section);
   if (!s) notFound();
   if (s.kind === "link") redirect(s.href);
-  const keys = s.kind === "docs" ? s.docs.filter((k) => !(s.nursesOnly as string[] | undefined)?.includes(k) || isNurse(me.roles)) : [];
+  if (s.kind === "docs" && s.nurses && !isNurse(me.roles)) notFound();
+  const keys = s.kind === "docs" ? s.docs : [];
   const docs = keys.length ? await accountDocs(me.id, keys, isoDate(new Date())) : [];
   const doc = docs.find((d) => d.def.key === sp.tab) ?? docs[0];
   const file = doc?.files.at(-1) ?? null;

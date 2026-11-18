@@ -1,30 +1,39 @@
-// The carer Account page: one row per section, like Bubble's account page.
+// The carer Account page: one row per item, like Bubble's account page. Each document has its own row,
+// so it's clear which one is missing.
 import type { AccountDocKey, DocKey } from "@/lib/compliance/docs";
 
+type Key = DocKey | AccountDocKey;
 export type Section =
-  | { key: string; label: string; kind: "docs"; docs: (DocKey | AccountDocKey)[]; tick: DocKey[]; nursesOnly?: AccountDocKey[] }
+  | { key: string; label: string; kind: "docs"; docs: Key[]; tick?: Key[]; nurses?: true }
   | { key: string; label: string; kind: "link"; href: string; external?: boolean }
   | { key: string; label: string; kind: "soon" };
+
+const doc = (key: string, label: string, k: Key, extra: { nurses?: true } = {}): Section => ({ key, label, kind: "docs", docs: [k], ...extra });
 
 export const SECTIONS: Section[] = [
   { key: "personal", label: "Personal Details", kind: "link", href: "/carer/account/personal" },
   { key: "availability", label: "Availability", kind: "link", href: "/carer/availability" },
   { key: "bank", label: "Bank Details", kind: "link", href: "/carer/account/bank" },
-  { key: "certifications", label: "Certifications", kind: "docs", docs: ["cpr", "first_aid"], tick: ["cpr", "first_aid"] },
+  doc("cpr", "CPR", "cpr"),
+  doc("first-aid", "First Aid", "first_aid"),
   { key: "contract", label: "Employment Contract", kind: "link", href: "/carer/contract" },
   { key: "handbook", label: "Handbook", kind: "link", href: "/docs/policies/handbook.pdf", external: true },
-  { key: "id", label: "I.D", kind: "docs", docs: ["passport", "licence"], tick: ["id"] },
-  { key: "insurance", label: "Insurance", kind: "docs", docs: ["insurance"], tick: [] },
-  { key: "ndis", label: "NDIS Worker Screening", kind: "docs", docs: ["ndis_screening"], tick: ["ndis_screening"] },
-  { key: "police", label: "Police Check", kind: "docs", docs: ["police"], tick: ["police"] },
-  { key: "wwcc", label: "WWCC", kind: "docs", docs: ["wwcc"], tick: ["wwcc"] },
-  { key: "qualifications", label: "Qualifications", kind: "docs", docs: ["resume", "certificate", "ahpra"], tick: ["qualification"], nursesOnly: ["ahpra"] },
+  doc("passport", "Passport", "passport"),
+  doc("licence", "Licence", "licence"),
+  doc("insurance", "Insurance", "insurance"),
+  doc("ndis", "NDIS Worker Screening", "ndis_screening"),
+  doc("police", "Police Check", "police"),
+  doc("wwcc", "WWCC", "wwcc"),
+  doc("resume", "Resume", "resume"),
+  doc("certificate", "Qualification Certificate", "certificate"),
+  doc("ahpra", "AHPRA", "ahpra", { nurses: true }),
   { key: "super", label: "Superannuation", kind: "link", href: "/carer/account/super" },
   { key: "tfn", label: "Tax File Number", kind: "link", href: "/carer/account/tfn" },
   { key: "vaccinations", label: "Vaccinations", kind: "docs", docs: ["flu", "covid"], tick: ["flu"] },
 ];
 
-export const sectionOf = (k: string) => SECTIONS.find((s) => s.key === k) ?? null;
-
-/** EN and RN carers see the AHPRA tab. */
+/** EN and RN carers see AHPRA. */
 export const isNurse = (roles: string[] | null) => (roles ?? []).some((r) => r === "en" || r === "rn");
+
+export const sectionsFor = (roles: string[] | null) => SECTIONS.filter((s) => !(s.kind === "docs" && s.nurses) || isNurse(roles));
+export const sectionOf = (k: string) => SECTIONS.find((s) => s.key === k) ?? null;
