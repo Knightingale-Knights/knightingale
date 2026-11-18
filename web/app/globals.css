@@ -743,3 +743,34 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 .coord-emails { margin-top: 0 !important; display: flex; flex-direction: column; gap: 10px; }
 .coord-emails button.link { text-align: left; color: var(--alert); font-size: 11px; letter-spacing: 0.06em; text-transform: none; }
 .coord-notice { margin: 0; padding: 12px; border: 1px solid var(--alert); color: var(--alert); font-size: 10px; line-height: 1.5; }
+
+/* Carer payslips: list from the shifts page, and Bubble's payslip layout (prints to PDF) */
+.pay-top { display: flex; justify-content: center; gap: 12px; padding: 14px; margin: -8px 0 18px; background: var(--desk); }
+.pay-top .button { display: inline-flex; align-items: center; text-decoration: none; min-height: 34px; }
+.pay-top .button.close { color: var(--alert); border-color: var(--alert); }
+.pay-top .button.close:hover { background: var(--alert); color: var(--paper); }
+.slip-list { list-style: none; padding: 0; margin: 14px 0 0; }
+.slip-list a { display: grid; grid-template-columns: 1fr auto 20px; align-items: center; gap: 10px; padding: 24px 10px; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 12px; letter-spacing: 0.06em; }
+.slip-list a:hover { background: var(--desk); }
+.slip-list .go { color: var(--ink-3); font-size: 18px; text-align: right; }
+.slip-page { min-height: 100vh; background: var(--desk); padding: 26px 12px 60px; }
+.slip { max-width: 640px; margin: 0 auto; background: var(--paper); box-shadow: var(--shadow-sheet); animation: rise 420ms var(--ease); }
+.slip-head { position: relative; padding: 16px; text-align: center; border-bottom: 1px solid var(--line); font-size: 13px; letter-spacing: 0.14em; }
+.slip-x { position: absolute; right: 16px; top: 10px; font-size: 22px; color: var(--ink-3); text-decoration: none; }
+.slip-body { padding: 34px 22px 26px; }
+.slip-co { margin: 0; font-family: var(--serif); font-size: 18px; }
+.slip-abn, .slip-addr { margin: 4px 0 0; font-size: 10px; letter-spacing: 0.08em; color: var(--ink-3); }
+.slip-name { margin: 40px 0 0; font-size: 18px; letter-spacing: 0.06em; }
+.slip-body hr { border: 0; border-top: 1px solid var(--ink-3); margin: 26px 8% 20px; }
+.slip-period { margin: 0 0 40px; text-align: center; font-size: 11px; letter-spacing: 0.1em; }
+.slip-label { margin: 34px 0 8px; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
+.slip-net { margin: 0; font-family: var(--serif); font-size: 22px; }
+.slip-rows { border-top: 1px solid var(--line-2); }
+.slip-row { display: flex; justify-content: space-between; padding: 16px 12px; border-bottom: 1px solid var(--line-2); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+.slip-row span:last-child { letter-spacing: 0.06em; }
+.slip-pdf { width: 100%; min-height: 48px; margin-top: 50px; }
+@media print {
+  .slip-page { background: none; padding: 0; }
+  .slip { box-shadow: none; max-width: none; }
+  .slip-x, .slip-pdf { display: none !important; }
+}

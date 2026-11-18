@@ -45,6 +45,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
         <CheckPopup kind={due.kind!} shiftId={due.s.id} title={`${due.s.place ?? "Your shift"}, ${clockLabel(due.s.start_time)} – ${clockLabel(due.s.end_time)}`} detail={due.s.address_text ?? ""} />
       )}
       <main className="carer-main">
+        <div className="pay-top"><Link href="/carer/payslips" className="button secondary">Payslips</Link></div>
         {!me.approved && <p className="banner ok">Thanks for applying! We&apos;re reviewing your application and will be in touch. Keep your documents up to date in the Documents tab.</p>}
         {day ? <DayList day={day} today={today} shifts={shifts} now={now} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
