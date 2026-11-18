@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@/lib/auth";
 import { DocError, setDetails, uploadDoc } from "@/lib/compliance/data";
-import { docDef, STATUS_LABEL, type DocKey } from "@/lib/compliance/docs";
+import { docDef, STATUS_LABEL, type AccountDocKey, type DocKey } from "@/lib/compliance/docs";
+import { uploadProfileFile, SignupError } from "@/lib/onboarding/data";
 import { auDate, isoDate } from "@/lib/invoicing/rules";
 
 export type DocResult = { ok: boolean; message: string };
@@ -22,9 +23,18 @@ const pathFor = (role: string, carer: string, back?: string) =>
 
 export async function uploadDocAction(f: FormData): Promise<DocResult> {
   const { me, carer } = await who(f.get("carer"));
-  const key = String(f.get("doc") ?? "") as DocKey;
+  const key = String(f.get("doc") ?? "") as DocKey | AccountDocKey;
   const file = f.get("file");
   if (!(file instanceof File)) return { ok: false, message: "Choose a file to upload." };
+  if (key === "resume") {
+    try {
+      await uploadProfileFile(carer, "resume", { name: file.name, type: file.type, bytes: Buffer.from(await file.arrayBuffer()) });
+      revalidatePath("/carer/account", "layout");
+      return { ok: true, message: "Thanks, your resume is saved." };
+    } catch (e) {
+      return { ok: false, message: e instanceof SignupError ? e.message : "Upload failed. Please try again." };
+    }
+  }
   try {
     const r = await uploadDoc(carer, key, { name: file.name, type: file.type, bytes: Buffer.from(await file.arrayBuffer()) }, me.id, isoDate(new Date()));
     revalidatePath(pathFor(me.role, carer));
@@ -45,7 +55,7 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
 
 export async function detailsAction(f: FormData) {
   const { me, carer } = await who(f.get("carer"));
-  const key = String(f.get("doc") ?? "") as DocKey;
+  const key = String(f.get("doc") ?? "") as DocKey | AccountDocKey;
   const base = pathFor(me.role, carer, String(f.get("back") ?? ""));
   const q = base.includes("?") ? "&" : "?";
   let dest = `${base}${q}saved=${key}#${key}`;
@@ -54,7 +64,7 @@ export async function detailsAction(f: FormData) {
     if (f.has("number")) v.number = String(f.get("number") ?? "");
     // Carers can type the expiry only for documents with no file to read it from; staff can always correct it.
     const d = docDef(key);
-    if (f.has("expiry") && (me.role === "admin" || (d && !d.uploadCol))) v.expiry = String(f.get("expiry") ?? "");
+    if (f.has("expiry") && (me.role === "admin" || (d && (!d.uploadCol || !d.ai)))) v.expiry = String(f.get("expiry") ?? "");
     await setDetails(carer, key, me.id, v, isoDate(new Date()));
   } catch (e) {
     if (!(e instanceof DocError)) console.error(e);

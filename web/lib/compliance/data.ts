@@ -1,7 +1,7 @@
 // Carer compliance documents: what is on file, uploads, and expiry checks.
 import { sql } from "@/lib/db";
 import { fromDay } from "@/lib/roster/queries";
-import { DOCS, docDef, statusOf, type DocDef, type DocKey, type Status } from "./docs";
+import { ACCOUNT_DOCS, DOCS, docDef, statusOf, type AccountDocKey, type DocDef, type DocKey, type Status } from "./docs";
 import { readExpiry, type ExpiryReading } from "./expiryReader";
 
 type Tx = typeof sql;
@@ -33,6 +33,25 @@ async function current(d: DocDef, carer: string, tx: Tx = sql): Promise<DocRecor
   return { ...r, has_record: true, has_file: list.length > 0, files: list };
 }
 
+/** The documents for one Account section, in the order given (office documents and the Account-only parts). */
+export async function accountDocs(carer: string, keys: (DocKey | AccountDocKey)[], today: string): Promise<DocState[]> {
+  const out: DocState[] = [];
+  for (const k of keys) {
+    const def = docDef(k);
+    if (!def) continue;
+    if (def.key === "resume") {
+      const [u] = await sql<{ resume: string | null }[]>`select nullif(resume, '') as resume from app.users where id = ${carer}`;
+      const files = u?.resume ? [u.resume] : [];
+      const r: DocRecord = { record: carer, has_record: true, has_file: files.length > 0, files, expiry: null, number: null, extra: {} };
+      out.push({ ...r, def, status: statusOf(def, r, today) });
+      continue;
+    }
+    const r = await current(def, carer);
+    out.push({ ...r, def, status: statusOf(def, r, today) });
+  }
+  return out;
+}
+
 export async function carerDocs(carer: string, today: string): Promise<DocState[]> {
   const out: DocState[] = [];
   for (const def of DOCS) {
@@ -56,11 +75,11 @@ export type UploadResult = { status: Status; expiry: string | null; reading: Exp
 
 /** Keeps the file, reads its expiry where that can be done, and records it as the carer's current document. */
 export async function uploadDoc(
-  carer: string, key: DocKey, file: { name: string; type: string; bytes: Buffer }, by: string, today: string,
+  carer: string, key: DocKey | AccountDocKey, file: { name: string; type: string; bytes: Buffer }, by: string, today: string,
   read: typeof readExpiry = readExpiry,
 ): Promise<UploadResult> {
   const d = docDef(key);
-  if (!d || !d.uploadCol) throw new DocError("That document can't be uploaded.");
+  if (!d || !d.uploadCol || d.table === "users") throw new DocError("That document can't be uploaded.");
   if (!DOC_TYPES.includes(file.type)) throw new DocError("Upload a photo or a PDF.");
   if (!file.bytes.length) throw new DocError("That file is empty.");
   if (file.bytes.length > MAX_DOC_BYTES) throw new DocError("That file is too big. Please take a photo instead.");
@@ -86,7 +105,7 @@ export async function uploadDoc(
 const dayValue = async (tx: Tx, day: string) => (await tx<{ v: Date }[]>`select ${fromDay(day)} as v`)[0].v;
 
 /** Number and (for documents with no file to read) expiry, typed in by the carer or the office. */
-export async function setDetails(carer: string, key: DocKey, by: string, v: { number?: string; expiry?: string }, today: string) {
+export async function setDetails(carer: string, key: DocKey | AccountDocKey, by: string, v: { number?: string; expiry?: string }, today: string) {
   const d = docDef(key);
   if (!d) throw new DocError("Unknown document.");
   const set: Record<string, unknown> = {};

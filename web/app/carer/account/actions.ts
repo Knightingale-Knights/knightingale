@@ -6,6 +6,7 @@ import { DetailsError, savePersonal, type Personal } from "@/lib/account/persona
 import { ABOUT_FIELDS, saveAbout, type About } from "@/lib/account/about";
 import { isoDate } from "@/lib/invoicing/rules";
 import { BankError, saveBank } from "@/lib/account/bank";
+import { MoneyError, saveSuper, saveTfn } from "@/lib/account/money";
 
 const s = (f: FormData, k: string) => String(f.get(k) ?? "");
 
@@ -49,6 +50,35 @@ export async function bankAction(f: FormData) {
   } catch (e) {
     if (!(e instanceof BankError)) console.error(e);
     dest = `/carer/account/bank?error=${encodeURIComponent(e instanceof BankError ? e.message : "Something went wrong. Please try again.")}`;
+  }
+  revalidatePath("/carer/account", "layout");
+  redirect(dest);
+}
+
+const yesNo = (v: FormDataEntryValue | null) => (v === "yes" ? true : v === "no" ? false : null);
+
+export async function superAction(f: FormData) {
+  const me = await requireCarer();
+  let dest = "/carer/account/super?saved=1";
+  try {
+    await saveSuper(me.id, { fund_name: s(f, "fund_name"), fund_abn: s(f, "fund_abn"), fund_usi: s(f, "fund_usi"), member_no: s(f, "member_no") });
+  } catch (e) {
+    if (!(e instanceof MoneyError)) console.error(e);
+    dest = `/carer/account/super?error=${encodeURIComponent(e instanceof MoneyError ? e.message : "Something went wrong. Please try again.")}`;
+  }
+  revalidatePath("/carer/account", "layout");
+  redirect(dest);
+}
+
+export async function tfnAction(f: FormData) {
+  const me = await requireCarer();
+  let dest = "/carer/account/tfn?saved=1";
+  try {
+    if (me.viewAs) throw new MoneyError("Only the carer can sign their own tax file number declaration.");
+    await saveTfn(me.id, { tfn: s(f, "tfn"), residency: s(f, "residency"), threshold: yesNo(f.get("threshold")), student_debt: yesNo(f.get("student_debt")) }, s(f, "signature"));
+  } catch (e) {
+    if (!(e instanceof MoneyError)) console.error(e);
+    dest = `/carer/account/tfn?error=${encodeURIComponent(e instanceof MoneyError ? e.message : "Something went wrong. Please try again.")}`;
   }
   revalidatePath("/carer/account", "layout");
   redirect(dest);

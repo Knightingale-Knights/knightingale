@@ -23,13 +23,13 @@ export function DocList({ docs, carer, admin, back }: { docs: DocState[]; carer?
               ))}
             </p>
           )}
-          {(def.numberCol || (def.expiryCol && (!def.uploadCol || admin))) && (
+          {(def.numberCol || (def.expiryCol && (!def.uploadCol || !def.ai || admin))) && (
             <form action={detailsAction} className="pair end">
               {carer && <input type="hidden" name="carer" value={carer} />}
               <input type="hidden" name="doc" value={def.key} />
               {back && <input type="hidden" name="back" value={back} />}
               {def.numberCol && <label>{def.numberLabel}<input name="number" defaultValue={number ?? ""} maxLength={60} /></label>}
-              {def.expiryCol && (!def.uploadCol || admin) && <label>Expiry<input type="date" name="expiry" defaultValue={expiry ?? ""} /></label>}
+              {def.expiryCol && (!def.uploadCol || !def.ai || admin) && <label>Expiry<input type="date" name="expiry" defaultValue={expiry ?? ""} /></label>}
               <button className="secondary">Save</button>
             </form>
           )}

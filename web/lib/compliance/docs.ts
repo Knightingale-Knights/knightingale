@@ -1,8 +1,10 @@
 // The compliance documents kept for each carer, and where Bubble stores each one.
 export type DocKey = "cpr" | "first_aid" | "police" | "wwcc" | "ndis_screening" | "flu" | "id" | "qualification";
+/** Documents shown one by one on the carer Account page (not columns in the office compliance table). */
+export type AccountDocKey = "passport" | "licence" | "resume" | "certificate" | "ahpra" | "covid";
 
-export type DocDef = {
-  key: DocKey;
+export type DocDef<K extends string = DocKey | AccountDocKey> = {
+  key: K;
   label: string;
   table: string;
   fileCols: string[]; // a record "has a file" when any of these is set ("[]" marks a list column)
@@ -16,7 +18,7 @@ export type DocDef = {
   hint: string;
 };
 
-export const DOCS: DocDef[] = [
+export const DOCS: DocDef<DocKey>[] = [
   { key: "cpr", label: "CPR", table: "cpr_certificates", fileCols: ["cpr_certificate"], uploadCol: "cpr_certificate", uploadIsArray: false,
     expiryCol: "expiry", numberCol: null, numberLabel: null, ai: { label: "CPR / cardiopulmonary resuscitation)", fallbackMonths: 12 }, roster: "all",
     hint: "Statement of Attainment for HLTAID009 from a registered training organisation." },
@@ -43,7 +45,26 @@ export const DOCS: DocDef[] = [
     hint: "Your certificate or transcript. Nurses: add your AHPRA number." },
 ];
 
-export const docDef = (k: string) => DOCS.find((d) => d.key === k) ?? null;
+/** The Account page splits I.D and qualifications into their parts. Same tables, so the office view still sees them. */
+export const ACCOUNT_DOCS: DocDef<AccountDocKey>[] = [
+  { key: "passport", label: "Passport", table: "identity_documents", fileCols: ["passport"], uploadCol: "passport", uploadIsArray: false,
+    expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null, hint: "The photo page of your passport." },
+  { key: "licence", label: "Licence", table: "identity_documents", fileCols: ["license"], uploadCol: "license", uploadIsArray: false,
+    expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null, hint: "The front of your driver licence." },
+  // The resume is kept on the user, as in Bubble (uploaded through the profile-file path, not a compliance table).
+  { key: "resume", label: "Resume", table: "users", fileCols: ["resume"], uploadCol: "resume", uploadIsArray: false,
+    expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null, hint: "Your current resume (PDF or a photo)." },
+  { key: "certificate", label: "Certificate", table: "qualifications", fileCols: ["transcript[]"], uploadCol: "transcript", uploadIsArray: true,
+    expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null, hint: "Your qualification certificate or transcript (e.g. Cert III, Cert IV, Diploma, Bachelor of Nursing)." },
+  { key: "covid", label: "COVID-19", table: "vaccinations", fileCols: ["covid19[]"], uploadCol: "covid19", uploadIsArray: true,
+    expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null,
+    hint: "Your COVID-19 digital certificate. One certificate lists every dose, including boosters." },
+  { key: "ahpra", label: "AHPRA", table: "qualifications", fileCols: ["ahpra[]"], uploadCol: "ahpra", uploadIsArray: true,
+    expiryCol: "expiry", numberCol: "registration_number", numberLabel: "AHPRA registration number", ai: null, roster: null,
+    hint: "Your AHPRA registration (a screenshot of the public register is fine) and your registration number." },
+];
+
+export const docDef = (k: string) => DOCS.find((d) => d.key === k) ?? ACCOUNT_DOCS.find((d) => d.key === k) ?? null;
 
 export const SOON_DAYS = 30;
 export type Status = "ok" | "soon" | "expired" | "missing" | "check";

@@ -115,7 +115,7 @@ export default async function JoinStep({ params, searchParams }: { params: Promi
         {step === "documents" && (
           <>
             <p className="hint">Upload a photo or PDF of each. Your CPR certificate is required; we read the expiry dates for you.</p>
-            <DocList docs={docs.filter((d) => SIGNUP_DOCS.includes(d.def.key))} back="/join/documents" />
+            <DocList docs={docs.filter((d) => (SIGNUP_DOCS as string[]).includes(d.def.key))} back="/join/documents" />
           </>
         )}
 

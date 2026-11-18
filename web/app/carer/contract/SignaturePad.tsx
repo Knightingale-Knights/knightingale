@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 
 /** Draw-to-sign box. Puts a PNG data URL in a hidden "signature" field. */
-export function SignaturePad({ disabled }: { disabled?: boolean }) {
+export function SignaturePad({ disabled, label = "I agree and sign" }: { disabled?: boolean; label?: string }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
   const [data, setData] = useState("");
@@ -61,7 +61,7 @@ export function SignaturePad({ disabled }: { disabled?: boolean }) {
         <span className="hint">Sign above with your finger or mouse.</span>
         <button type="button" className="link" onClick={clear}>Clear</button>
       </div>
-      <button className="big" disabled={disabled || !data}>I agree and sign</button>
+      <button className="big" disabled={disabled || !data}>{label}</button>
     </div>
   );
 }
