@@ -60,16 +60,13 @@ export default async function AccountSection({ params, searchParams }: { params:
                 <p className="doc-exp">{doc.expiry ? `Expires ${auDate(doc.expiry)}` : STATUS_LABEL[doc.status]}</p>
               </div>
             )}
-            {s.key === "insurance" && (
+            {s.key === "insurance" && (noInsurance ? (
               <form action={noInsuranceAction} className="no-ins">
-                {noInsurance ? (
-                  <>
-                    <p className="hint">You&apos;ve told us you don&apos;t have insurance, so you won&apos;t be offered shifts where a participant needs to travel in your car.</p>
-                    <input type="hidden" name="none" value="0" />
-                    <button className="secondary">I have insurance now</button>
-                  </>
-                ) : !file && <NoInsurance />}
+                <p className="hint">You&apos;ve told us you don&apos;t have insurance, so you won&apos;t be offered shifts where a participant needs to be driven in your car.</p>
+                <input type="hidden" name="none" value="0" />
+                <button className="secondary">I have insurance now</button>
               </form>
+            ) : !file && <div className="no-ins"><NoInsurance /></div>)}
             )}
             {!(s.key === "insurance" && noInsurance) && <DocList docs={[doc]} back={back} />}
           </>

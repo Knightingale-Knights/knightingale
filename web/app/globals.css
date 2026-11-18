@@ -669,3 +669,4 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 .nag-actions .secondary { min-height: 44px; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 .no-ins { margin: 4px 0 16px; } .no-ins .secondary { width: 100%; min-height: 44px; }
+.no-ins > .secondary, .no-ins > form .secondary { width: 100%; min-height: 44px; }
