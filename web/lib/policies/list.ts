@@ -8,7 +8,7 @@ export const POLICIES: Policy[] = [
   { slug: "employment-contract", title: "Employment Contract" },
   { slug: "first-shift-aged-care", title: "First Shift (Aged Care)" },
   { slug: "first-shift-community", title: "First Shift (Community)" },
-  { slug: "handbook", title: "Handbook" },
+  { slug: "handbook", title: "Handbook", ready: true },
   { slug: "hr-policy", title: "HR Policy", ready: true },
   { slug: "incident-management-policy", title: "Incident Report Policy", ready: true },
   { slug: "progress-note-guide", title: "Progress Notes Guide", ready: true },
