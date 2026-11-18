@@ -5,6 +5,7 @@ import { fromDay, melbDay } from "@/lib/roster/queries";
 import { addDays } from "@/lib/roster/rules";
 import { normalizePhone } from "@/lib/texts/rules";
 import { carerDocs, setDetails, DOC_TYPES, MAX_DOC_BYTES } from "@/lib/compliance/data";
+import { PHOTO_MIME, shrinkPhoto } from "@/lib/photo";
 import type { DocKey } from "@/lib/compliance/docs";
 
 type Tx = typeof sql;
@@ -133,6 +134,13 @@ export async function uploadProfileFile(id: string, kind: ProfileFile, file: { n
   const types = kind === "photo" ? ["image/jpeg", "image/png", "image/webp"] : DOC_TYPES;
   if (!types.includes(file.type)) throw new SignupError(kind === "photo" ? "Upload a photo (JPG or PNG)." : "Upload a photo or a PDF.");
   if (!file.bytes.length || file.bytes.length > MAX_DOC_BYTES) throw new SignupError("That file is too big or empty.");
+  if (kind === "photo") {
+    try {
+      file = { name: (file.name || "photo").replace(/\.\w+$/, "") + ".webp", type: PHOTO_MIME, bytes: await shrinkPhoto(file.bytes) };
+    } catch {
+      throw new SignupError("That photo couldn't be read. Try a JPG or PNG.");
+    }
+  }
   const name = (file.name || kind).replace(/[^\w.\- ]+/g, "_").slice(0, 120);
   const [f] = await sql<{ id: string }[]>`
     insert into app.compliance_files (carer, doc, file_name, mime, bytes, uploaded_by)
