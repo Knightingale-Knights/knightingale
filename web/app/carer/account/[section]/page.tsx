@@ -9,6 +9,7 @@ import { auDate, isoDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "../../CarerNav";
 import { DocList } from "../../documents/DocList";
 import { noInsuranceAction } from "../actions";
+import { NoInsurance } from "../NoInsurance";
 import { PdfPreview } from "@/components/PdfPreview";
 
 export const dynamic = "force-dynamic";
@@ -67,12 +68,7 @@ export default async function AccountSection({ params, searchParams }: { params:
                     <input type="hidden" name="none" value="0" />
                     <button className="secondary">I have insurance now</button>
                   </>
-                ) : !file && (
-                  <>
-                    <input type="hidden" name="none" value="1" />
-                    <button className="secondary">I don&apos;t have insurance</button>
-                  </>
-                )}
+                ) : !file && <NoInsurance />}
               </form>
             )}
             {!(s.key === "insurance" && noInsurance) && <DocList docs={[doc]} back={back} />}
