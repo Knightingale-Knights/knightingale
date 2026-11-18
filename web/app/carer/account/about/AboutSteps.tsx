@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
-import type { About } from "@/lib/account/about";
-import { ABOUT_STEPS } from "@/lib/account/about";
+import { ABOUT_STEPS, type About } from "@/lib/account/aboutSteps";
 import { aboutAction } from "../actions";
 
 /** Intro, then one question card at a time, then save. All answers stay in one form. */
