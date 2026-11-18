@@ -43,7 +43,7 @@ export function NoteSteps({ shiftId, error }: { shiftId: string; error?: string 
 
       <fieldset hidden={step !== 0}>
         <h3>Summary</h3>
-        <p className="hint"><a href="/docs/progress-note-guide.pdf" target="_blank" rel="noopener">Progress note guide</a></p>
+        <p className="hint"><a href="/docs/policies/progress-note-guide.pdf" target="_blank" rel="noopener">Progress note guide</a></p>
         <p className="eg">{SUMMARY_EG}</p>
         <textarea name="summary" rows={10} value={summary} onChange={(e) => setSummary(e.target.value)} placeholder={SUMMARY_EG} maxLength={8000} />
         {msg && <p className="banner error">{msg}</p>}

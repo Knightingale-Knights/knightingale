@@ -6,7 +6,7 @@ import { attentionCount } from "@/lib/compliance/data";
 import { isoDate } from "@/lib/invoicing/rules";
 import { ViewAsBar } from "@/components/ViewAsBar";
 
-type On = "shifts" | "availability" | "chats" | "documents";
+type On = "shifts" | "availability" | "chats" | "documents" | "policies";
 
 /** The carer's menu, down the left side like the admin pages. */
 export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; name: string; shiftsHref?: string }) {
@@ -17,6 +17,7 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
     { key: "availability", label: "Availability", href: "/carer/availability" },
     { key: "chats", label: "Chats", href: "/carer/chats", badge: unread },
     { key: "documents", label: "Documents", href: "/carer/documents", badge: docs },
+    { key: "policies", label: "Policies", href: "/carer/policies" },
   ];
   return (
     <>
