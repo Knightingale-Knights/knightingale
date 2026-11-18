@@ -20,8 +20,8 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
     { key: "shifts", label: "My Shifts", href: shiftsHref },
     { key: "availability", label: "Availability", href: "/carer/availability" },
     { key: "chats", label: "Chats", href: "/carer/chats", badge: unread },
-    { key: "account", label: "Account", href: "/carer/account", badge: docs },
     { key: "policies", label: "Policies", href: "/carer/policies" },
+    { key: "account", label: "Account", href: "/carer/account", badge: docs },
   ];
   return (
     <>
