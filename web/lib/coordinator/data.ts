@@ -119,3 +119,31 @@ export async function participantDocs(participant: string): Promise<Record<DocKe
       from app.users u where u.id = ${participant}`;
   return r;
 }
+
+export type Appointment = { id: string; day: string; time: string | null; participant: string; details: string | null };
+export type DayNote = { id: string; day: string; participant_id: string; participant: string; carer: string | null };
+
+/** Appointments (Bubble events) for the coordinator's participants between two days (inclusive). */
+export async function coordAppointments(coordinator: string, from: string, to: string, participant: string | null): Promise<Appointment[]> {
+  return sql<Appointment[]>`
+    select e.id, ${melbDay("e.date")} as day, nullif(e.time, '') as time,
+           trim(concat_ws(' ', p.first_name, p.last_name)) as participant, nullif(trim(e.details), '') as details
+      from app.events e join app.users p on p.id = e.participant
+     where p.coordinator_2 = ${coordinator}
+       and e.date >= ${fromDay(from)} and e.date < ${fromDay(addDays(to, 1))}
+       and (${participant}::uuid is null or e.participant = ${participant}::uuid)
+     order by e.date, e.time nulls last`;
+}
+
+/** Progress notes for the coordinator's participants between two days (inclusive), by the day of the note. */
+export async function coordNotes(coordinator: string, from: string, to: string, participant: string | null): Promise<DayNote[]> {
+  return sql<DayNote[]>`
+    select n.id, ${melbDay("coalesce(n.date, n.created_at)")} as day, p.id as participant_id,
+           trim(concat_ws(' ', p.first_name, p.last_name)) as participant,
+           nullif(trim(concat_ws(' ', c.first_name, c.last_name)), '') as carer
+      from app.progress_notes n join app.users p on p.id = n.participant left join app.users c on c.id = n.carer
+     where p.coordinator_2 = ${coordinator}
+       and coalesce(n.date, n.created_at) >= ${fromDay(from)} and coalesce(n.date, n.created_at) < ${fromDay(addDays(to, 1))}
+       and (${participant}::uuid is null or n.participant = ${participant}::uuid)
+     order by coalesce(n.date, n.created_at)`;
+}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireCoordinator } from "@/lib/auth";
-import { coordShifts, myParticipants, type CoordShift } from "@/lib/coordinator/data";
+import { coordAppointments, coordNotes, coordShifts, myParticipants, type CoordShift } from "@/lib/coordinator/data";
 import { addDays, clockLabel } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 import { Portrait } from "@/components/CarerCells";
@@ -35,9 +35,14 @@ export default async function CoordinatorCalendar({ searchParams }: { searchPara
   const last = addDays(addMonths(day, 1), -1);
   const gridFrom = addDays(first, -weekday(first));
   const gridTo = addDays(last, 6 - weekday(last));
-  const shifts = view === "day" ? await coordShifts(me.id, day, day, p) : await coordShifts(me.id, gridFrom, gridTo, p);
+  const [rf, rt] = view === "day" ? [day, day] : [gridFrom, gridTo];
+  const [shifts, appts, notes] = await Promise.all([
+    coordShifts(me.id, rf, rt, p), coordAppointments(me.id, rf, rt, p), coordNotes(me.id, rf, rt, p),
+  ]);
   const perDay = new Map<string, number>();
   for (const s of shifts) perDay.set(s.day, (perDay.get(s.day) ?? 0) + 1);
+  const apptDays = new Set(appts.map((a) => a.day));
+  const noteDays = new Set(notes.map((n) => n.day));
   const cells: string[] = [];
   for (let d = gridFrom; d <= gridTo; d = addDays(d, 1)) cells.push(d);
 
@@ -67,6 +72,11 @@ export default async function CoordinatorCalendar({ searchParams }: { searchPara
           </nav>
           <ParticipantPick participants={parts} value={p} />
         </div>
+        <div className="coord-legend">
+          <span><i className="dot shift" />shift</span>
+          <span><i className="dot appt" />appointment</span>
+          <span><i className="dot note" />progress note</span>
+        </div>
 
         {view === "month" ? (
           <>
@@ -79,9 +89,11 @@ export default async function CoordinatorCalendar({ searchParams }: { searchPara
               {WEEK.map((w, i) => <span key={i} className="coord-wd">{w}</span>)}
               {cells.map((d) => (
                 <Link key={d} href={href({ view: "day", d })}
-                  className={`coord-day${d.slice(0, 7) !== first.slice(0, 7) ? " out" : ""}${d === today ? " today" : ""}`}>
-                  <span>{Number(d.slice(8))}</span>
-                  {perDay.get(d) ? <small>{perDay.get(d)} shift{perDay.get(d) === 1 ? "" : "s"}</small> : <small className="none">›</small>}
+                  className={`coord-day${d.slice(0, 7) !== first.slice(0, 7) ? " out" : ""}${d === today ? " today" : ""}${perDay.get(d) ? " has-shift" : ""}`}>
+                  <span className={`coord-ring${apptDays.has(d) ? " has-appt" : ""}${noteDays.has(d) ? " has-note" : ""}`}>
+                    <span>{Number(d.slice(8))}</span>
+                    {perDay.get(d) ? <small>{perDay.get(d)} shift{perDay.get(d) === 1 ? "" : "s"}</small> : <small className="none">›</small>}
+                  </span>
                 </Link>
               ))}
             </div>
@@ -97,6 +109,30 @@ export default async function CoordinatorCalendar({ searchParams }: { searchPara
               <h2>Shifts</h2>
               {shifts.length ? shifts.map(card) : <p className="hint">No shifts this day.</p>}
             </section>
+            {appts.length > 0 && (
+              <section className="coord-shifts appt">
+                <h2>Appointments</h2>
+                {appts.map((a) => (
+                  <article key={a.id} className="coord-shift">
+                    <h3>{a.participant}</h3>
+                    {a.time && <p className="coord-time">{a.time}</p>}
+                    {a.details && <p className="coord-detail">{a.details}</p>}
+                  </article>
+                ))}
+              </section>
+            )}
+            {notes.length > 0 && (
+              <section className="coord-shifts note">
+                <h2>Progress Notes</h2>
+                {notes.map((n) => (
+                  <Link key={n.id} href={`/coordinator/participants/${n.participant_id}/notes/${n.id}`} className="coord-shift link">
+                    <h3>{n.participant}</h3>
+                    {n.carer && <p className="coord-time">by {n.carer}</p>}
+                    <p className="coord-detail">Read note ›</p>
+                  </Link>
+                ))}
+              </section>
+            )}
           </>
         )}
       </main>
