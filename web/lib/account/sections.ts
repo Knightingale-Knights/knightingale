@@ -9,7 +9,7 @@ export type Section =
 export const SECTIONS: Section[] = [
   { key: "personal", label: "Personal Details", kind: "link", href: "/carer/account/personal" },
   { key: "availability", label: "Availability", kind: "link", href: "/carer/availability" },
-  { key: "bank", label: "Bank Details", kind: "soon" },
+  { key: "bank", label: "Bank Details", kind: "link", href: "/carer/account/bank" },
   { key: "certifications", label: "Certifications", kind: "docs", docs: ["cpr", "first_aid"] },
   { key: "contract", label: "Employment Contract", kind: "link", href: "/carer/contract" },
   { key: "handbook", label: "Handbook", kind: "link", href: "/docs/policies/handbook.pdf", external: true },

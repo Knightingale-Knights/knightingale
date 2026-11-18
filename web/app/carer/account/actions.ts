@@ -5,6 +5,7 @@ import { requireCarer } from "@/lib/auth";
 import { DetailsError, savePersonal, type Personal } from "@/lib/account/personal";
 import { ABOUT_FIELDS, saveAbout, type About } from "@/lib/account/about";
 import { isoDate } from "@/lib/invoicing/rules";
+import { BankError, saveBank } from "@/lib/account/bank";
 
 const s = (f: FormData, k: string) => String(f.get(k) ?? "");
 
@@ -38,4 +39,17 @@ export async function aboutAction(f: FormData) {
     redirect(`/carer/account/about?error=${encodeURIComponent(String((e as Error).message ?? e))}`);
   }
   redirect("/carer/account/personal?about=1");
+}
+
+export async function bankAction(f: FormData) {
+  const me = await requireCarer();
+  let dest = "/carer/account/bank?saved=1";
+  try {
+    await saveBank(me.id, { acc_name: s(f, "acc_name"), bsb: s(f, "bsb"), acc_no: s(f, "acc_no") });
+  } catch (e) {
+    if (!(e instanceof BankError)) console.error(e);
+    dest = `/carer/account/bank?error=${encodeURIComponent(e instanceof BankError ? e.message : "Something went wrong. Please try again.")}`;
+  }
+  revalidatePath("/carer/account", "layout");
+  redirect(dest);
 }

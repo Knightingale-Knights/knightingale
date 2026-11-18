@@ -1,21 +1,36 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireCarer } from "@/lib/auth";
+import { sql } from "@/lib/db";
 import { carerDocs } from "@/lib/compliance/data";
+import { fileHref, STATUS_LABEL } from "@/lib/compliance/docs";
 import { sectionOf } from "@/lib/account/sections";
-import { isoDate } from "@/lib/invoicing/rules";
+import { auDate, isoDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "../../CarerNav";
 import { DocList } from "../../documents/DocList";
 
 export const dynamic = "force-dynamic";
 
-export default async function AccountSection({ params, searchParams }: { params: Promise<{ section: string }>; searchParams: Promise<{ error?: string; saved?: string }> }) {
+/** Is this stored file a PDF? Bubble links show it in the name; app uploads keep the type. */
+async function isPdf(url: string) {
+  if (/\.pdf($|\?)/i.test(url)) return true;
+  const m = /^\/files\/([0-9a-f-]{36})$/i.exec(url);
+  if (!m) return false;
+  const [r] = await sql<{ mime: string }[]>`select mime from app.compliance_files where id = ${m[1]}`;
+  return r?.mime === "application/pdf";
+}
+
+export default async function AccountSection({ params, searchParams }: { params: Promise<{ section: string }>; searchParams: Promise<{ error?: string; saved?: string; tab?: string }> }) {
   const me = await requireCarer();
   const [{ section }, sp] = await Promise.all([params, searchParams]);
   const s = sectionOf(section);
   if (!s) notFound();
   if (s.kind === "link") redirect(s.href);
   const docs = s.kind === "docs" ? (await carerDocs(me.id, isoDate(new Date()))).filter((d) => s.docs.includes(d.def.key)) : [];
+  const doc = docs.find((d) => d.def.key === sp.tab) ?? docs[0];
+  const file = doc?.files.at(-1) ?? null;
+  const pdf = file ? await isPdf(file) : false;
+  const back = `/carer/account/${s.key}${docs.length > 1 ? `?tab=${doc.def.key}` : ""}`;
   return (
     <div className="carer">
       <CarerNav on="account" name={me.name} />
@@ -24,7 +39,24 @@ export default async function AccountSection({ params, searchParams }: { params:
         <h1>{s.label}</h1>
         {sp.error && <p className="banner error">{sp.error}</p>}
         {sp.saved && <p className="banner ok">Saved.</p>}
-        {s.kind === "docs" ? <DocList docs={docs} back={`/carer/account/${s.key}`} /> : <p className="hint">Coming soon.</p>}
+        {s.kind !== "docs" || !doc ? <p className="hint">Coming soon.</p> : (
+          <>
+            {docs.length > 1 && (
+              <nav className="doc-tabs">
+                {docs.map((d) => <Link key={d.def.key} href={`/carer/account/${s.key}?tab=${d.def.key}`} className={d === doc ? "on" : ""}>{d.def.label}</Link>)}
+              </nav>
+            )}
+            {file && (
+              <div className="doc-preview">
+                {pdf
+                  ? <a className="button" href={fileHref(file)} target="_blank" rel="noreferrer">View PDF</a>
+                  : <a href={fileHref(file)} target="_blank" rel="noreferrer"><img src={fileHref(file)} alt={doc.def.label} /></a>}
+                <p className="doc-exp">{doc.expiry ? `Expires ${auDate(doc.expiry)}` : STATUS_LABEL[doc.status]}</p>
+              </div>
+            )}
+            <DocList docs={[doc]} back={back} />
+          </>
+        )}
       </main>
     </div>
   );

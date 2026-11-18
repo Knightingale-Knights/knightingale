@@ -18,7 +18,7 @@ async function who(carerField: FormDataEntryValue | null) {
 }
 
 const pathFor = (role: string, carer: string, back?: string) =>
-  role === "admin" ? `/compliance/${carer}` : back && /^\/(join\/[a-z]+|carer\/account\/[a-z]+)$/.test(back) ? back : "/carer/account";
+  role === "admin" ? `/compliance/${carer}` : back && /^\/(join\/[a-z]+|carer\/account\/[a-z]+(\?tab=[a-z_]+)?)$/.test(back) ? back : "/carer/account";
 
 export async function uploadDocAction(f: FormData): Promise<DocResult> {
   const { me, carer } = await who(f.get("carer"));
@@ -47,7 +47,8 @@ export async function detailsAction(f: FormData) {
   const { me, carer } = await who(f.get("carer"));
   const key = String(f.get("doc") ?? "") as DocKey;
   const base = pathFor(me.role, carer, String(f.get("back") ?? ""));
-  let dest = `${base}?saved=${key}#${key}`;
+  const q = base.includes("?") ? "&" : "?";
+  let dest = `${base}${q}saved=${key}#${key}`;
   try {
     const v: { number?: string; expiry?: string } = {};
     if (f.has("number")) v.number = String(f.get("number") ?? "");
@@ -57,7 +58,7 @@ export async function detailsAction(f: FormData) {
     await setDetails(carer, key, me.id, v, isoDate(new Date()));
   } catch (e) {
     if (!(e instanceof DocError)) console.error(e);
-    dest = `${base}?error=${encodeURIComponent(e instanceof DocError ? e.message : "Something went wrong. Please try again.")}#${key}`;
+    dest = `${base}${q}error=${encodeURIComponent(e instanceof DocError ? e.message : "Something went wrong. Please try again.")}#${key}`;
   }
   revalidatePath(base);
   redirect(dest);
