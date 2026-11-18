@@ -1,7 +1,7 @@
 // The Knightingale casual employment contract, as carers sign it in the app.
 // Wording follows the Bubble contract; typos fixed. Changing the wording here changes it for future signers only.
 
-export const EMPLOYER = "Knightingale Pty Ltd (ABN: 674 982 293)";
+export const EMPLOYER = "Knightingale Pty Ltd (ACN: 674 982 293)";
 
 export const ROLE_LABEL: Record<string, string> = { rn: "RN", en: "EN", dsw: "DSW", pca: "PCA" };
 export const positionOf = (roles: string[] | null) =>
@@ -93,7 +93,6 @@ export const CONTRACT: Block[] = [
   ] },
   { h: "Leave Generally", p: [
     "The rules set out in the Fair Work Act 2009 in relation to the taking of compassionate leave, carer's leave and parental leave will apply in conjunction with this agreement.",
-    "You are not entitled to any paid leave.",
   ] },
   { h: "Termination", p: ["Your employment may be terminated at any time by either Knightingale or yourself with 1 day's notice, or without notice for serious misconduct."] },
   { h: "Confidential Information", p: [
