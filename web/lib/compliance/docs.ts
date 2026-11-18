@@ -1,7 +1,7 @@
 // The compliance documents kept for each carer, and where Bubble stores each one.
 export type DocKey = "cpr" | "first_aid" | "police" | "wwcc" | "ndis_screening" | "flu" | "id" | "qualification";
 /** Documents shown one by one on the carer Account page (not columns in the office compliance table). */
-export type AccountDocKey = "passport" | "licence" | "resume" | "certificate" | "ahpra" | "covid";
+export type AccountDocKey = "passport" | "licence" | "resume" | "certificate" | "ahpra" | "covid" | "insurance";
 
 export type DocDef<K extends string = DocKey | AccountDocKey> = {
   key: K;
@@ -56,6 +56,9 @@ export const ACCOUNT_DOCS: DocDef<AccountDocKey>[] = [
     expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null, hint: "Your current resume (PDF or a photo)." },
   { key: "certificate", label: "Certificate", table: "qualifications", fileCols: ["transcript[]"], uploadCol: "transcript", uploadIsArray: true,
     expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null, hint: "Your qualification certificate or transcript (e.g. Cert III, Cert IV, Diploma, Bachelor of Nursing)." },
+  { key: "insurance", label: "Insurance", table: "identity_documents", fileCols: ["insurance"], uploadCol: "insurance", uploadIsArray: false,
+    expiryCol: "insurance_expiry", numberCol: null, numberLabel: null, ai: null, roster: null,
+    hint: "A photo of your insurance certificate of currency, and the date it expires." },
   { key: "covid", label: "COVID-19", table: "vaccinations", fileCols: ["covid19[]"], uploadCol: "covid19", uploadIsArray: true,
     expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null,
     hint: "Your COVID-19 digital certificate. One certificate lists every dose, including boosters." },

@@ -28,7 +28,8 @@ export async function accountOverview(carer: string, today: string) {
   const done: Record<string, Done> = {};
   for (const s of SECTIONS) {
     done[s.key] =
-      s.kind === "docs" ? docsDone(s.tick)
+      s.key === "insurance" ? u.insurance
+      : s.kind === "docs" ? docsDone(s.tick)
       : s.key === "personal" ? u.personal
       : s.key === "availability" ? u.avail
       : s.key === "contract" ? u.signed

@@ -14,7 +14,7 @@ export const SECTIONS: Section[] = [
   { key: "contract", label: "Employment Contract", kind: "link", href: "/carer/contract" },
   { key: "handbook", label: "Handbook", kind: "link", href: "/docs/policies/handbook.pdf", external: true },
   { key: "id", label: "I.D", kind: "docs", docs: ["passport", "licence"], tick: ["id"] },
-  { key: "insurance", label: "Insurance", kind: "soon" },
+  { key: "insurance", label: "Insurance", kind: "docs", docs: ["insurance"], tick: [] },
   { key: "checks", label: "NDIS, Police, WWCC", kind: "docs", docs: ["ndis_screening", "police", "wwcc"], tick: ["ndis_screening", "police", "wwcc"] },
   { key: "qualifications", label: "Qualifications", kind: "docs", docs: ["resume", "certificate", "ahpra"], tick: ["qualification"], nursesOnly: ["ahpra"] },
   { key: "super", label: "Superannuation", kind: "link", href: "/carer/account/super" },
