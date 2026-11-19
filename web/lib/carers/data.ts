@@ -42,7 +42,7 @@ export async function activeCarers(today: string, q: string, role: CarerRole | n
 
 export type AvailRow = CarerRow & { periods: ("AM" | "PM" | "NS")[] };
 
-/** Active carers who marked themselves available on the day. */
+/** Active carers who marked themselves available on the day and aren't already rostered on it. */
 export async function availableCarers(day: string, today: string, role: CarerRole | null): Promise<AvailRow[]> {
   const rows = await sql<(CarerRow & { slots: string[] })[]>`
     select u.id, u.first_name, u.last_name, u.profile_photo as photo, u.phone_number as phone, u.email, u.roles,
@@ -52,6 +52,10 @@ export async function availableCarers(day: string, today: string, role: CarerRol
        and coalesce(a.available, false)
        and u.account_type = 'carer' and coalesce(u.active, false) and coalesce(u.account_status, false)
        and (${role}::text is null or ${role} = any(u.roles))
+       -- Already rostered that day: not available any more (comes back if the shift is cancelled or moved).
+       and not exists (select 1 from app.shifts s
+                         where s.carer = u.id and not coalesce(s.cancelled, false)
+                           and s.date >= ${fromDay(day)} and s.date < ${fromDay(addDays(day, 1))})
      group by u.id
      order by u.first_name, u.last_name`;
   const order = ["AM", "PM", "NS"] as const;
