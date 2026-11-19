@@ -1,4 +1,4 @@
-// The participant's list documents: Points of Care (Shift Duties) and their Carers, as in Bubble's popups.
+// The participant's list pages: Points of Care (Shift Duties), and the carers who worked with them lately.
 import { sql } from "@/lib/db";
 
 export type Duty = { id: string; duty: string | null; done: boolean | null };
@@ -28,32 +28,15 @@ export async function removeDuty(participant: string, id: string) {
 
 export type Person = { id: string; name: string };
 
-/** The participant's carers (Bubble's User.carers list). */
-export function participantCarers(participant: string) {
-  return sql<Person[]>`
-    select u.id, coalesce(nullif(trim(concat_ws(' ', u.first_name, u.last_name)), ''), u.email, '(no name)') as name
-      from app.users_carers uc join app.users u on u.id = uc.users_id
-     where uc.owner_id = ${participant} order by u.first_name, u.last_name`;
-}
+export type RecentCarer = Person & { shifts: number; last: Date };
 
-/** Active carers not yet on the participant's list. */
-export function otherCarers(participant: string) {
-  return sql<Person[]>`
-    select u.id, coalesce(nullif(trim(concat_ws(' ', u.first_name, u.last_name)), ''), u.email, '(no name)') as name
-      from app.users u
-     where u.account_type = 'carer' and u.active
-       and not exists (select 1 from app.users_carers uc where uc.owner_id = ${participant} and uc.users_id = u.id)
-     order by u.first_name, u.last_name`;
-}
-
-export async function addCarers(participant: string, carers: string[]) {
-  if (!carers.length) return;
-  await sql`
-    insert into app.users_carers (owner_id, users_id)
-    select ${participant}::uuid, c from unnest(${carers}::uuid[]) c
-     where not exists (select 1 from app.users_carers uc where uc.owner_id = ${participant} and uc.users_id = c)`;
-}
-
-export async function removeCarer(participant: string, carer: string) {
-  await sql`delete from app.users_carers where owner_id = ${participant} and users_id = ${carer}`;
+/** Carers who worked with the participant in the last 30 days (shifts not cancelled), most recent first. */
+export function recentCarers(participant: string) {
+  return sql<RecentCarer[]>`
+    select u.id, coalesce(nullif(trim(concat_ws(' ', u.first_name, u.last_name)), ''), u.email, '(no name)') as name,
+           count(*)::int as shifts, max(s.date) as last
+      from app.shifts s join app.users u on u.id = s.carer
+     where s.participant = ${participant} and not coalesce(s.cancelled, false)
+       and s.date >= now() - interval '30 days' and s.date <= now()
+     group by u.id order by max(s.date) desc`;
 }
