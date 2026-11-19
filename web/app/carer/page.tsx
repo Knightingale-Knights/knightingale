@@ -112,7 +112,7 @@ function ShiftCard({ s, day, now }: { s: CarerShift; day: string; now: number })
       {ndis && s.participant && (
         <div className="shift-card-actions">
           <Link href={`/carer/chats/${s.participant}`} className="button secondary">Communication book</Link>
-          <Link href={`/carer?date=${day}&summary=${s.id}`} className="button secondary">{name} support summary</Link>
+          <Link href={`/carer?date=${day}&summary=${s.id}`} className="button secondary">About {(name ?? "").split(" ")[0]}</Link>
         </div>
       )}
       <dl className="shift-card-facts">
@@ -171,8 +171,8 @@ function SummaryRequest({ s, email, close, day, sent, error }: { s?: CarerShift;
     <div className="popup-back">
       <Link href={close} className="modal-shade" aria-label="Close" />
       <div className="popup details-popup">
-        <h2>Request {first}&apos;s summary</h2>
-        <p>If you are new to working with {first} please request a summary. It will help you know what to do on your shift, how to provide which supports, and also give you insight into their personality.</p>
+        <h2>About {first}</h2>
+        <p>If you are new to working with {first} please tap About {first} for a support summary. It will help you know what to do on your shift, how to provide which supports, and also give you insight into their personality.</p>
         <p>We want to see you succeed. We hope this helps.</p>
         <p>It will be sent to your email: {email}.</p>
         <p>If you have any suggestions on how to make it better, please email <a href="mailto:care@knightingale.com.au">care@knightingale.com.au</a>. We love feedback. We love to improve.</p>
@@ -182,7 +182,7 @@ function SummaryRequest({ s, email, close, day, sent, error }: { s?: CarerShift;
           <form action={requestSummaryAction}>
             <input type="hidden" name="shift" value={s.id} />
             <input type="hidden" name="date" value={day} />
-            <PendingButton className="big" pending="Putting the summary together…">Request {first}&apos;s summary</PendingButton>
+            <PendingButton className="big" pending="Putting it together…">About {first}</PendingButton>
             <p className="hint">It takes about a minute to put together.</p>
           </form>
         )}

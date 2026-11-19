@@ -36,6 +36,7 @@ const TABS: { key: string; label: string; icon: ReactNode }[] = [
 ];
 
 const TITLES: Record<string, (n: string) => string> = {
+  summary: (n) => `About ${n.split(" ")[0]}`,
   notes: (n) => `${n}'s progress note`,
   receipts: (n) => `${n} receipts`,
   intake: (n) => `${n} intake form`,
@@ -117,7 +118,7 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
             )}
             <div className="sd-grid">
               {TABS.map((t) => (
-                <Link key={t.key} href={`${home}&tab=${t.key}`} className="sd-btn">{t.icon}<span>{t.label}</span></Link>
+                <Link key={t.key} href={`${home}&tab=${t.key}`} className="sd-btn">{t.icon}<span>{t.key === "summary" ? `About ${name.split(" ")[0]}` : t.label}</span></Link>
               ))}
             </div>
             {s.participant && <NotesList s={s} home={home} />}
@@ -142,7 +143,7 @@ async function Section({ s, day, tab, first, email, msgs }: { s: CarerShift; day
   if (tab === "summary") {
     return (
       <>
-        <p>If you are new to working with {first} please request a summary. It will help you know what to do on your shift, how to provide which supports, and also give you insight into their personality.</p>
+        <p>If you are new to working with {first} please tap About {first} for a support summary. It will help you know what to do on your shift, how to provide which supports, and also give you insight into their personality.</p>
         <p>We want to see you succeed. We hope this helps.</p>
         <p>It will be sent to your email: {email}.</p>
         <p>If you have any suggestions on how to make it better, please email <a href="mailto:care@knightingale.com.au">care@knightingale.com.au</a>. We love feedback. We love to improve.</p>
@@ -153,7 +154,7 @@ async function Section({ s, day, tab, first, email, msgs }: { s: CarerShift; day
             <input type="hidden" name="shift" value={s.id} />
             <input type="hidden" name="date" value={day} />
             <input type="hidden" name="in" value="details" />
-            <PendingButton className="big" pending="Putting the summary together…">Request {first}&apos;s summary</PendingButton>
+            <PendingButton className="big" pending="Putting it together…">About {first}</PendingButton>
             <p className="hint">It takes about a minute to put together.</p>
           </form>
         )}

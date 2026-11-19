@@ -17,8 +17,8 @@ export default async function Summary({ params, searchParams }: { params: Promis
   if (!p) notFound();
   const name = [p.first_name, p.last_name].filter(Boolean).join(" ") || "(no name)";
   return (
-    <ParticipantShell id={id} name={name} email={staff.email} title={`${p.first_name ?? name}'s Support Summary`}
-      lede={`A summary of the last month's progress notes, emailed to ${staff.email} as a PDF.`} msg={sp.msg} error={sp.error}>
+    <ParticipantShell id={id} name={name} email={staff.email} title={`About ${(p.first_name ?? name).trim().split(/\s+/)[0]}`}
+      lede={`A support summary from the last month's progress notes, emailed to ${staff.email} as a PDF.`} msg={sp.msg} error={sp.error}>
       <form action={summaryAction} className="stack">
         <input type="hidden" name="participant" value={id} />
         <PendingButton className="big" pending="Drafting the summary…">Email me the summary</PendingButton>

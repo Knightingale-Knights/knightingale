@@ -57,8 +57,9 @@ ${notes.map((n) => `${auDate(n.date)}: ${n.summary}`).join("\n")}`;
 
 /** Drafts the participant's summary from the last months of progress notes. Returns the PDF and the period it covers. */
 export async function buildSummary(participant: string, monthsBack = 1) {
-  const [p] = await sql<{ first: string | null; setting: string | null; support: string | null }[]>`
-    select coalesce(nullif(trim(u.first_name), ''), 'Participant') as first, u.current_location->>'address' as setting,
+  const [p] = await sql<{ first: string | null; full: string | null; setting: string | null; support: string | null }[]>`
+    select coalesce(nullif(trim(u.first_name), ''), 'Participant') as first, trim(concat_ws(' ', u.first_name, u.last_name)) as full,
+           u.current_location->>'address' as setting,
            (select string_agg(o.display, ', ') from app.intakes i join app.option_values o on o.set_key = 'service_required' and o.value = any(i.services)
              where i.id = u.intake_form) as support
       from app.users u where u.id = ${participant}`;
@@ -74,7 +75,7 @@ export async function buildSummary(participant: string, monthsBack = 1) {
   const reportPeriod = `${auDate(notes[0].date)} - ${auDate(notes[notes.length - 1].date)}`;
   const base64 = await supportSummaryPdf({ participantName: p.first ?? "Participant", reportPeriod, content });
   return {
-    first, reportPeriod,
+    first, full: p.full || first, reportPeriod,
     attachment: { Name: `${(p.first ?? "Participant").replace(/\s+/g, "_")}_Supports_Summary.pdf`, Content: base64, ContentType: "application/pdf" },
   };
 }
@@ -84,19 +85,21 @@ export async function requestSummary(carer: { id: string; email: string; name: s
   const [s] = await sql<{ participant: string | null }[]>`select participant from app.shifts where id = ${shiftId} and carer = ${carer.id}`;
   if (!s?.participant) throw new Error("We couldn't find this shift.");
   if (!carer.email) throw new Error("We don't have an email address for you.");
-  const { first, reportPeriod, attachment } = await buildSummary(s.participant);
+  const { first, full, reportPeriod, attachment } = await buildSummary(s.participant);
+  const [me] = await sql<{ full: string | null }[]>`select nullif(trim(concat_ws(' ', first_name, last_name)), '') as full from app.users where id = ${carer.id}`;
+  const carerName = me?.full || carer.name || carer.email;
   await sendPlainEmail({
     to: carer.email,
     subject: `${first}'s support summary`,
     text: `Hi ${carer.name.split(" ")[0] || "there"},\n\nAttached is ${first}'s support summary (${reportPeriod}). We hope it helps on your shift.\n\nIf you have any suggestions on how to make it better, please email care@knightingale.com.au.\n\nKnightingale`,
     attachments: [attachment],
   });
-  // A copy to Paul, so he knows who is asking and what the summaries say.
+  // Let Paul know who asked (a copy of the summary is attached).
   const copyTo = process.env.SUMMARY_COPY_TO ?? "paul@knightingale.com.au";
   await sendPlainEmail({
     to: copyTo,
-    subject: `${first}'s support summary, requested by ${carer.name || carer.email}`,
-    text: `${carer.name || "A carer"} (${carer.email}) requested ${first}'s support summary covering ${reportPeriod}. A copy is attached.`,
+    subject: `${carerName} requested a support summary about ${full}`,
+    text: `${carerName} requested a support summary about ${full}.\n\nIt covers ${reportPeriod} and was sent to ${carer.email}. A copy is attached.`,
     attachments: [attachment],
   }).catch((e) => console.error("summary copy failed", e));
   return first;

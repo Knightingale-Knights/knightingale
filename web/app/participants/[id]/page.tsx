@@ -11,11 +11,11 @@ export const dynamic = "force-dynamic";
 
 // The participant's sections, as in Bubble. Those with a link are built.
 const BUILT: Record<string, string> = { "Intake Form": "intake", Consent: "consent", Emergency: "emergency", "Risk Assessment": "risk", "Support Plan": "support", "Info Book": "info", "Service Agreement": "service", "Shift Duties": "duties", Carers: "carers",
-  About: "about", Documents: "documents", Feedback: "feedback", Funding: "funding", "Group Chat": "/chats/", "Incident Reports": "incidents",
+  Documents: "documents", Feedback: "feedback", Funding: "funding", "Group Chat": "/chats/", "Incident Reports": "incidents",
   "Progress Notes": "notes", Summary: "summary", Survey: "survey" };
 const SECTIONS = [
-  "About", "Carers", "Consent", "Documents", "Emergency", "Feedback", "Funding", "Group Chat", "Incident Reports",
-  "Info Book", "Intake Form", "Progress Notes", "Risk Assessment", "Service Agreement", "Shift Duties", "Summary",
+  "Summary", "Carers", "Consent", "Documents", "Emergency", "Feedback", "Funding", "Group Chat", "Incident Reports",
+  "Info Book", "Intake Form", "Progress Notes", "Risk Assessment", "Service Agreement", "Shift Duties",
   "Support Plan", "Survey",
 ];
 
@@ -43,7 +43,7 @@ export default async function Participant({ params, searchParams }: { params: Pr
         </div>
         <nav className="section-grid">
           {SECTIONS.map((s) => BUILT[s]
-            ? <Link key={s} href={BUILT[s].startsWith("/") ? `${BUILT[s]}${id}` : `/participants/${id}/${BUILT[s]}`} className="side-btn">{s}</Link>
+            ? <Link key={s} href={BUILT[s].startsWith("/") ? `${BUILT[s]}${id}` : `/participants/${id}/${BUILT[s]}`} className="side-btn">{s === "Summary" ? `About ${(p.first_name ?? "").trim().split(/\s+/)[0] || "them"}` : s}</Link>
             : <span key={s} className="side-btn off" title="Not built yet">{s}</span>)}
         </nav>
         <ParticipantCalendar participant={id} view={sp.view === "day" ? "day" : "month"} day={sp.d} base={`/participants/${id}`} />

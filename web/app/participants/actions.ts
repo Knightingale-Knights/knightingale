@@ -84,20 +84,12 @@ export async function carersAction(f: FormData) {
   redirect(`/participants/${id}/carers${msg ? `?msg=${encodeURIComponent(msg)}` : ""}`);
 }
 
-// ---- About, Feedback, Funding, Summary ----------------------------------------------------
-import { addFeedback, removeQuarter, saveAbout, saveQuarter } from "@/lib/participants/extra";
+// ---- Feedback, Funding, Summary (About <first name>) ----------------------------------------------------
+import { addFeedback, removeQuarter, saveQuarter } from "@/lib/participants/extra";
 import { emailSummaryTo } from "@/lib/carer/summary";
 
 const back = (id: string, page: string, msg: string, error = false) =>
   redirect(`/participants/${id}/${page}?${error ? "error" : "msg"}=${encodeURIComponent(msg)}`);
-
-export async function aboutAction(f: FormData) {
-  await requireStaff();
-  const id = String(f.get("participant") ?? "");
-  await saveAbout(id, String(f.get("description") ?? ""));
-  revalidatePath(`/participants/${id}`);
-  back(id, "about", "Saved.");
-}
 
 export async function feedbackAction(f: FormData) {
   const staff = await requireStaff();
