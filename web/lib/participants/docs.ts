@@ -141,7 +141,7 @@ export function riskPlans(participant: string) {
 const PLAN_COLS = ["risk", "treatment", "participant_impact", "others", "person_responsible"] as const;
 
 /** Saves the Risk Management Plan rows posted with the Risk Assessment (plan_<id>_<col>, plan_new_<col>, plan_<id>_delete). */
-export async function saveRiskPlans(participant: string, assessment: string, f: FormData, by: string) {
+export async function saveRiskPlans(participant: string, assessment: string, f: FormData, by: string): Promise<string | null> {
   const rows = await riskPlans(participant);
   const read = (k: string) => {
     const v: Record<string, unknown> = {};
@@ -150,7 +150,7 @@ export async function saveRiskPlans(participant: string, assessment: string, f: 
     v.review_date = /^\d{4}-\d{2}-\d{2}$/.test(d) ? melbMidnight(d) : null;
     return v;
   };
-  await sql.begin(async (tx) => {
+  return sql.begin(async (tx) => {
     for (const r of rows) {
       if (!f.has(`plan_${r.id}_risk`)) continue;
       if (f.get(`plan_${r.id}_delete`) === "on") {
@@ -165,7 +165,58 @@ export async function saveRiskPlans(participant: string, assessment: string, f: 
       const [row] = await tx<{ id: string }[]>`
         insert into app.risk_management_plans ${tx({ ...n, participant, created_by: by })} returning id`;
       await tx`insert into app.risk_assessments_risk_management_plan (risk_assessments_id, risk_management_plans_id) values (${assessment}, ${row.id})`;
+      return row.id;
     }
+    return null;
+  });
+}
+
+// ---- Home Risks (app.home_safety, linked as users.home_safety) ----
+export const HOME_SAFE: [string, string][] = [
+  ["bathroom_access", "Bathroom Access"], ["bathroom_drainage", "Bathroom Drainage"], ["bathroom_ventilation", "Bathroom Ventilation"],
+  ["bed_height", "Bed Height"], ["bed_space", "Bed Space Sufficient"], ["cleaning_products", "Cleaning Products"],
+  ["cleaning_products_storage", "Cleaning Products Storage"], ["clothesline", "Clothesline"], ["door_access", "Door Access"],
+  ["electrical_equipment", "Electrical Equipment"], ["electrical_leads", "Electrical Leads"], ["floor_surfaces", "Floor Surfaces"],
+  ["food_prep_equipment", "Food Prep Equipment"], ["fridge_freezer", "Fridge / Freezer"], ["furniture_placement", "Furniture Placement"],
+  ["gates", "Gates"], ["laundry_drainage", "Laundry Drainage"], ["laundry_ventilation", "Laundry Ventilation"], ["lighting", "Lighting"],
+  ["manual_handling", "Manual Handling"], ["parking", "Parking"], ["pathway_garden", "Pathway Garden"], ["portable_heaters", "Portable Heaters"],
+  ["power_points", "Power Points"], ["room_to_move", "Room To Move Safely"], ["stairs", "Stairs"], ["stove", "Stove"],
+  ["switches_plugs", "Switches / Plugs"], ["tables_chairs", "Tables / Chairs"], ["vacuum", "Vacuum"], ["verandah", "Verandah"],
+  ["walking_aid_access", "Walking Aids Access"], ["washer_dryer", "Washer / Dryer"],
+];
+export const HOME_YES: [string, string][] = [
+  ["dangerous_visitors", "Dangerous Visitors"], ["doors_locked", "Doors Locked"], ["exposed_gas_cylinders", "Exposed Gas Cylinders"],
+  ["faulty_smoke_detectors", "Faulty Smoke Detectors"], ["hoarding", "Hoarding"], ["infectious_disease", "Infectious Disease"],
+  ["pests", "Pests"], ["pets", "Pets"], ["power_points_near_water", "Power Points Near Water"], ["restraint_used", "Restraint Used"],
+  ["smoker_in_home", "Smoker In Home"], ["weapons", "Weapons"],
+];
+export const SAFE_CHOICES: [string, string][] = [["safe", "Safe"], ["unsafe", "Unsafe"], ["n_a", "N/A"]];
+export const YES_CHOICES: [string, string][] = [["yes", "Yes"], ["no", "No"], ["n_a", "N/A"]];
+
+/** The participant's home safety row, from their link field or the newest one for them. */
+export async function homeSafety(participant: string): Promise<Record<string, string | null> | null> {
+  const [r] = await sql<Record<string, string | null>[]>`
+    select h.* from app.home_safety h, app.users u
+     where u.id = ${participant} and (h.id = u.home_safety or h.participant = u.id)
+     order by (h.id = u.home_safety) desc, h.updated_at desc limit 1`;
+  return r ?? null;
+}
+
+/** Saves the Home Risks posted with the Risk Assessment (home_<col>), creating and linking the row if needed. */
+export async function saveHomeSafety(participant: string, f: FormData, by: string) {
+  if (!f.has("home_present")) return;
+  const v: Record<string, string | null> = {};
+  for (const [c] of [...HOME_SAFE, ...HOME_YES]) v[c] = String(f.get(`home_${c}`) ?? "") || null;
+  v.home_safety_notes = String(f.get("home_home_safety_notes") ?? "").trim() || null;
+  const cur = await homeSafety(participant);
+  if (cur) {
+    await sql`update app.home_safety set ${sql({ ...v, updated_at: new Date() })} where id = ${cur.id}`;
+    return;
+  }
+  if (!Object.values(v).some(Boolean)) return;
+  await sql.begin(async (tx) => {
+    const [row] = await tx<{ id: string }[]>`insert into app.home_safety ${tx({ ...v, participant, created_by: by })} returning id`;
+    await tx`update app.users set home_safety = ${row.id} where id = ${participant}`;
   });
 }
 
@@ -194,8 +245,12 @@ export async function saveDoc(d: DocDef, participant: string, f: FormData, by: s
       return row.id;
     });
   }
-  if (d.key === "risk") await saveRiskPlans(participant, id, f, by);
-  return id;
+  let newPlan: string | null = null;
+  if (d.key === "risk") {
+    newPlan = await saveRiskPlans(participant, id, f, by);
+    await saveHomeSafety(participant, f, by);
+  }
+  return { id, newPlan };
 }
 
 /** The participant details on the Emergency Plan, grouped as in Bubble (from their profile and intake). */

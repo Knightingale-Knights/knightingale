@@ -901,3 +901,10 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 
 .plan-row { padding: 14px 0; border-bottom: 1px solid var(--line); }
 .plan-row:last-of-type { border-bottom: 0; }
+.plan-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.home-risks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: start; }
+.home-risks { width: 100%; border-collapse: collapse; font-size: 14px; }
+.home-risks th { text-align: center; font-weight: 600; font-size: 12px; color: var(--ink-3); padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.home-risks th:first-child, .home-risks td:first-child { text-align: left; }
+.home-risks td { text-align: center; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.home-risks input[type="radio"] { width: 18px; height: 18px; margin: 0; }
