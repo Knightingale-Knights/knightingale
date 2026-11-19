@@ -374,7 +374,93 @@ export async function profileAndIntake(d: DocDef, participant: string) {
   return { ...pick(u, fieldsFrom(d.sections, "user")), ...pick(i, fieldsFrom(d.sections, "intake")) };
 }
 
-export const DOCS: Record<string, DocDef> = { consent: CONSENT, emergency: EMERGENCY, risk: RISK, support: SUPPORT };
+
+export const INFO: DocDef = {
+  key: "info", title: "Information Booklet", table: "info_book_signoffs", link: "info_book",
+  sections: [
+    {
+      title: "Signatures",
+      fields: [
+        { col: "participant_signature", label: "Participant Signature", kind: "signature" },
+        { col: "ro_name", label: "Participant", kind: "show" },
+        { col: "signed_date", label: "Date", kind: "date" },
+        { col: "representative_signature", label: "Representative Signature (if applicable)", kind: "signature" },
+        { col: "representative", label: "Representative Name", kind: "text" },
+        { col: "ro_kn_sig", label: "Knightingale Signature", kind: "show", img: true },
+        { col: "ro_kn_date", label: "Date", kind: "show" },
+      ],
+    },
+  ],
+};
+
+export const SERVICE: DocDef = {
+  key: "service", title: "Service Agreement", table: "service_agreements", link: "service_agreement",
+  sections: [
+    {
+      title: "Signatures",
+      fields: [
+        { col: "ro_consent", label: "Consent", kind: "show" },
+        { col: "participant_signature", label: "Participant Signature", kind: "signature" },
+        { col: "ro_name", label: "Participant", kind: "show" },
+        { col: "signed_date", label: "Date Signed", kind: "date" },
+        { col: "representative_signature", label: "Representative Signature (if applicable)", kind: "signature" },
+        { col: "representative", label: "Representative Name", kind: "text" },
+        { col: "ro_kn_sig", label: "Knightingale Signature", kind: "show", img: true },
+        { col: "ro_kn_date", label: "Date Signed", kind: "show" },
+      ],
+    },
+  ],
+};
+
+export type PriceItem = { id: string; item_no: string | null; item_name: string | null; item_price: number | null };
+export type Support = { id: string; no: number | null; ndis_pricing: string | null; hours: number | null; total: number | null };
+
+/** NDIS price items for the Schedule of Supports. */
+export function priceItems() {
+  return sql<PriceItem[]>`select id, item_no, item_name, item_price::float as item_price from app.ndis_price_items order by item_name`;
+}
+
+/** The Service Agreement's supports (Bubble's Support Arrangements), in order. */
+export function agreementSupports(agreement: string | null) {
+  if (!agreement) return Promise.resolve([] as Support[]);
+  return sql<Support[]>`
+    select id, no::float as no, ndis_pricing, hours::float as hours, total::float as total
+      from app.support_arrangements where service_agreement = ${agreement} order by no nulls last, created_at`;
+}
+
+/** Saves the Schedule of Supports posted with the agreement (sup_<id>_item/_hours/_delete, sup_new_*). */
+async function saveSupports(participant: string, agreement: string, f: FormData, by: string) {
+  const rows = await agreementSupports(agreement);
+  const prices = new Map((await priceItems()).map((p) => [p.id, p.item_price ?? 0]));
+  const read = (k: string) => {
+    const item = String(f.get(`sup_${k}_item`) ?? "") || null;
+    const h = Number(String(f.get(`sup_${k}_hours`) ?? "").replace(/[^\d.]/g, ""));
+    const hours = Number.isFinite(h) && h > 0 ? h : null;
+    return { ndis_pricing: item, hours, total: item && hours ? Math.round(hours * (prices.get(item) ?? 0) * 100) / 100 : null };
+  };
+  await sql.begin(async (tx) => {
+    let n = 0;
+    for (const r of rows) {
+      if (!f.has(`sup_${r.id}_item`)) { n++; continue; }
+      if (f.get(`sup_${r.id}_delete`) === "on") {
+        await tx`delete from app.support_arrangements where id = ${r.id}`;
+        continue;
+      }
+      n++;
+      await tx`update app.support_arrangements set ${tx({ ...read(r.id), no: n, updated_at: new Date() })} where id = ${r.id}`;
+    }
+    const v = read("new");
+    if (v.ndis_pricing) {
+      n++;
+      await tx`insert into app.support_arrangements ${tx({ ...v, no: n, participant, service_agreement: agreement, created_by: by })}`;
+    }
+    // Keep Bubble's Support 1 to 5 fields in step.
+    const ids = (await tx<{ id: string }[]>`select id from app.support_arrangements where service_agreement = ${agreement} order by no nulls last, created_at limit 5`).map((x) => x.id);
+    await tx`update app.service_agreements set ${tx({ support_1: ids[0] ?? null, support_2: ids[1] ?? null, support_3: ids[2] ?? null, support_4: ids[3] ?? null, support_5: ids[4] ?? null })} where id = ${agreement}`;
+  });
+}
+
+export const DOCS: Record<string, DocDef> = { consent: CONSENT, emergency: EMERGENCY, risk: RISK, support: SUPPORT, info: INFO, service: SERVICE };
 
 export type RiskPlan = { id: string; risk: string | null; treatment: string | null; participant_impact: string | null; others: string | null; person_responsible: string | null; review_date: Date | null };
 
@@ -505,6 +591,7 @@ export async function saveDoc(d: DocDef, participant: string, f: FormData, by: s
     newPlan = await saveRiskPlans(participant, id, f, by);
     await saveHomeSafety(participant, f, by);
   }
+  if (d.key === "service") await saveSupports(participant, id, f, by);
   return { id, newPlan };
 }
 

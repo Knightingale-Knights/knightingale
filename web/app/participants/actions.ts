@@ -48,3 +48,38 @@ export async function saveDocAction(f: FormData) {
   revalidatePath(`/participants/${id}`);
   redirect(dest);
 }
+
+// ---- Points of Care (Shift Duties) and Carers --------------------------------------------
+import { addCarers, addDuty, removeCarer, removeDuty, toggleDuty } from "@/lib/participants/lists";
+
+export async function dutyAction(f: FormData) {
+  const staff = await requireStaff();
+  const id = String(f.get("participant") ?? "");
+  const op = String(f.get("op") ?? "");
+  const duty = String(f.get("duty") ?? "");
+  let msg = "";
+  if (op === "add") {
+    const text = String(f.get("text") ?? "").trim();
+    if (text) { await addDuty(id, text, staff.id); msg = "Added."; }
+  } else if (op === "toggle" && duty) await toggleDuty(id, duty);
+  else if (op === "remove" && duty) { await removeDuty(id, duty); msg = "Removed."; }
+  revalidatePath(`/participants/${id}/duties`);
+  redirect(`/participants/${id}/duties${msg ? `?msg=${encodeURIComponent(msg)}` : ""}`);
+}
+
+export async function carersAction(f: FormData) {
+  await requireStaff();
+  const id = String(f.get("participant") ?? "");
+  const op = String(f.get("op") ?? "");
+  let msg = "";
+  if (op === "add") {
+    const ids = f.getAll("carers").map(String).filter((x) => /^[0-9a-f-]{36}$/i.test(x));
+    await addCarers(id, ids);
+    msg = ids.length ? `Added ${ids.length}.` : "";
+  } else if (op === "remove") {
+    await removeCarer(id, String(f.get("carer") ?? ""));
+    msg = "Removed.";
+  }
+  revalidatePath(`/participants/${id}/carers`);
+  redirect(`/participants/${id}/carers${msg ? `?msg=${encodeURIComponent(msg)}` : ""}`);
+}
