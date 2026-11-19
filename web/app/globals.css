@@ -879,3 +879,8 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 .pay-popup input { text-align: right; font-variant-numeric: tabular-nums; }
 .pay-popup input[type="date"] { text-align: left; }
 
+/* Availability waits for Culture of Care */
+.culture-gate { margin: 18px 0 8px; padding: 24px 20px; border: 1px solid var(--line); background: var(--desk); display: flex; flex-direction: column; gap: 10px; }
+.culture-gate h2 { margin: 0; font-size: 22px; }
+.culture-gate p { margin: 0; }
+

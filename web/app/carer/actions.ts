@@ -58,6 +58,8 @@ export async function availabilityAction(f: FormData) {
   const day = String(f.get("day") ?? "");
   const from = String(f.get("from") ?? "");
   let dest = `/carer/availability?from=${from}`;
+  // Carers finish the Culture of Care videos before giving availability (staff viewing as them can still change it).
+  if (!me.viewAs && !(await cultureProgress(me.id)).complete) redirect("/carer/availability");
   try {
     await setAvailability(me, day, String(f.get("slot") ?? ""), f.get("on") === "1", isoDate(new Date()));
   } catch (e) {
@@ -66,6 +68,8 @@ export async function availabilityAction(f: FormData) {
   revalidatePath("/carer/availability");
   redirect(dest);
 }
+
+import { cultureProgress } from "@/lib/culture/data";
 
 // ---- travel and receipts ------------------------------------------------------
 import { addReceipt, addTravel, removeReceipt, removeTravel, TravelError } from "@/lib/carer/travel";

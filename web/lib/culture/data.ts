@@ -40,3 +40,10 @@ export async function markWatched(userId: string, key: CultureKey) {
     attachments: [],
   }).catch((e) => console.error("Culture of Care email failed", e));
 }
+
+/** How many of the Culture of Care videos the carer has finished, out of all of them. */
+export async function cultureProgress(userId: string) {
+  const s = await cultureState(userId);
+  const done = CULTURE_KEYS.filter((k) => s[k]).length;
+  return { done, total: CULTURE_KEYS.length, complete: done === CULTURE_KEYS.length };
+}
