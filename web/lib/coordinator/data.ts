@@ -124,8 +124,8 @@ export async function participantDocs(participant: string): Promise<Record<DocKe
            exists (select 1 from app.users_shift_duties d where d.users_id = u.id) as points,
            exists (select 1 from app.support_plans x where x.id = u.support_plan) as support,
            exists (select 1 from app.medication_charts x where x.id = u.medication_chart) as medication,
-           exists (select 1 from app.emergency_plans x where x.id = u.emergency_plan) as emergency,
-           exists (select 1 from app.consents x where x.id = u.consent) as consent
+           exists (select 1 from app.emergency_plans x where x.id = u.emergency_plan and nullif(x.participant_signature, '') is not null) as emergency,
+           exists (select 1 from app.consents x where x.id = u.consent and nullif(x.participant_signature, '') is not null) as consent
       from app.users u where u.id = ${participant}`;
   return r;
 }
@@ -171,4 +171,17 @@ export async function coordAppointment(coordinator: string, id: string): Promise
       from app.events e join app.users p on p.id = e.participant left join app.users c on c.id = e.carer
      where e.id = ${id} and p.coordinator_2 = ${coordinator}`;
   return a ?? null;
+}
+
+/** A stored file (a signature) a coordinator may open: one on a document of one of their participants. */
+export async function coordinatorMayOpen(coordinator: string, url: string) {
+  const bare = url.replace(/^https?:/, "");
+  const [r] = await sql<{ ok: boolean }[]>`
+    select exists (
+      select 1 from app.users p
+       where p.coordinator_2 = ${coordinator}
+         and (exists (select 1 from app.consents x where x.participant = p.id and x.participant_signature in (${url}, ${bare}))
+           or exists (select 1 from app.emergency_plans x where x.participant = p.id and x.participant_signature in (${url}, ${bare})))
+    ) as ok`;
+  return Boolean(r?.ok);
 }

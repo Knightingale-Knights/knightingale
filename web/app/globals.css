@@ -884,3 +884,18 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 .culture-gate h2 { margin: 0; font-size: 22px; }
 .culture-gate p { margin: 0; }
 
+/* Participant documents: fixed wording and the read-only view coordinators see */
+.doc-page { max-width: 680px; }
+.doc-text { margin: 18px 0; }
+.doc-text h3 { margin: 18px 0 4px; font-size: 13px; font-family: inherit; letter-spacing: 0.04em; }
+.doc-text p { margin: 0; white-space: pre-line; font-size: 13px; line-height: 1.6; color: var(--ink-2); }
+.doc-view { margin: 26px 0 0; }
+.doc-view h2 { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-family: inherit; color: var(--ink-3); border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.doc-view dl { margin: 0; }
+.doc-view dl > div { display: grid; grid-template-columns: minmax(140px, 38%) 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.doc-view dt { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.doc-view dd { margin: 0; white-space: pre-line; font-size: 13px; }
+.doc-check { display: grid; grid-template-columns: 22px 1fr; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.doc-sig { max-width: 260px; max-height: 110px; background: var(--paper); border: 1px solid var(--line); }
+@media (max-width: 600px) { .doc-view dl > div { grid-template-columns: 1fr; gap: 4px; } }
+

@@ -18,8 +18,8 @@ const DOCS: { label: string; key?: DocKey; path?: string }[] = [
   { label: "Points of Care", key: "points" },
   { label: "Support Plan", key: "support" },
   { label: "Medication Plan", key: "medication" },
-  { label: "Emergency Plan", key: "emergency" },
-  { label: "Privacy Consent Form", key: "consent" },
+  { label: "Emergency Plan", key: "emergency", path: "emergency" },
+  { label: "Privacy Consent Form", key: "consent", path: "consent" },
 ];
 
 export default async function CoordinatorParticipant({ params }: { params: Promise<{ id: string }> }) {

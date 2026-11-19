@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/auth";
 import { copied, fromStorage, isBubbleFile, ownsFile } from "@/lib/files";
 import { PHOTO_MIME, isProfilePhoto, shrinkBubblePhoto } from "@/lib/photo";
+import { coordinatorMayOpen } from "@/lib/coordinator/data";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,8 @@ export async function GET(req: Request) {
   const me = await currentUser();
   if (!me || !isBubbleFile(url)) return new Response("Not found", { status: 404 });
   // Coordinators see carers' profile photos on their calendar; otherwise only staff, or the file's owner.
-  const allowed = me.role === "admin" || (me.role === "coordinator" ? await isProfilePhoto(url) : await ownsFile(me.id, url));
+  const allowed = me.role === "admin"
+    || (me.role === "coordinator" ? (await isProfilePhoto(url)) || (await coordinatorMayOpen(me.id, url)) : await ownsFile(me.id, url));
   if (!allowed) return new Response("Not found", { status: 404 });
   const c = await copied(url);
   if (!c?.path.startsWith("photos/") && (await isProfilePhoto(url))) {

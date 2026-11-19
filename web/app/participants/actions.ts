@@ -17,3 +17,22 @@ export async function saveIntakeAction(f: FormData) {
   revalidatePath(`/participants/${id}`);
   redirect(dest);
 }
+
+// ---- other participant documents (Privacy Consent Form, Emergency Plan) ---------------
+import { DOCS, saveDoc } from "@/lib/participants/docs";
+
+export async function saveDocAction(f: FormData) {
+  const staff = await requireStaff();
+  const id = String(f.get("participant") ?? "");
+  const d = DOCS[String(f.get("doc") ?? "")];
+  if (!d) redirect(`/participants/${id}`);
+  let dest = `/participants/${id}/${d.key}?msg=${encodeURIComponent(`${d.title} saved.`)}`;
+  try {
+    await saveDoc(d, id, f, staff.id);
+  } catch (e) {
+    console.error("doc save failed", e);
+    dest = `/participants/${id}/${d.key}?error=${encodeURIComponent((e as Error).message)}`;
+  }
+  revalidatePath(`/participants/${id}`);
+  redirect(dest);
+}
