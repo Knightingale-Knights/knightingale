@@ -78,3 +78,18 @@ export async function bookShift(u: Pick<AppUser, "id" | "name" | "phone">, input
   await logAndSend(id, "booking_alert", null, env.bookingAlertTo, t.alert, send);
   return id;
 }
+
+export type SiteAccount = { id: string; name: string; sites: string | null; phone: string | null; email: string | null; photo: string | null };
+
+/** Admin list of aged care site logins (Bubble profile "location"), with the sites each one books for. */
+export async function siteAccounts(q: string): Promise<SiteAccount[]> {
+  const like = q ? `%${q.toLowerCase()}%` : null;
+  return sql<SiteAccount[]>`
+    select u.id, trim(concat_ws(' ', u.first_name, u.last_name)) as name, u.profile_photo as photo, u.phone_number as phone, u.email,
+           (select string_agg(l.name, ', ' order by l.name) from app.users_locations x join app.locations l on l.id = x.locations_id where x.users_id = u.id) as sites
+      from app.users u
+     where u.account_type = 'location' and u.active is not false
+       and (${like}::text is null or lower(concat_ws(' ', u.first_name, u.last_name, u.email, u.phone_number,
+             (select string_agg(l.name, ' ') from app.users_locations x join app.locations l on l.id = x.locations_id where x.users_id = u.id))) like ${like})
+     order by sites nulls last, name`;
+}

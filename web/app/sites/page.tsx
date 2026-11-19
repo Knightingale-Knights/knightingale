@@ -1,0 +1,52 @@
+import { requireStaff } from "@/lib/auth";
+import { TopBar } from "@/components/TopBar";
+import { Portrait } from "@/components/CarerCells";
+import { ViewAsButton } from "@/components/ViewAsButton";
+import { siteAccounts } from "@/lib/facility/data";
+
+export const dynamic = "force-dynamic";
+
+/** Aged care site logins, with View as to open their booking pages as them. */
+export default async function Sites({ searchParams }: { searchParams: Promise<{ q?: string; error?: string }> }) {
+  const staff = await requireStaff();
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim();
+  const rows = await siteAccounts(q);
+  return (
+    <div className="shell">
+      <TopBar section="/sites" email={staff.email} />
+      <main>
+        <h1>Aged Care Sites</h1>
+        <p className="lede">{rows.length} site login{rows.length === 1 ? "" : "s"}</p>
+        {sp.error && <p className="banner error">{sp.error}</p>}
+        <div className="row filters">
+          <form className="search">
+            <input name="q" defaultValue={q} placeholder="Search site, name, email or phone" />
+            <button className="secondary">Search</button>
+          </form>
+        </div>
+        {rows.length === 0 ? (
+          <p className="empty">No site logins match.</p>
+        ) : (
+          <div className="table-wrap">
+            <table className="grid people">
+              <thead><tr><th></th><th>Site</th><th>Name</th><th>Phone</th><th>Email</th><th></th></tr></thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id}>
+                    <td className="pic"><Portrait photo={r.photo} name={r.sites || r.name || "?"} /></td>
+                    <td>{r.sites ?? "–"}</td>
+                    <td>{r.name || "(no name)"}</td>
+                    <td>{r.phone ? <a href={`tel:${r.phone}`}>{r.phone}</a> : ""}</td>
+                    <td>{r.email ? <a href={`mailto:${r.email}`}>{r.email}</a> : ""}</td>
+                    <td><ViewAsButton user={r.id} back="/sites" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

@@ -14,6 +14,7 @@ const MENU: { label: string; href?: string; section?: string }[] = [
   { label: "Ask Klarra" },
   { label: "Participants", href: "/participants", section: "/participants" },
   { label: "Support Coordinators", href: "/coordinators", section: "/coordinators" },
+  { label: "Aged Care Sites", href: "/sites", section: "/sites" },
   { label: "Invoicing", href: "/invoicing", section: "/invoicing" },
   { label: "Map", href: "/map", section: "/map" },
   { label: "Timesheets", href: "/timesheets", section: "/timesheets" },

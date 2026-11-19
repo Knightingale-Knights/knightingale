@@ -29,5 +29,5 @@ export async function stopViewAsAction() {
   await stopViewAs(v?.session ?? null);
   if (!v) redirect("/roster");
   const [t] = await sql<{ account_type: string | null }[]>`select account_type from app.users where id = ${v.target}`;
-  redirect(t?.account_type === "resident" ? "/coordinators" : `/compliance/${v.target}`);
+  redirect(t?.account_type === "resident" ? "/coordinators" : t?.account_type === "location" ? "/sites" : `/compliance/${v.target}`);
 }
