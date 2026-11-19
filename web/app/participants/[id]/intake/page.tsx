@@ -25,6 +25,7 @@ export default async function Intake({ params, searchParams }: { params: Promise
         <Link href={`/participants/${id}`}>← {name}</Link>
       </TopBar>
       <main className="form-page">
+        <Link href={`/participants/${id}`} className="sheet-close" aria-label="Close" title="Back to the participant">×</Link>
         <h1>{name} intake</h1>
         <p className="lede">{cur?.id ? "Editing the saved intake." : "No intake yet. Saving creates one."}</p>
         {sp.msg && <p className="banner ok">{sp.msg}</p>}

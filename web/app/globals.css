@@ -973,3 +973,7 @@ details.tags .tags-empty { color: var(--ink-3); font-size: 14px; }
 .period-cell .slot-btn:hover { border-color: var(--ink); color: var(--ink); }
 .period-cell .slot-btn.on { color: var(--ink); border: 1px solid var(--ink); background: transparent; }
 .period-cell .slot-btn.on:hover { background: var(--ink); color: var(--paper); }
+.shell > main.form-page { position: relative; }
+.sheet-close { position: absolute; top: 18px; right: 18px; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line-2); border-radius: 50%; color: var(--ink); text-decoration: none; font-size: 22px; line-height: 1; background: var(--paper); }
+.sheet-close:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.shell > main.form-page > h1 { padding-right: 52px; }

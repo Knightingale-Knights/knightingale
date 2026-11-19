@@ -11,6 +11,7 @@ export function ParticipantShell({ id, name, email, title, lede, msg, error, wid
         <Link href={`/participants/${id}`}>← {name}</Link>
       </TopBar>
       <main className={wide ? "form-page" : "form-page list-doc"}>
+        <Link href={`/participants/${id}`} className="sheet-close" aria-label="Close" title="Back to the participant">×</Link>
         <h1>{title}</h1>
         {lede && <p className="lede">{lede}</p>}
         {msg && <p className="banner ok">{msg}</p>}

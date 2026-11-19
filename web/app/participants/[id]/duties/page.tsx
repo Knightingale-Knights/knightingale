@@ -23,6 +23,7 @@ export default async function Duties({ params, searchParams }: { params: Promise
         <Link href={`/participants/${id}`}>← {name}</Link>
       </TopBar>
       <main className="form-page list-doc">
+        <Link href={`/participants/${id}`} className="sheet-close" aria-label="Close" title="Back to the participant">×</Link>
         <h1>{p.first_name ?? name}&apos;s Points of Care</h1>
         <p className="lede">Please use this as a guide for the shift. Mark off or add any tasks you complete.</p>
         {sp.msg && <p className="banner ok">{sp.msg}</p>}

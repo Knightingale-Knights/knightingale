@@ -51,6 +51,7 @@ export default async function ParticipantDoc({ params, searchParams }: { params:
         <Link href={`/participants/${id}`}>← {name}</Link>
       </TopBar>
       <main className="form-page">
+        <Link href={`/participants/${id}`} className="sheet-close" aria-label="Close" title="Back to the participant">×</Link>
         <h1>{p.first_name ?? name}&apos;s {d.title}</h1>
         <p className="lede">{cur ? "Editing the saved form." : "Not filled in yet. Saving creates it."}</p>
         {sp.msg && <p className="banner ok">{sp.msg}</p>}
