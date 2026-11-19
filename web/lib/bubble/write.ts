@@ -6,7 +6,8 @@ import { sql } from "@/lib/db";
 
 const BASE = (process.env.BUBBLE_API_BASE ?? "https://knightingale.com.au/api/1.1/obj").replace(/\/$/, "");
 
-export const bubbleOn = () => Boolean(process.env.BUBBLE_API_TOKEN) && process.env.BUBBLE_WRITE !== "off";
+// Off once LAUNCHED=yes: after the switch, knightingale.com.au/api/1.1 is this app, so writing "back" would loop.
+export const bubbleOn = () => process.env.LAUNCHED !== "yes" && Boolean(process.env.BUBBLE_API_TOKEN) && process.env.BUBBLE_WRITE !== "off";
 
 async function api<T = unknown>(method: "GET" | "POST" | "PATCH" | "DELETE", path: string, body?: unknown): Promise<T> {
   const res = await fetch(`${BASE}/${path}`, {

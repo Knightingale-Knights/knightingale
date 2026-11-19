@@ -3,9 +3,15 @@ import { timingSafeEqual } from "node:crypto";
 import { ApiError } from "./core";
 import { typeFor, type TypeDef } from "./map";
 
-/** Same token check as Bubble: "Authorization: Bearer <token>" or ?api_token=. Tokens come from DATA_API_TOKENS (comma separated). */
+/**
+ * Same token check as Bubble: "Authorization: Bearer <token>" or ?api_token=. Tokens come from DATA_API_TOKENS
+ * (comma separated); once LAUNCHED=yes, the old Bubble API token also works, so Klarra keeps working unchanged.
+ */
 export function authorised(req: Request) {
-  const tokens = (process.env.DATA_API_TOKENS ?? "").split(",").map((t) => t.trim()).filter(Boolean);
+  const tokens = [
+    ...(process.env.DATA_API_TOKENS ?? "").split(","),
+    ...(process.env.LAUNCHED === "yes" ? [process.env.BUBBLE_API_TOKEN ?? ""] : []),
+  ].map((t) => t.trim()).filter(Boolean);
   if (!tokens.length) return false;
   const given = /^Bearer (.+)$/.exec(req.headers.get("authorization") ?? "")?.[1] ?? new URL(req.url).searchParams.get("api_token") ?? "";
   const g = Buffer.from(given);

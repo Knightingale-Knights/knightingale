@@ -26,10 +26,10 @@ export async function myAway(carer: string, today: string): Promise<Away[]> {
 /** Every away period touching these days, keyed by the carer's Bubble id (for the Saturday check). */
 export async function awayBetween(from: string, to: string) {
   return sql<{ carer_b: string; name: string; from_day: string; to_day: string; reason: string }[]>`
-    select u.bubble_id as carer_b, trim(concat_ws(' ', u.first_name, u.last_name)) as name,
+    select coalesce(u.bubble_id, u.id::text) as carer_b, trim(concat_ws(' ', u.first_name, u.last_name)) as name,
            to_char(a.from_day, 'YYYY-MM-DD') as from_day, to_char(a.to_day, 'YYYY-MM-DD') as to_day, a.reason
       from app.carer_away a join app.users u on u.id = a.carer
-     where u.bubble_id is not null and a.to_day >= ${from} and a.from_day < ${to}`;
+     where a.to_day >= ${from} and a.from_day < ${to}`;
 }
 
 /** Records the period, then emails Paul if the carer is rostered in it. Returns how many shifts clash. */
@@ -51,7 +51,7 @@ export async function removeAway(carer: string, id: string) {
 }
 
 async function alertIfRostered(carer: { id: string; name: string }, a: { from: string; to: string; reason: Away["reason"]; note: string | null }) {
-  const [u] = await sql<{ b: string | null }[]>`select bubble_id as b from app.users where id = ${carer.id}`;
+  const [u] = await sql<{ b: string | null }[]>`select coalesce(bubble_id, id::text) as b from app.users where id = ${carer.id}`;
   if (!u?.b) return 0;
   const shifts: Slot[] = toSlots(await bubbleShifts(a.from, addDays(a.to, 1), u.b)).filter((s) => s.day >= a.from && s.day <= a.to);
   if (!shifts.length) return 0;
