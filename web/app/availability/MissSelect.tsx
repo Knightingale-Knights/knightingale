@@ -9,7 +9,7 @@ export function MissSelect({ carer, day, value, reasons }: { carer: string; day:
     <form ref={form} action={missAction} className="miss-form">
       <input type="hidden" name="carer" value={carer} />
       <input type="hidden" name="day" value={day} />
-      <select name="reason" defaultValue={value} onChange={() => form.current?.requestSubmit()} className={value ? "on" : ""} aria-label="Missed">
+      <select name="reason" defaultValue={value} onChange={() => form.current?.requestSubmit()} className={value === "accepted" ? "ok" : value ? "on" : ""} aria-label="Missed">
         <option value="">–</option>
         {reasons.map((r) => <option key={r.value} value={r.value}>{r.display}</option>)}
       </select>

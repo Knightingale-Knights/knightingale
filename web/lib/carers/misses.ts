@@ -28,16 +28,17 @@ export async function setMiss(carer: string, day: string, reason: string, by: st
     on conflict (carer, day) do update set reason = excluded.reason, created_by = excluded.created_by, updated_at = now()`;
 }
 
-export type MissCount = { total: number; byReason: Record<string, number> };
+export type MissCount = { total: number; accepted: number; byReason: Record<string, number> };
 
-/** Misses per carer in the last 90 days, with a count per reason. */
+/** Misses per carer in the last 90 days, with a count per reason. "accepted" is counted apart, not as a miss. */
 export async function missCounts(): Promise<Record<string, MissCount>> {
   const rows = await sql<{ carer: string; reason: string; n: number }[]>`
     select carer, reason, count(*)::int as n from app.carer_misses
      where day > (now() at time zone 'Australia/Melbourne')::date - 90 group by carer, reason`;
   const out: Record<string, MissCount> = {};
   for (const r of rows) {
-    const c = (out[r.carer] ??= { total: 0, byReason: {} });
+    const c = (out[r.carer] ??= { total: 0, accepted: 0, byReason: {} });
+    if (r.reason === "accepted") { c.accepted += r.n; continue; }
     c.total += r.n;
     c.byReason[r.reason] = r.n;
   }

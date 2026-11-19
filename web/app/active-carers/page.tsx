@@ -55,6 +55,7 @@ export default async function ActiveCarers({ searchParams }: { searchParams: Pro
                         {misses[r.id]?.total
                           ? <><span className="miss-count">{misses[r.id].total}</span><small className="miss-why">{Object.entries(misses[r.id].byReason).map(([k, n]) => `${n} ${label[k] ?? k}`).join(", ")}</small></>
                           : <span className="dash">0</span>}
+                        {misses[r.id]?.accepted ? <small className="miss-why ok">{misses[r.id].accepted} accepted</small> : null}
                       </td>
                       <td><ViewAsButton user={r.id} back="/active-carers" /></td>
                     </tr>
