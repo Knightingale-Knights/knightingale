@@ -837,3 +837,23 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 .stat-top .rank { font-family: var(--serif); font-size: 18px; color: var(--ink-3); }
 .stat-top .n { font-size: 11px; color: var(--ink-3); }
 
+/* Phone menu: every menu (admin, carer, coordinator, facility, sign-up) folds into a button top right */
+.menu-toggle { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+.menu-burger { display: none; }
+@media (max-width: 900px) {
+  .side, .carer-top { position: sticky; top: 0; z-index: 40; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0; padding: 14px 18px; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .side .wordmark.small, .carer-top .wordmark.small { font-size: 11px; color: var(--ink); }
+  .menu-burger { display: flex; flex-direction: column; justify-content: center; gap: 5px; width: 40px; height: 40px; padding: 0 9px; margin: -8px -9px -8px 0; cursor: pointer; }
+  .menu-burger span { display: block; height: 1.5px; background: var(--ink); transition: transform 200ms var(--ease), opacity 160ms; }
+  .menu-toggle:focus-visible + .menu-burger { outline: 1px solid var(--ink); }
+  .menu-toggle:checked + .menu-burger span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .menu-toggle:checked + .menu-burger span:nth-child(2) { opacity: 0; }
+  .menu-toggle:checked + .menu-burger span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+  .side > .menu-burger ~ *, .carer-top > .menu-burger ~ * { display: none !important; }
+  .menu-toggle:checked ~ nav { display: flex !important; flex-direction: column; width: 100%; gap: 8px; margin-top: 16px; animation: rise 220ms var(--ease); }
+  .menu-toggle:checked ~ form { display: flex !important; flex-direction: column; width: 100%; margin-top: 10px; }
+  .menu-toggle:checked ~ .side-hello, .menu-toggle:checked ~ .hello { display: block !important; width: 100%; margin: 14px 0 0; }
+  .carer-top .menu-toggle:checked ~ nav form { margin-left: 0; }
+  .side nav .side-btn { justify-content: flex-start; padding: 0 14px; }
+}
+

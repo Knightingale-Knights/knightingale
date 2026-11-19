@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MenuBurger } from "@/components/MenuBurger";
 import { redirect } from "next/navigation";
 import { CONTRACT_GATE, contractState } from "@/lib/contract/data";
 import { signOutAction } from "@/app/invoicing/actions";
@@ -41,6 +42,7 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
       )}
       <aside className="side">
         <span className="wordmark small">knightingale</span>
+        <MenuBurger />
         <span className="side-hello">Hi {name.split(" ")[0]}</span>
         <nav>
           {items.map((i) => (

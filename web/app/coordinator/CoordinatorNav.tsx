@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MenuBurger } from "@/components/MenuBurger";
 import { signOutAction } from "@/app/invoicing/actions";
 import { ViewAsBar } from "@/components/ViewAsBar";
 import { noteEmailsOn } from "@/lib/coordinator/data";
@@ -18,6 +19,7 @@ export async function CoordinatorNav({ on, me }: { on: On; me: { id: string; nam
       <ViewAsBar />
       <aside className="side">
         <span className="wordmark small">knightingale</span>
+        <MenuBurger />
         <span className="side-hello">Hi {me.name.split(" ")[0]}</span>
         <nav>
           {items.map((i) => (

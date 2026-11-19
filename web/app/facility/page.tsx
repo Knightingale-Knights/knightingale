@@ -1,4 +1,5 @@
 import { requireFacility } from "@/lib/auth";
+import { MenuBurger } from "@/components/MenuBurger";
 import { ViewAsBar } from "@/components/ViewAsBar";
 import { facilityFor, facilityShifts, type Booking } from "@/lib/facility/data";
 import { roleName } from "@/lib/facility/rules";
@@ -41,6 +42,7 @@ export default async function FacilityHome({ searchParams }: { searchParams: Pro
       <ViewAsBar />
       <header className="carer-top">
         <span className="wordmark small">knightingale</span>
+        <MenuBurger />
         <span className="hello">{facility?.name ?? me.name}</span>
         <nav><form action={signOutAction}><button className="link">Sign out</button></form></nav>
       </header>

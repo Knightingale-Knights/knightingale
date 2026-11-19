@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MenuBurger } from "@/components/MenuBurger";
 import { ViewAsBar } from "@/components/ViewAsBar";
 import { notFound } from "next/navigation";
 import { requireApplicant } from "@/lib/auth";
@@ -44,6 +45,7 @@ export default async function JoinStep({ params, searchParams }: { params: Promi
       <ViewAsBar />
       <header className="carer-top">
         <span className="wordmark small">knightingale</span>
+        <MenuBurger />
         <span className="hello">Your application</span>
         <nav><form action={signOutAction}><button className="link">Save and sign out</button></form></nav>
       </header>

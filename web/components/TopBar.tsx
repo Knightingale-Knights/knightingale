@@ -2,6 +2,7 @@ import Link from "next/link";
 import { signOutAction } from "@/app/invoicing/actions";
 import { currentUser } from "@/lib/auth";
 import { unreadTotal } from "@/lib/chats/data";
+import { MenuBurger } from "@/components/MenuBurger";
 
 // Admin sidebar. Items with no href are not built yet and show greyed out.
 const MENU: { label: string; href?: string; section?: string }[] = [
@@ -27,6 +28,7 @@ export async function TopBar({ section, email, children }: { section: string; em
     <>
       <aside className="side">
         <span className="wordmark small">knightingale</span>
+        <MenuBurger />
         <nav>
           {MENU.map((m) =>
             m.href ? (
