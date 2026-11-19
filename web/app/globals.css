@@ -963,3 +963,8 @@ details.tags .tags-empty { color: var(--ink-3); font-size: 14px; }
 .funding-stats b { font-size: 18px; font-weight: 400; }
 .list-box small { color: var(--ink-3); }
 .participant-centre .section-grid { max-width: none; }
+.miss-form { margin: 0; }
+.miss-form select { min-height: 32px; padding: 4px 8px; font-size: 13px; min-width: 130px; }
+.miss-form select.on { border-color: #a3333d; color: #a3333d; }
+.miss-count { color: #a3333d; font-weight: 600; }
+.miss-why { display: block; font-size: 11px; color: var(--ink-3); white-space: nowrap; }

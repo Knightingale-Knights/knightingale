@@ -6,6 +6,7 @@ import { CarerTabs } from "@/components/CarerTabs";
 import { Portrait, hoursLabel, roleList } from "@/components/CarerCells";
 import { CARER_ROLES, activeCarers, isRole } from "@/lib/carers/data";
 import { isoDate } from "@/lib/invoicing/rules";
+import { missCounts, missReasons } from "@/lib/carers/misses";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,8 @@ export default async function ActiveCarers({ searchParams }: { searchParams: Pro
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const role = isRole(sp.role) ? sp.role : null;
-  const rows = await activeCarers(isoDate(new Date()), q, role);
+  const [rows, misses, reasons] = await Promise.all([activeCarers(isoDate(new Date()), q, role), missCounts(), missReasons()]);
+  const label = Object.fromEntries(reasons.map((r) => [r.value, r.display]));
   const href = (r: string | null) => `/active-carers?${new URLSearchParams({ ...(q ? { q } : {}), ...(r ? { role: r } : {}) })}`;
   return (
     <div className="shell">
@@ -37,7 +39,7 @@ export default async function ActiveCarers({ searchParams }: { searchParams: Pro
         ) : (
           <div className="table-wrap">
             <table className="grid people">
-              <thead><tr><th></th><th>Name</th><th>Role</th><th>Phone</th><th>Email</th><th className="num">Last 7 days</th><th></th></tr></thead>
+              <thead><tr><th></th><th>Name</th><th>Role</th><th>Phone</th><th>Email</th><th className="num">Last 7 days</th><th className="num" title="Missed calls and opportunities in the last 90 days">Missed (90 days)</th><th></th></tr></thead>
               <tbody>
                 {rows.map((r) => {
                   const name = [r.first_name, r.last_name].filter(Boolean).join(" ") || "(no name)";
@@ -49,6 +51,11 @@ export default async function ActiveCarers({ searchParams }: { searchParams: Pro
                       <td>{r.phone ? <a href={`tel:${r.phone}`}>{r.phone}</a> : ""}</td>
                       <td>{r.email ? <a href={`mailto:${r.email}`}>{r.email}</a> : ""}</td>
                       <td className="num">{hoursLabel(r.hours7)}</td>
+                      <td className="num" title={misses[r.id] ? Object.entries(misses[r.id].byReason).map(([k, n]) => `${label[k] ?? k}: ${n}`).join(", ") : undefined}>
+                        {misses[r.id]?.total
+                          ? <><span className="miss-count">{misses[r.id].total}</span><small className="miss-why">{Object.entries(misses[r.id].byReason).map(([k, n]) => `${n} ${label[k] ?? k}`).join(", ")}</small></>
+                          : <span className="dash">0</span>}
+                      </td>
                       <td><ViewAsButton user={r.id} back="/active-carers" /></td>
                     </tr>
                   );

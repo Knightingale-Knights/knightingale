@@ -5,6 +5,8 @@ import { CarerTabs } from "@/components/CarerTabs";
 import { Portrait, hoursLabel } from "@/components/CarerCells";
 import { CARER_ROLES, availableCarers, isRole } from "@/lib/carers/data";
 import { isoDate } from "@/lib/invoicing/rules";
+import { missReasons, missesOn } from "@/lib/carers/misses";
+import { MissSelect } from "./MissSelect";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +20,7 @@ export default async function Availability({ searchParams }: { searchParams: Pro
   const today = isoDate(new Date());
   const date = validDay(sp.date) ?? today;
   const role = isRole(sp.role) ? sp.role : null;
-  const rows = await availableCarers(date, today, role);
+  const [rows, reasons, misses] = await Promise.all([availableCarers(date, today, role), missReasons(), missesOn(date)]);
   const href = (r: string | null) => `/availability?${new URLSearchParams({ date, ...(r ? { role: r } : {}) })}`;
   return (
     <div className="shell">
@@ -41,7 +43,7 @@ export default async function Availability({ searchParams }: { searchParams: Pro
         ) : (
           <div className="table-wrap">
             <table className="grid people">
-              <thead><tr><th></th><th>Name</th><th className="num">Last 7 days</th><th>Phone</th><th>AM</th><th>PM</th><th>NS</th></tr></thead>
+              <thead><tr><th></th><th>Name</th><th className="num">Last 7 days</th><th>Phone</th><th>AM</th><th>PM</th><th>NS</th><th>Missed</th></tr></thead>
               <tbody>
                 {rows.map((r) => {
                   const name = [r.first_name, r.last_name].filter(Boolean).join(" ") || "(no name)";
@@ -54,6 +56,7 @@ export default async function Availability({ searchParams }: { searchParams: Pro
                       {(["AM", "PM", "NS"] as const).map((p) => (
                         <td key={p} className="period-cell">{r.periods.includes(p) ? <span className="tick">{p}</span> : <span className="dash">–</span>}</td>
                       ))}
+                      <td><MissSelect key={`${r.id}-${date}-${misses[r.id] ?? ""}`} carer={r.id} day={date} value={misses[r.id] ?? ""} reasons={reasons} /></td>
                     </tr>
                   );
                 })}
