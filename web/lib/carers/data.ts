@@ -1,6 +1,6 @@
 // Admin carer lists: active carers and who is available on a day.
 import { sql } from "@/lib/db";
-import { addDays } from "@/lib/roster/rules";
+import { addDays, SLOTS } from "@/lib/roster/rules";
 import { fromDay } from "@/lib/roster/queries";
 
 export const CARER_ROLES = [["rn", "RN"], ["en", "EN"], ["dsw", "DSW"], ["pca", "PCA"]] as const;
@@ -63,4 +63,35 @@ export async function availableCarers(day: string, today: string, role: CarerRol
     ...r,
     periods: order.filter((p) => (slots ?? []).some((s) => PERIOD_OF_SLOT[s] === p)),
   }));
+}
+
+const WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+
+/** Admin: turns one of the carer's AM / PM / NS slots on or off for the day (Availability page). */
+export async function adminSetSlot(carer: string, day: string, period: "AM" | "PM" | "NS", on: boolean, by: string) {
+  const meta = SLOTS.find((s) => s.short === period);
+  if (!meta || !/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new Error("Unknown day or time slot.");
+  // Every Bubble option that shows as this period (older ones included), so turning it off clears them all.
+  const values = Object.entries(PERIOD_OF_SLOT).filter(([, p]) => p === period).map(([v]) => v);
+  await sql.begin(async (tx) => {
+    const existing = await tx<{ id: string }[]>`
+      select id from app.availability
+       where carer = ${carer} and shift = any(${values}::text[]) and date >= ${fromDay(day)} and date < ${fromDay(addDays(day, 1))}
+       for update`;
+    if (!on) {
+      if (existing.length) await tx`delete from app.availability where id = any(${existing.map((e) => e.id)}::uuid[])`;
+      return;
+    }
+    if (existing.length) {
+      await tx`update app.availability set available = true, updated_at = now() where id = any(${existing.map((e) => e.id)}::uuid[])`;
+      return;
+    }
+    const [u] = await tx<{ first: string | null; phone: string | null; role: string | null }[]>`
+      select split_part(trim(first_name), ' ', 1) as first, phone_number as phone, roles[1] as role from app.users where id = ${carer}`;
+    if (!u) throw new Error("That carer no longer exists.");
+    await tx`
+      insert into app.availability (carer, date, shift, shift_text, available, accepted, role, nurse_name, nurse_phone, weekday, priority, created_by)
+      values (${carer}, ${fromDay(day)}, ${meta.value}, ${meta.label}, true, 'pending', ${u.role}, ${u.first}, ${u.phone},
+              ${WEEKDAYS[new Date(`${day}T00:00:00Z`).getUTCDay()]}, 0, ${by})`;
+  });
 }

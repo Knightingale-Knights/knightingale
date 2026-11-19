@@ -7,6 +7,7 @@ import { CARER_ROLES, availableCarers, isRole } from "@/lib/carers/data";
 import { isoDate } from "@/lib/invoicing/rules";
 import { missReasons, missesOn } from "@/lib/carers/misses";
 import { MissSelect } from "./MissSelect";
+import { slotAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,13 @@ export default async function Availability({ searchParams }: { searchParams: Pro
                       <td className="num">{hoursLabel(r.hours7)}</td>
                       <td>{r.phone ? <a href={`tel:${r.phone}`}>{r.phone}</a> : ""}</td>
                       {(["AM", "PM", "NS"] as const).map((p) => (
-                        <td key={p} className="period-cell">{r.periods.includes(p) ? <span className="tick">{p}</span> : <span className="dash">–</span>}</td>
+                        <td key={p} className="period-cell">
+                          <form action={slotAction}>
+                            <input type="hidden" name="carer" value={r.id} /><input type="hidden" name="day" value={date} />
+                            <input type="hidden" name="period" value={p} /><input type="hidden" name="on" value={r.periods.includes(p) ? "0" : "1"} />
+                            <button className={r.periods.includes(p) ? "slot-btn on" : "slot-btn"} title={r.periods.includes(p) ? `Remove ${p}` : `Add ${p}`}>{r.periods.includes(p) ? p : "–"}</button>
+                          </form>
+                        </td>
                       ))}
                       <td><MissSelect key={`${r.id}-${date}-${misses[r.id] ?? ""}`} carer={r.id} day={date} value={misses[r.id] ?? ""} reasons={reasons} /></td>
                     </tr>

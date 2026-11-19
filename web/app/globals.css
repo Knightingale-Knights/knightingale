@@ -968,3 +968,8 @@ details.tags .tags-empty { color: var(--ink-3); font-size: 14px; }
 .miss-form select.on { border-color: #a3333d; color: #a3333d; }
 .miss-count { color: #a3333d; font-weight: 600; }
 .miss-why { display: block; font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.period-cell form { margin: 0; }
+.period-cell .slot-btn { min-width: 44px; min-height: 0; padding: 3px 8px; background: transparent; color: var(--ink-4); border: 1px dashed var(--line-2); font-size: 10px; letter-spacing: 0.2em; cursor: pointer; }
+.period-cell .slot-btn:hover { border-color: var(--ink); color: var(--ink); }
+.period-cell .slot-btn.on { color: var(--ink); border: 1px solid var(--ink); background: transparent; }
+.period-cell .slot-btn.on:hover { background: var(--ink); color: var(--paper); }
