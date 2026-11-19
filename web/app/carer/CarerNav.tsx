@@ -10,7 +10,7 @@ import { ViewAsBar } from "@/components/ViewAsBar";
 import { AccountNag } from "@/components/AccountNag";
 import { accountNag } from "@/lib/account/nag";
 
-type On = "shifts" | "availability" | "chats" | "account" | "policies";
+type On = "shifts" | "availability" | "chats" | "account" | "policies" | "stats";
 
 /** The carer's menu, down the left side like the admin pages. */
 export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; name: string; shiftsHref?: string }) {
@@ -29,6 +29,7 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
     { key: "availability", label: "Availability", href: "/carer/availability" },
     { key: "chats", label: "Chats", href: "/carer/chats", badge: unread },
     { key: "policies", label: "Policies", href: "/carer/policies" },
+    { key: "stats", label: "My Stats", href: "/carer/stats" },
     { key: "account", label: "Account", href: "/carer/account", badge: docs },
   ];
   return (

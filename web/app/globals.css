@@ -812,3 +812,28 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 .cal-more summary { cursor: pointer; text-align: center; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2); padding: 6px 0; }
 .cal-more[open] summary { color: var(--ink); }
 
+/* Carer My Stats dashboard */
+.stats .hint { margin-bottom: 0; }
+.stat-hero { display: flex; flex-direction: column; gap: 6px; margin: 22px 0 8px; padding: 28px 22px; background: var(--ink); color: var(--paper); animation: rise 420ms var(--ease); }
+.stat-hero .stat-label, .stat-hero .stat-note { color: rgba(255, 255, 255, 0.7); }
+.stat-hero-value { font-family: var(--serif); font-size: 46px; line-height: 1.05; }
+.stat-head { margin: 34px 0 12px; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-family: inherit; color: var(--ink-3); border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.stat-tile { display: flex; flex-direction: column; gap: 6px; padding: 16px 14px; background: var(--paper); }
+.stat-tile.big .stat-value { font-size: 34px; }
+.stat-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
+.stat-value { font-family: var(--serif); font-size: 24px; line-height: 1.1; color: var(--ink); }
+.stat-note { font-size: 11px; color: var(--ink-3); }
+.stat-chart { margin: 18px 0 0; padding: 16px 14px 10px; border: 1px solid var(--line); }
+.stat-bars { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; align-items: end; height: 140px; margin-top: 14px; }
+.stat-bar { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; outline: none; }
+.stat-bar i { display: block; width: 70%; min-height: 1px; background: var(--ink-2); border-radius: 4px 4px 0 0; transition: background 160ms; }
+.stat-bar small { margin-top: 6px; font-size: 9px; color: var(--ink-3); }
+.stat-bar:hover i, .stat-bar:focus i { background: var(--ink); }
+.stat-tip { position: absolute; bottom: calc(100% - 6px); left: 50%; transform: translateX(-50%); padding: 3px 6px; background: var(--ink); color: var(--paper); font-size: 10px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 120ms; z-index: 2; }
+.stat-bar:hover .stat-tip, .stat-bar:focus .stat-tip { opacity: 1; }
+.stat-top { list-style: none; padding: 0; margin: 12px 0 0; }
+.stat-top li { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.stat-top .rank { font-family: var(--serif); font-size: 18px; color: var(--ink-3); }
+.stat-top .n { font-size: 11px; color: var(--ink-3); }
+
