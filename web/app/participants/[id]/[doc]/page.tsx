@@ -5,15 +5,15 @@ import { TopBar } from "@/components/TopBar";
 import { RecordFields } from "@/components/RecordForm";
 import { RiskLayout } from "@/components/RiskForm";
 import { participant } from "@/lib/participants/data";
-import { DOCS, docId, emergencyDetails, homeSafety, riskPlans, riskShowValues, type RiskPlan } from "@/lib/participants/docs";
+import { DOCS, docId, emergencyDetails, homeSafety, profileAndIntake, riskPlans, riskShowValues, supportShowValues, type RiskPlan } from "@/lib/participants/docs";
 import { Blocks, CONSENT_INTRO, consentOutro, EVACUATION_KIT } from "@/lib/participants/docText";
-import { loadOptions, readRecord } from "@/lib/forms/fields";
+import { loadOptions, planManagers, readRecord } from "@/lib/forms/fields";
 import { saveDocAction } from "../../actions";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60; // Generate writes a risk treatment with Claude
 
-/** Admin: a participant document (Privacy Consent Form, Emergency Plan, Risk Assessment), editable. */
+/** Admin: a participant document (Privacy Consent Form, Emergency Plan, Risk Assessment, Support Plan), editable. */
 export default async function ParticipantDoc({ params, searchParams }: { params: Promise<{ id: string; doc: string }>; searchParams: Promise<{ msg?: string; error?: string }> }) {
   const staff = await requireStaff();
   const { id, doc } = await params;
@@ -24,14 +24,17 @@ export default async function ParticipantDoc({ params, searchParams }: { params:
   if (!p) notFound();
   const cur = await docId(d, id);
   const risk = d.key === "risk";
-  const [record, options, details, plans, home, shown] = await Promise.all([
+  const support = d.key === "support";
+  const [record, options, details, plans, home, shown, linked, pms] = await Promise.all([
     readRecord(d.table, cur), loadOptions(d.sections),
     d.key === "emergency" ? emergencyDetails(id) : Promise.resolve([]),
     risk ? riskPlans(id) : Promise.resolve([] as RiskPlan[]),
     risk ? homeSafety(id) : Promise.resolve(null),
-    risk ? riskShowValues(id) : Promise.resolve({}),
+    risk ? riskShowValues(id) : support ? supportShowValues(id) : Promise.resolve({}),
+    profileAndIntake(d, id),
+    support ? planManagers() : Promise.resolve([]),
   ]);
-  const values = { ...record, ...shown };
+  const values = { ...linked, ...record, ...shown };
   const name = [p.first_name, p.last_name].filter(Boolean).join(" ") || "(no name)";
   return (
     <div className="shell">
@@ -51,12 +54,19 @@ export default async function ParticipantDoc({ params, searchParams }: { params:
         ))}
         {d.key === "emergency" && <p className="hint">These details come from the intake. <Link href={`/participants/${id}/intake`}>Edit them in the intake</Link>.</p>}
         {risk && <p className="hint">Profile, contact and consent details come from the intake. <Link href={`/participants/${id}/intake`}>Edit them in the intake</Link>.</p>}
-        <form action={saveDocAction} className={risk ? "stack doc-cards" : "stack"}>
+        {support && <p className="hint">Most of the Support Plan is the participant&apos;s profile and intake, so changes here update those too.</p>}
+        <form action={saveDocAction} className={risk || support ? "stack doc-cards" : "stack"}>
           <input type="hidden" name="participant" value={id} />
           <input type="hidden" name="doc" value={d.key} />
           {risk
             ? <RiskLayout sections={d.sections} values={values} options={options} home={home} plans={plans} />
-            : <RecordFields sections={d.sections} values={values} options={options} />}
+            : support
+              ? <>
+                  <RecordFields sections={d.sections.slice(0, 3)} values={values} options={options} planManagers={pms} />
+                  <div className="doc-link-row"><Link href={`/participants/${id}/emergency`} className="button">EMERGENCY PLAN</Link></div>
+                  <RecordFields sections={d.sections.slice(3)} values={values} options={options} planManagers={pms} />
+                </>
+              : <RecordFields sections={d.sections} values={values} options={options} />}
           {d.key === "consent" && <Blocks blocks={consentOutro(name)} />}
           {d.key === "emergency" && <Blocks blocks={EVACUATION_KIT} />}
           <div className="form-save"><button type="submit" className="big">Save {d.title}</button></div>

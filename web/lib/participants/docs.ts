@@ -1,7 +1,8 @@
 // Participant documents other than the intake: one list of fields drives the admin edit page and the
 // read-only view support coordinators see. Each is linked from the participant (users.<link>) as in Bubble.
 import { sql } from "@/lib/db";
-import { dbValues, melbMidnight, readForm, type Section } from "@/lib/forms/fields";
+import { dbValues, fieldsFrom, melbMidnight, readForm, type Section } from "@/lib/forms/fields";
+import { saveIntakePart } from "./intake";
 
 export type DocDef = { key: string; title: string; table: string; link: string; sections: Section[] };
 
@@ -213,7 +214,167 @@ export async function riskShowValues(participant: string): Promise<Record<string
   return { ...r, ro_privacy: "Privacy policy was explained to participant", ro_sole: `${first} has been assigned multiple support workers.` };
 }
 
-export const DOCS: Record<string, DocDef> = { consent: CONSENT, emergency: EMERGENCY, risk: RISK };
+
+const YN = ["Yes", "No"];
+
+/** Laid out as Bubble's Support Plan popup, which edits the profile and intake as well as the plan itself.
+ *  The page puts the Emergency Plan button after the emergency contacts (section 2). */
+export const SUPPORT: DocDef = {
+  key: "support", title: "Support Plan", table: "support_plans", link: "support_plan",
+  sections: [
+    {
+      title: "Participant", src: "user",
+      fields: [
+        { col: "ro_name", label: "Full Name", kind: "show" },
+        { col: "sex", label: "Gender", kind: "choice", set: "sex" },
+        { col: "date_of_birth", label: "D.O.B", kind: "date" },
+        { col: "address", label: "Address", kind: "address" },
+        { col: "phone_number", label: "Phone Number", kind: "text" },
+        { col: "ro_email", label: "Email Address", kind: "show" },
+        { col: "communication_method", label: "How do you prefer we contact you?", kind: "choice", set: "communication_method", src: "intake" },
+        { col: "ndis_number", label: "What is your NDIS number?", kind: "text" },
+        { col: "ndis_funding", label: "What is your NDIS Funding type?", kind: "choice", set: "ndis_funding", src: "intake" },
+        { col: "plan_manager", label: "Who is your plan manager?", kind: "planManager", src: "intake" },
+        { col: "ro_pm_email", label: "What is your plan manager's email?", kind: "show" },
+        { col: "ro_pm_phone", label: "What is your plan manager's contact number?", kind: "show" },
+        { col: "plan_start", label: "What date does your NDIS plan start?", kind: "date" },
+        { col: "plan_end", label: "What date does your NDIS plan end?", kind: "date" },
+      ],
+    },
+    {
+      title: "Personal Details", src: "intake",
+      fields: [
+        { col: "aboriginal", label: "Do you identify as Aboriginal / Torres Strait Islander", kind: "fixed", options: YN },
+        { col: "cultural_values", label: "Culture, Diversity, Values, Beliefs?", kind: "area" },
+        { col: "living_situation", label: "Living Situation", kind: "choice", set: "living_situation" },
+        { col: "bsp", label: "BSP", kind: "fixed", options: YN },
+        { col: "primary_diagnosis", label: "Primary formal NDIS diagnosis", kind: "area" },
+        { col: "secondary_diagnosis", label: "Secondary formal NDIS diagnosis", kind: "area" },
+        { col: "legal_issues", label: "Any Legal Issues", kind: "area" },
+        { col: "other_info", label: "Other Relevant Info", kind: "area" },
+        { col: "gp", label: "Medical Team Contacts", kind: "area", src: "doc" },
+      ],
+    },
+    {
+      title: "Emergency Contact Details", src: "intake",
+      fields: [1, 2].flatMap((n) => [
+        { col: `contact${n}`, label: n === 1 ? "Emergency Contact #1" : "Emergency Contact #2 (optional)", kind: "choice", set: "contact" },
+        { col: `contact${n}name`, label: "Name", kind: "text" },
+        { col: `contact${n}relation`, label: "Relationship", kind: "text" },
+        { col: `contact${n}address`, label: "Address", kind: "address" },
+        { col: `contact${n}phone`, label: "Phone Number", kind: "text" },
+        { col: `contact${n}email`, label: "Email", kind: "text" },
+        { col: `contact${n}advocacyform`, label: "Advocacy Form", kind: "fixed", options: YN },
+      ] as Section["fields"]),
+    },
+    {
+      title: "Communication", src: "intake",
+      fields: [
+        { col: "communication_type", label: "Preferred Communication Type", kind: "choice", set: "communication_type" },
+        { col: "language", label: "Spoken Languages", kind: "area" },
+        { col: "interpreter", label: "Interpreter Requirements", kind: "fixed", options: YN },
+      ],
+    },
+    {
+      title: "Physical Health", src: "intake",
+      fields: [
+        { col: "physical_health", label: "Physical Diagnosis", kind: "multi", set: "physical_health", compact: true },
+        { col: "medications", label: "Medications", kind: "area" },
+        { col: "medication_assistance", label: "Medication Assistance", kind: "area" },
+        { col: "emerging_health", label: "Express Emerging Health Concerns", kind: "area", src: "doc" },
+        { col: "urgent_health", label: "Escalate Urgent Health Situations", kind: "area", src: "doc" },
+      ],
+    },
+    {
+      title: "Mental Health", src: "intake",
+      fields: [
+        { col: "mental_health", label: "Mental Health Diagnosis", kind: "multi", set: "mental_health", compact: true },
+        { col: "mental_medications", label: "Medications", kind: "area" },
+        { col: "hospital_admission_history", label: "Hospital Admissions", kind: "fixed", options: YN },
+        { col: "hospital_admission_assistance", label: "Staying Out Of Hospital", kind: "area" },
+      ],
+    },
+    {
+      title: "Diet", src: "intake",
+      fields: [
+        { col: "diet_requirements", label: "Dietary Requirements", kind: "area" },
+        { col: "vegetarian", label: "Vegetarian", kind: "fixed", options: YN },
+        { col: "vegan", label: "Vegan", kind: "fixed", options: YN },
+        { col: "dairy", label: "Dairy Free", kind: "fixed", options: YN },
+        { col: "gluten", label: "Gluten Free", kind: "fixed", options: YN },
+        { col: "allergies", label: "Allergies", kind: "area" },
+        { col: "dont_eat", label: "Least Favourite Food", kind: "area" },
+        { col: "favourite_food", label: "Favourite Food", kind: "area" },
+      ],
+    },
+    {
+      title: "Practical Support Needs", src: "intake",
+      fields: [
+        { col: "support_needs", label: "Daily Support", kind: "area" },
+        { col: "mobility", label: "Mobility Aids", kind: "multi", set: "mobility", compact: true },
+        { col: "manual_handling", label: "Manual Handling Assistance?", kind: "multi", set: "manual_handling", compact: true },
+        { col: "personal_care", label: "Personal Care Assistance", kind: "multi", set: "personal_care", compact: true },
+        { col: "services", label: "Support Needed", kind: "multi", set: "service_required", compact: true },
+        { col: "assist_by", label: "We Can Best Assist You", kind: "area" },
+      ],
+    },
+    {
+      title: "Your Preferences", src: "intake",
+      fields: [
+        { col: "carer_age", label: "Carer Age", kind: "text" },
+        { col: "carer_gender", label: "Carer Gender", kind: "choice", set: "sex" },
+        { col: "carer_culture", label: "Cultural, Religious, Ethnic Preferences", kind: "area" },
+        { col: "carer_language", label: "Spoken Language Preferences", kind: "area" },
+        { col: "carer_personality", label: "Personality Preferences", kind: "area" },
+        { col: "carer_skills", label: "Unique Carer Skills/Knowledge", kind: "area" },
+        { col: "carer_training", label: "Specific Training Needed", kind: "area" },
+        { col: "unique_you", label: "Anything Else We Should Know", kind: "area" },
+      ],
+    },
+    {
+      title: "Goals/Expectations/Desired Outcomes", src: "intake",
+      fields: [
+        { col: "outcomes", label: "Goals/Expectations/Desired Outcomes", kind: "area" },
+        { col: "twelve_month_goals", label: "12 Month Goals", kind: "area" },
+      ],
+    },
+    {
+      title: "Admin", src: "intake",
+      fields: [{ col: "consent", label: "Consent", kind: "multi", set: "participation_consent", compact: true }],
+    },
+    {
+      title: "Signatures",
+      fields: [
+        { col: "participant_signature", label: "Participant Signature", kind: "signature" },
+        { col: "ro_name", label: "Participant", kind: "show" },
+        { col: "signed_date", label: "Date", kind: "date" },
+        { col: "representative_signature", label: "Representative Signature (if applicable)", kind: "signature", src: "intake" },
+        { col: "knightingale_signature", label: "Knightingale Signature", kind: "signature", src: "intake" },
+        { col: "signature_date", label: "Date", kind: "date", src: "intake" },
+      ],
+    },
+  ],
+};
+
+/** Details the Support Plan shows but doesn't edit, keyed ro_*. */
+export async function supportShowValues(participant: string): Promise<Record<string, string | null>> {
+  const [r] = await sql<Record<string, string | null>[]>`
+    select trim(concat_ws(' ', u.first_name, u.last_name)) as ro_name, u.email as ro_email, pm.email as ro_pm_email, pm.phone as ro_pm_phone
+      from app.users u left join app.intakes i on i.id = u.intake_form left join app.plan_managers pm on pm.id = i.plan_manager
+     where u.id = ${participant}`;
+  return r ?? {};
+}
+
+/** The profile and intake values a document's "user" and "intake" fields show. */
+export async function profileAndIntake(d: DocDef, participant: string) {
+  const pick = (row: Record<string, unknown> | undefined, secs: Section[]) =>
+    Object.fromEntries(secs.flatMap((x) => x.fields).filter((f) => row && f.col in row).map((f) => [f.col, row![f.col]]));
+  const [u] = await sql<Record<string, unknown>[]>`select * from app.users where id = ${participant}`;
+  const [i] = u?.intake_form ? await sql<Record<string, unknown>[]>`select * from app.intakes where id = ${u.intake_form as string}` : [];
+  return { ...pick(u, fieldsFrom(d.sections, "user")), ...pick(i, fieldsFrom(d.sections, "intake")) };
+}
+
+export const DOCS: Record<string, DocDef> = { consent: CONSENT, emergency: EMERGENCY, risk: RISK, support: SUPPORT };
 
 export type RiskPlan = { id: string; risk: string | null; treatment: string | null; participant_impact: string | null; others: string | null; person_responsible: string | null; review_date: Date | null };
 
@@ -319,7 +480,15 @@ export async function docId(d: DocDef, participant: string): Promise<string | nu
 
 /** Saves the document, creating and linking it to the participant if they have none. */
 export async function saveDoc(d: DocDef, participant: string, f: FormData, by: string) {
-  const db = dbValues(d.sections, readForm(d.sections, f));
+  const own = fieldsFrom(d.sections, "doc");
+  const db = dbValues(own, readForm(own, f));
+  const intakePart = fieldsFrom(d.sections, "intake");
+  const userPart = fieldsFrom(d.sections, "user");
+  if (intakePart.length) await saveIntakePart(participant, intakePart, f, by);
+  if (userPart.length) {
+    const u = dbValues(userPart, readForm(userPart, f));
+    if (Object.keys(u).length) await sql`update app.users set ${sql({ ...u, updated_at: new Date() })} where id = ${participant}`;
+  }
   let id = await docId(d, participant);
   if (id) {
     await sql`update ${sql(`app.${d.table}`)} set ${sql({ ...db, updated_at: new Date() })} where id = ${id}`;

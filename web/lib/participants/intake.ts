@@ -127,11 +127,17 @@ export async function intakeFor(participant: string) {
 
 /** Saves the intake here and in Bubble, creating and linking it first if the participant has none. */
 export async function saveIntake(participant: string, f: FormData, by: string | null) {
+  return saveIntakePart(participant, INTAKE, f, by);
+}
+
+/** Saves only the intake fields in these sections (the Support Plan edits part of the intake). */
+export async function saveIntakePart(participant: string, sections: Section[], f: FormData, by: string | null) {
   const cur = await intakeFor(participant);
   if (!cur) throw new Error("That participant no longer exists.");
-  const values = readForm(INTAKE, f);
-  const body = await bubbleBody(INTAKE, values);
-  const db = dbValues(INTAKE, values);
+  const values = readForm(sections, f);
+  const body = await bubbleBody(sections, values);
+  const db = dbValues(sections, values);
+  if (!Object.keys(db).length) return cur.id;
 
   if (cur.id) {
     if (bubbleOn() && cur.bubble_id) await bubblePatch("intake", cur.bubble_id, body);

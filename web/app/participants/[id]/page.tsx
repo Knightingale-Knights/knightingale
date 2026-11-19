@@ -10,7 +10,7 @@ import { ParticipantCalendar } from "@/components/ParticipantCalendar";
 export const dynamic = "force-dynamic";
 
 // The participant's sections, as in Bubble. Those with a link are built.
-const BUILT: Record<string, string> = { "Intake Form": "intake", Consent: "consent", Emergency: "emergency", "Risk Assessment": "risk" };
+const BUILT: Record<string, string> = { "Intake Form": "intake", Consent: "consent", Emergency: "emergency", "Risk Assessment": "risk", "Support Plan": "support" };
 const SECTIONS = [
   "About", "Carers", "Consent", "Documents", "Emergency", "Feedback", "Funding", "Group Chat", "Incident Reports",
   "Info Book", "Intake Form", "Progress Notes", "Risk Assessment", "Service Agreement", "Shift Duties", "Summary",

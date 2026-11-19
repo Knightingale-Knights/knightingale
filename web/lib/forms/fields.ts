@@ -2,14 +2,22 @@
 // the save to our database, and the copy sent to Bubble.
 import { sql } from "@/lib/db";
 
-export type Field =
+export type Field = ({ src?: "intake" | "user" | "doc" }) & (
   | { col: string; label: string; kind: "text" | "area" | "yesno" | "address" | "date" | "signature" | "planManager" | "check" }
   | { col: string; label: string; kind: "choice"; set: string }
   | { col: string; label: string; kind: "multi"; set: string; compact?: boolean }
   | { col: string; label: string; kind: "show"; img?: boolean; wide?: boolean }
-  | { col: string; label: string; kind: "fixed"; options: string[] };
+  | { col: string; label: string; kind: "fixed"; options: string[] });
 
-export type Section = { title: string; note?: string; fields: Field[] };
+/** src: where the section's values are saved when it's part of another document ("intake", "user"); default the document itself. */
+export type Section = { title: string; note?: string; fields: Field[]; src?: "intake" | "user" };
+
+/** The sections holding only the fields saved to one place (a field's src overrides its section's; none means the document). */
+export function fieldsFrom(sections: Section[], src: "intake" | "user" | "doc"): Section[] {
+  return sections
+    .map((s) => ({ ...s, fields: s.fields.filter((f) => (f.src ?? s.src ?? "doc") === src) }))
+    .filter((s) => s.fields.length);
+}
 
 export type Options = Record<string, { value: string; display: string }[]>;
 

@@ -928,3 +928,5 @@ details.tags > summary::-webkit-details-marker { display: none; }
 details.tags .tag { background: var(--ink); color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 3px; }
 details.tags .tags-empty { color: var(--ink-3); font-size: 14px; }
 .tags-list { border-top: 1px solid var(--line); max-height: 260px; overflow: auto; padding: 8px 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px 14px; }
+.doc-link-row { display: flex; justify-content: center; margin: 0 0 24px; }
+.doc-link-row .button { display: inline-flex; align-items: center; text-decoration: none; }
