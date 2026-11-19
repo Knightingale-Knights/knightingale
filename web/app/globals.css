@@ -229,7 +229,8 @@ table.lines { width: 100%; border-collapse: collapse; margin-bottom: 26px; }
 .cshift.cancelled { opacity: 0.5; }
 .block { border-top: 1px solid var(--ink); padding: 18px 0 0; margin-top: 44px; }
 .block h2 { margin-top: 0; border-bottom: 0; padding-bottom: 0; }
-button.big { width: 100%; min-height: 50px; }
+button.big, a.button.big { width: 100%; min-height: 50px; }
+a.button.big { display: flex; align-items: center; justify-content: center; margin-top: 22px; text-decoration: none; }
 .check .banner { margin-top: 12px; }
 .avail { display: flex; flex-direction: column; gap: 0; margin: 26px 0; border-top: 1px solid var(--ink); }
 .avail-row { display: grid; grid-template-columns: 84px repeat(3, 1fr); gap: 6px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
