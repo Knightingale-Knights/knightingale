@@ -19,6 +19,7 @@ export function RecordView({ sections, values, options }: { sections: Section[];
               let shown: React.ReactNode;
               switch (f.kind) {
                 case "signature": shown = <img className="doc-sig" src={fileHref(String(v))} alt={f.label} />; break;
+                case "show": shown = f.img ? <img className="doc-sig" src={fileHref(String(v))} alt={f.label} /> : String(v); break;
                 case "date": shown = dmy(v); break;
                 case "address": shown = (v as { address?: string }).address ?? ""; break;
                 case "choice": shown = options?.[f.set]?.find((o) => o.value === v)?.display ?? String(v); break;

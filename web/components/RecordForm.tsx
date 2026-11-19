@@ -1,4 +1,5 @@
 import { SignaturePad } from "@/components/SignaturePad";
+import { TagsField } from "@/components/TagsField";
 import { fileHref } from "@/lib/files";
 import { melbDate, type Options, type Section } from "@/lib/forms/fields";
 
@@ -43,8 +44,18 @@ export function RecordFields({ sections, values, options, planManagers }: {
                       </select>
                     </label>
                   );
+                case "show":
+                  return (
+                    <div key={f.col} className={f.wide === false ? "half show-field" : "wide show-field"}>
+                      <span className="label">{f.label}</span>
+                      {!str ? <span className="show-empty">Not given</span>
+                        : f.img ? <img className="doc-sig" src={fileHref(str)} alt={f.label} />
+                        : <span className="show-value">{str}</span>}
+                    </div>
+                  );
                 case "multi": {
                   const on = new Set((v as string[] | null) ?? []);
+                  if (f.compact) return <TagsField key={f.col} name={f.col} label={f.label} options={options[f.set] ?? []} initial={[...on]} />;
                   return (
                     <fieldset key={f.col} className="chips wide">
                       <legend>{f.label}</legend>

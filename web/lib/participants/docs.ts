@@ -73,59 +73,145 @@ export const EMERGENCY: DocDef = {
 
 const TIMING = ["N/A", "Weekly", "Monthly", "Quarterly", "Bi-Annual"];
 
+export const IMPACT = ["High", "Med", "Low"];
+
+/** Laid out as Bubble's Risk Assessment popup. "show" fields come from the profile and intake (riskShowValues).
+ *  The page puts Home Risks after section 5 and the Risk Management Plan after section 6. */
 export const RISK: DocDef = {
   key: "risk", title: "Risk Assessment", table: "risk_assessments", link: "risk_assessment",
   sections: [
     {
-      title: "Risk factors",
+      title: "Participant",
       fields: [
-        { col: "physical_health", label: "Medical Conditions", kind: "multi", set: "physical_health" },
-        { col: "personal_care", label: "Personal Care", kind: "multi", set: "personal_care" },
-        { col: "nutrition", label: "Eating / Drinking", kind: "multi", set: "nutrition" },
-        { col: "accidental_movement", label: "Accidental Movement", kind: "multi", set: "accidental_movement" },
-        { col: "manual_handling", label: "Manual Handling", kind: "multi", set: "manual_handling" },
-        { col: "environmental_risks", label: "Environmental", kind: "multi", set: "environmental" },
-        { col: "mental_health", label: "Mental Health", kind: "multi", set: "mental_health" },
-        { col: "financial_risks", label: "Financial", kind: "multi", set: "financial_risks" },
-        { col: "social_risks", label: "Social Risks", kind: "multi", set: "social_risks" },
-        { col: "substance_use", label: "Substance Use", kind: "multi", set: "substance_use" },
-        { col: "other_risks", label: "Other Risks", kind: "area" },
+        { col: "ro_name", label: "Full Name", kind: "show" },
+        { col: "ro_dob", label: "D.O.B", kind: "show" },
+        { col: "ro_address", label: "Address", kind: "show" },
+        { col: "ro_phone", label: "Phone Number", kind: "show" },
       ],
     },
     {
-      title: "Participant",
+      title: "Personal Details",
       fields: [
-        { col: "communication", label: "Preferred Communication", kind: "text" },
+        { col: "ro_pref_comm", label: "Preferred Communication", kind: "show" },
+        { col: "communication", label: "Communicability", kind: "fixed", options: [
+          "1. Without the assistance of another person the participant has limited or no ability to communicate",
+          "2. The participant uses equipment to enable or facilitate communication with others, including to enable or facilitate the use of a phone or other device.",
+          "3. N/A"] },
+        { col: "ro_cultural", label: "Cultural Considerations", kind: "show" },
+        { col: "ro_religion", label: "Religion / Spirituality", kind: "show" },
+        { col: "ro_interests", label: "Interests", kind: "show" },
+        { col: "ro_mental", label: "Mental Health", kind: "show" },
+        { col: "ro_physical", label: "Physical Health", kind: "show" },
         { col: "physical_mobility", label: "Physical Mobility", kind: "fixed", options: [
           "1. Relies on other people to be physically mobile or to facilitate their physical mobility.",
           "2. Uses equipment to enable them to be physically mobile or to facilitate their physical mobility.",
           "3. N/A"] },
+        { col: "ro_allergies", label: "Allergies", kind: "show" },
+      ],
+    },
+    {
+      title: "Emergency Contact Details",
+      fields: [
+        { col: "ro_c1", label: "Emergency Contact 1", kind: "show" },
+        { col: "ro_c1name", label: "Name", kind: "show", wide: false },
+        { col: "ro_c1rel", label: "Relationship", kind: "show", wide: false },
+        { col: "ro_c1addr", label: "Address", kind: "show" },
+        { col: "ro_c1phone", label: "Phone Number", kind: "show", wide: false },
+        { col: "ro_c1email", label: "Email", kind: "show", wide: false },
+        { col: "ro_c1adv", label: "Advocacy Form", kind: "show" },
+        { col: "ro_c2", label: "Emergency Contact 2", kind: "show" },
+        { col: "ro_c2name", label: "Name", kind: "show", wide: false },
+        { col: "ro_c2rel", label: "Relationship", kind: "show", wide: false },
+        { col: "ro_c2addr", label: "Address", kind: "show" },
+        { col: "ro_c2phone", label: "Phone Number", kind: "show", wide: false },
+        { col: "ro_c2email", label: "Email", kind: "show", wide: false },
+        { col: "ro_c2adv", label: "Advocacy Form", kind: "show" },
+      ],
+    },
+    {
+      title: "Consent",
+      fields: [
+        { col: "persons_involved", label: "Participant Involvement", kind: "area" },
+        { col: "ro_privacy", label: "Privacy Policy", kind: "show" },
+      ],
+    },
+    {
+      title: "Living Alone",
+      fields: [
+        { col: "ro_sole", label: "Sole Support Worker", kind: "show" },
         { col: "personal_contact", label: "Outside Contact", kind: "fixed", options: [
           "1. No regular face-to-face contact with other NDIS providers.",
           "2. Limited or irregular face-to-face contact with relatives, friends or other people.",
           "3. N/A"] },
-        { col: "persons_involved", label: "Participant Involvement", kind: "area" },
         { col: "reliance", label: "Reliance on our service", kind: "area" },
         { col: "health_safety_impact", label: "Disruption Impact", kind: "area" },
+      ],
+    },
+    {
+      title: "Risk Factors",
+      fields: [
+        { col: "physical_health", label: "Medical Conditions", kind: "multi", set: "physical_health", compact: true },
+        { col: "personal_care", label: "Personal Care", kind: "multi", set: "personal_care", compact: true },
+        { col: "nutrition", label: "Eating / Drinking", kind: "multi", set: "nutrition", compact: true },
+        { col: "accidental_movement", label: "Accidental Movement", kind: "multi", set: "accidental_movement", compact: true },
+        { col: "manual_handling", label: "Manual Handling", kind: "multi", set: "manual_handling", compact: true },
+        { col: "environmental_risks", label: "Environmental", kind: "multi", set: "environmental", compact: true },
+        { col: "mental_health", label: "Mental Health", kind: "multi", set: "mental_health", compact: true },
+        { col: "financial_risks", label: "Financial", kind: "multi", set: "financial_risks", compact: true },
+        { col: "social_risks", label: "Social Risks", kind: "multi", set: "social_risks", compact: true },
+        { col: "substance_use", label: "Substance Use", kind: "multi", set: "substance_use", compact: true },
+        { col: "other_risks", label: "Other Risks", kind: "area" },
       ],
     },
     {
       title: "Monitoring & Supervision Plan",
       fields: [
         { col: "sole_worker", label: "Is Personal Support (Assistance with Daily Personal Activities) being provided by a sole Worker?", kind: "yesno" },
-        { col: "supervision_timing", label: "If YES, how often Knightingale will undertake in-person supervision of the Worker", kind: "fixed", options: TIMING },
-        { col: "provider_timing", label: "If YES, how often we engage with providers who may be involved in providing Other Support Services to the Client in their home or in supporting the Client to access community based-activities", kind: "fixed", options: TIMING },
+        { col: "supervision_timing", label: "If YES, set out the frequency at which Knightingale will undertake in-person supervision of the Worker. Weekly? Monthly? Quarterly? Bi-Annually?", kind: "fixed", options: TIMING },
+        { col: "provider_timing", label: "If YES, set out the frequency for engaging with providers who may be involved in providing Other Support Services to the Client in their home or in supporting the Client to access community based-activities.", kind: "fixed", options: TIMING },
       ],
     },
     {
       title: "Signatures",
       fields: [
-        { col: "participant_signature", label: "Participant signature", kind: "signature" },
-        { col: "signature_date", label: "Date signed", kind: "date" },
+        { col: "ro_consent", label: "Consent", kind: "show" },
+        { col: "participant_signature", label: "Participant Signature", kind: "signature" },
+        { col: "ro_name", label: "Participant", kind: "show" },
+        { col: "signature_date", label: "Date Signed", kind: "date" },
+        { col: "ro_rep_sig", label: "Representative Signature (if applicable)", kind: "show", img: true },
+        { col: "ro_kn_sig", label: "Knightingale Signature", kind: "show", img: true },
+        { col: "ro_kn_date", label: "Date Signed", kind: "show" },
       ],
     },
   ],
 };
+
+/** The profile and intake details the Risk Assessment shows (edited in the intake), keyed ro_*. */
+export async function riskShowValues(participant: string): Promise<Record<string, string | null>> {
+  const [r] = await sql<Record<string, string | null>[]>`
+    with i as (select * from app.intakes where id = (select intake_form from app.users where id = ${participant})),
+    opt as (select set_key, value, display from app.option_values)
+    select trim(concat_ws(' ', u.first_name, u.last_name)) as ro_name, u.first_name,
+           to_char(u.date_of_birth at time zone 'Australia/Melbourne', 'DD/MM/YYYY') as ro_dob,
+           u.address->>'address' as ro_address, u.phone_number as ro_phone,
+           nullif(concat_ws(' - ', (select display from opt where set_key = 'communication_type' and value = i.communication_type), nullif(i.language, '')), '') as ro_pref_comm,
+           i.cultural_values as ro_cultural, i.religion as ro_religion, i.hobbies as ro_interests,
+           (select string_agg(o.display, ', ') from opt o where o.set_key = 'mental_health' and o.value = any(i.mental_health)) as ro_mental,
+           (select string_agg(o.display, ', ') from opt o where o.set_key = 'physical_health' and o.value = any(i.physical_health)) as ro_physical,
+           i.allergies as ro_allergies,
+           (select display from opt where set_key = 'contact' and value = i.contact1) as ro_c1, i.contact1name as ro_c1name, i.contact1relation as ro_c1rel,
+           i.contact1address->>'address' as ro_c1addr, i.contact1phone as ro_c1phone, i.contact1email as ro_c1email, i.contact1advocacyform as ro_c1adv,
+           (select display from opt where set_key = 'contact' and value = i.contact2) as ro_c2, i.contact2name as ro_c2name, i.contact2relation as ro_c2rel,
+           i.contact2address->>'address' as ro_c2addr, i.contact2phone as ro_c2phone, i.contact2email as ro_c2email, i.contact2advocacyform as ro_c2adv,
+           (select string_agg(o.display, ', ') from opt o where o.set_key = 'participation_consent' and o.value = any(i.consent)) as ro_consent,
+           (select nullif(sa.representative_signature, '') from app.service_agreements sa where sa.id = u.service_agreement) as ro_rep_sig,
+           nullif(i.knightingale_signature, '') as ro_kn_sig,
+           to_char(i.signature_date at time zone 'Australia/Melbourne', 'DD/MM/YYYY') as ro_kn_date
+      from app.users u left join i on true where u.id = ${participant}`;
+  if (!r) return {};
+  const first = r.first_name || r.ro_name || "The participant";
+  return { ...r, ro_privacy: "Privacy policy was explained to participant", ro_sole: `${first} has been assigned multiple support workers.` };
+}
 
 export const DOCS: Record<string, DocDef> = { consent: CONSENT, emergency: EMERGENCY, risk: RISK };
 
@@ -161,7 +247,7 @@ export async function saveRiskPlans(participant: string, assessment: string, f: 
       }
     }
     const n = read("new");
-    if (PLAN_COLS.some((c) => n[c])) {
+    if (n.risk || n.treatment) {
       const [row] = await tx<{ id: string }[]>`
         insert into app.risk_management_plans ${tx({ ...n, participant, created_by: by })} returning id`;
       await tx`insert into app.risk_assessments_risk_management_plan (risk_assessments_id, risk_management_plans_id) values (${assessment}, ${row.id})`;
@@ -179,7 +265,7 @@ export const HOME_SAFE: [string, string][] = [
   ["electrical_equipment", "Electrical Equipment"], ["electrical_leads", "Electrical Leads"], ["floor_surfaces", "Floor Surfaces"],
   ["food_prep_equipment", "Food Prep Equipment"], ["fridge_freezer", "Fridge / Freezer"], ["furniture_placement", "Furniture Placement"],
   ["gates", "Gates"], ["laundry_drainage", "Laundry Drainage"], ["laundry_ventilation", "Laundry Ventilation"], ["lighting", "Lighting"],
-  ["manual_handling", "Manual Handling"], ["parking", "Parking"], ["pathway_garden", "Pathway Garden"], ["portable_heaters", "Portable Heaters"],
+  ["parking", "Parking"], ["pathway_garden", "Pathway Garden"], ["portable_heaters", "Portable Heaters"],
   ["power_points", "Power Points"], ["room_to_move", "Room To Move Safely"], ["stairs", "Stairs"], ["stove", "Stove"],
   ["switches_plugs", "Switches / Plugs"], ["tables_chairs", "Tables / Chairs"], ["vacuum", "Vacuum"], ["verandah", "Verandah"],
   ["walking_aid_access", "Walking Aids Access"], ["washer_dryer", "Washer / Dryer"],
@@ -187,7 +273,7 @@ export const HOME_SAFE: [string, string][] = [
 export const HOME_YES: [string, string][] = [
   ["dangerous_visitors", "Dangerous Visitors"], ["doors_locked", "Doors Locked"], ["exposed_gas_cylinders", "Exposed Gas Cylinders"],
   ["faulty_smoke_detectors", "Faulty Smoke Detectors"], ["hoarding", "Hoarding"], ["infectious_disease", "Infectious Disease"],
-  ["pests", "Pests"], ["pets", "Pets"], ["power_points_near_water", "Power Points Near Water"], ["restraint_used", "Restraint Used"],
+  ["manual_handling", "Manual Handling"], ["pests", "Pests"], ["pets", "Pets"], ["power_points_near_water", "Power Points Near Water"], ["restraint_used", "Restraint Used"],
   ["smoker_in_home", "Smoker In Home"], ["weapons", "Weapons"],
 ];
 export const SAFE_CHOICES: [string, string][] = [["safe", "Safe"], ["unsafe", "Unsafe"], ["n_a", "N/A"]];
@@ -206,7 +292,7 @@ export async function homeSafety(participant: string): Promise<Record<string, st
 export async function saveHomeSafety(participant: string, f: FormData, by: string) {
   if (!f.has("home_present")) return;
   const v: Record<string, string | null> = {};
-  for (const [c] of [...HOME_SAFE, ...HOME_YES]) v[c] = String(f.get(`home_${c}`) ?? "") || null;
+  for (const [c] of [...HOME_SAFE, ...HOME_YES]) v[c] = String(f.getAll(`home_${c}`).at(-1) ?? "") || null;
   v.home_safety_notes = String(f.get("home_home_safety_notes") ?? "").trim() || null;
   const cur = await homeSafety(participant);
   if (cur) {

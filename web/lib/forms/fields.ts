@@ -4,7 +4,9 @@ import { sql } from "@/lib/db";
 
 export type Field =
   | { col: string; label: string; kind: "text" | "area" | "yesno" | "address" | "date" | "signature" | "planManager" | "check" }
-  | { col: string; label: string; kind: "choice" | "multi"; set: string }
+  | { col: string; label: string; kind: "choice"; set: string }
+  | { col: string; label: string; kind: "multi"; set: string; compact?: boolean }
+  | { col: string; label: string; kind: "show"; img?: boolean; wide?: boolean }
   | { col: string; label: string; kind: "fixed"; options: string[] };
 
 export type Section = { title: string; note?: string; fields: Field[] };
@@ -43,6 +45,7 @@ export function readForm(sections: Section[], f: FormData) {
     const raw = f.getAll(fld.col).map((x) => String(x).trim()).filter(Boolean);
     const one = raw[0] ?? "";
     switch (fld.kind) {
+      case "show": break; // shown only, saved elsewhere
       case "multi": v[fld.col] = raw; break;
       case "check": v[fld.col] = one === "on" || one === "true"; break;
       case "address": v[fld.col] = one ? { address: one } : null; break;
