@@ -952,3 +952,8 @@ details.tags .tags-empty { color: var(--ink-3); font-size: 14px; }
 .list-add input[name="text"] { flex: 1; min-width: 0; }
 .list-add.stack { flex-direction: column; align-items: stretch; }
 .list-add.stack button { align-self: center; }
+.funding-card h2, .doc-cards form.form-section > h2 { text-align: center; font-family: var(--serif); font-weight: 300; font-size: 22px; margin: 0 0 14px; }
+.funding-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 10px; text-align: center; }
+.funding-stats span { display: block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
+.funding-stats b { font-size: 18px; font-weight: 400; }
+.list-box small { color: var(--ink-3); }

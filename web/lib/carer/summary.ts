@@ -42,3 +42,28 @@ export async function requestSummary(carer: { id: string; email: string; name: s
   }).catch((e) => console.error("summary copy failed", e));
   return first;
 }
+
+/** Admin: emails the participant's support summary to the person asking (Bubble's Summary button). */
+export async function emailSummaryTo(participant: string, to: string) {
+  const [p] = await sql<{ b: string | null; first: string | null }[]>`
+    select bubble_id as b, split_part(trim(first_name), ' ', 1) as first from app.users where id = ${participant}`;
+  if (!p) throw new Error("That participant no longer exists.");
+  if (!p.b) throw new Error("This participant isn't set up for summaries yet.");
+  const res = await fetch(URL_(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ participant_id: p.b, format: "pdf", months_back: 1 }),
+    cache: "no-store",
+  });
+  const out = (await res.json().catch(() => ({}))) as { filename?: string; file_base64?: string; mime_type?: string; report_period?: string };
+  const first = p.first ?? "The participant";
+  if (res.status === 422) throw new Error(`There are no recent progress notes for ${first} yet, so there's nothing to summarise.`);
+  if (!res.ok || !out.file_base64) throw new Error("The summary couldn't be made just now. Please try again later.");
+  await sendPlainEmail({
+    to,
+    subject: `${first}'s support summary`,
+    text: `Attached is ${first}'s support summary${out.report_period ? ` (${out.report_period})` : ""}.`,
+    attachments: [{ Name: out.filename ?? `${first}_Supports_Summary.pdf`, Content: out.file_base64, ContentType: out.mime_type ?? "application/pdf" }],
+  });
+  return `${first}'s summary is on its way to ${to}.`;
+}

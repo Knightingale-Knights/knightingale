@@ -83,3 +83,47 @@ export async function carersAction(f: FormData) {
   revalidatePath(`/participants/${id}/carers`);
   redirect(`/participants/${id}/carers${msg ? `?msg=${encodeURIComponent(msg)}` : ""}`);
 }
+
+// ---- About, Feedback, Funding, Summary ----------------------------------------------------
+import { addFeedback, removeQuarter, saveAbout, saveQuarter } from "@/lib/participants/extra";
+import { emailSummaryTo } from "@/lib/carer/summary";
+
+const back = (id: string, page: string, msg: string, error = false) =>
+  redirect(`/participants/${id}/${page}?${error ? "error" : "msg"}=${encodeURIComponent(msg)}`);
+
+export async function aboutAction(f: FormData) {
+  await requireStaff();
+  const id = String(f.get("participant") ?? "");
+  await saveAbout(id, String(f.get("description") ?? ""));
+  revalidatePath(`/participants/${id}`);
+  back(id, "about", "Saved.");
+}
+
+export async function feedbackAction(f: FormData) {
+  const staff = await requireStaff();
+  const id = String(f.get("participant") ?? "");
+  await addFeedback(id, f, staff.id);
+  revalidatePath(`/participants/${id}/feedback`);
+  back(id, "feedback", "Feedback saved.");
+}
+
+export async function quarterAction(f: FormData) {
+  const staff = await requireStaff();
+  const id = String(f.get("participant") ?? "");
+  if (f.get("op") === "remove") await removeQuarter(id, String(f.get("quarter") ?? ""));
+  else await saveQuarter(id, f, staff.id);
+  revalidatePath(`/participants/${id}/funding`);
+  back(id, "funding", f.get("op") === "remove" ? "Removed." : "Saved.");
+}
+
+export async function summaryAction(f: FormData) {
+  const staff = await requireStaff();
+  const id = String(f.get("participant") ?? "");
+  let msg = "";
+  try {
+    msg = await emailSummaryTo(id, staff.email);
+  } catch (e) {
+    back(id, "summary", (e as Error).message, true);
+  }
+  back(id, "summary", msg);
+}
