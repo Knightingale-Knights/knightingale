@@ -1,7 +1,7 @@
 // Participant documents other than the intake: one list of fields drives the admin edit page and the
 // read-only view support coordinators see. Each is linked from the participant (users.<link>) as in Bubble.
 import { sql } from "@/lib/db";
-import { dbValues, readForm, type Section } from "@/lib/forms/fields";
+import { dbValues, melbMidnight, readForm, type Section } from "@/lib/forms/fields";
 
 export type DocDef = { key: string; title: string; table: string; link: string; sections: Section[] };
 
@@ -71,7 +71,103 @@ export const EMERGENCY: DocDef = {
   ],
 };
 
-export const DOCS: Record<string, DocDef> = { consent: CONSENT, emergency: EMERGENCY };
+const TIMING = ["N/A", "Weekly", "Monthly", "Quarterly", "Bi-Annual"];
+
+export const RISK: DocDef = {
+  key: "risk", title: "Risk Assessment", table: "risk_assessments", link: "risk_assessment",
+  sections: [
+    {
+      title: "Risk factors",
+      fields: [
+        { col: "physical_health", label: "Medical Conditions", kind: "multi", set: "physical_health" },
+        { col: "personal_care", label: "Personal Care", kind: "multi", set: "personal_care" },
+        { col: "nutrition", label: "Eating / Drinking", kind: "multi", set: "nutrition" },
+        { col: "accidental_movement", label: "Accidental Movement", kind: "multi", set: "accidental_movement" },
+        { col: "manual_handling", label: "Manual Handling", kind: "multi", set: "manual_handling" },
+        { col: "environmental_risks", label: "Environmental", kind: "multi", set: "environmental" },
+        { col: "mental_health", label: "Mental Health", kind: "multi", set: "mental_health" },
+        { col: "financial_risks", label: "Financial", kind: "multi", set: "financial_risks" },
+        { col: "social_risks", label: "Social Risks", kind: "multi", set: "social_risks" },
+        { col: "substance_use", label: "Substance Use", kind: "multi", set: "substance_use" },
+        { col: "other_risks", label: "Other Risks", kind: "area" },
+      ],
+    },
+    {
+      title: "Participant",
+      fields: [
+        { col: "communication", label: "Preferred Communication", kind: "text" },
+        { col: "physical_mobility", label: "Physical Mobility", kind: "fixed", options: [
+          "1. Relies on other people to be physically mobile or to facilitate their physical mobility.",
+          "2. Uses equipment to enable them to be physically mobile or to facilitate their physical mobility.",
+          "3. N/A"] },
+        { col: "personal_contact", label: "Outside Contact", kind: "fixed", options: [
+          "1. No regular face-to-face contact with other NDIS providers.",
+          "2. Limited or irregular face-to-face contact with relatives, friends or other people.",
+          "3. N/A"] },
+        { col: "persons_involved", label: "Participant Involvement", kind: "area" },
+        { col: "reliance", label: "Reliance on our service", kind: "area" },
+        { col: "health_safety_impact", label: "Disruption Impact", kind: "area" },
+      ],
+    },
+    {
+      title: "Monitoring & Supervision Plan",
+      fields: [
+        { col: "sole_worker", label: "Is Personal Support (Assistance with Daily Personal Activities) being provided by a sole Worker?", kind: "yesno" },
+        { col: "supervision_timing", label: "If YES, how often Knightingale will undertake in-person supervision of the Worker", kind: "fixed", options: TIMING },
+        { col: "provider_timing", label: "If YES, how often we engage with providers who may be involved in providing Other Support Services to the Client in their home or in supporting the Client to access community based-activities", kind: "fixed", options: TIMING },
+      ],
+    },
+    {
+      title: "Signatures",
+      fields: [
+        { col: "participant_signature", label: "Participant signature", kind: "signature" },
+        { col: "signature_date", label: "Date signed", kind: "date" },
+      ],
+    },
+  ],
+};
+
+export const DOCS: Record<string, DocDef> = { consent: CONSENT, emergency: EMERGENCY, risk: RISK };
+
+export type RiskPlan = { id: string; risk: string | null; treatment: string | null; participant_impact: string | null; others: string | null; person_responsible: string | null; review_date: Date | null };
+
+/** The participant's Risk Management Plan rows. */
+export function riskPlans(participant: string) {
+  return sql<RiskPlan[]>`
+    select id, risk, treatment, participant_impact, others, person_responsible, review_date
+      from app.risk_management_plans where participant = ${participant} order by created_at`;
+}
+
+const PLAN_COLS = ["risk", "treatment", "participant_impact", "others", "person_responsible"] as const;
+
+/** Saves the Risk Management Plan rows posted with the Risk Assessment (plan_<id>_<col>, plan_new_<col>, plan_<id>_delete). */
+export async function saveRiskPlans(participant: string, assessment: string, f: FormData, by: string) {
+  const rows = await riskPlans(participant);
+  const read = (k: string) => {
+    const v: Record<string, unknown> = {};
+    for (const c of PLAN_COLS) v[c] = String(f.get(`plan_${k}_${c}`) ?? "").trim() || null;
+    const d = String(f.get(`plan_${k}_review_date`) ?? "");
+    v.review_date = /^\d{4}-\d{2}-\d{2}$/.test(d) ? melbMidnight(d) : null;
+    return v;
+  };
+  await sql.begin(async (tx) => {
+    for (const r of rows) {
+      if (!f.has(`plan_${r.id}_risk`)) continue;
+      if (f.get(`plan_${r.id}_delete`) === "on") {
+        await tx`delete from app.risk_assessments_risk_management_plan where risk_management_plans_id = ${r.id}`;
+        await tx`delete from app.risk_management_plans where id = ${r.id}`;
+      } else {
+        await tx`update app.risk_management_plans set ${tx({ ...read(r.id), updated_at: new Date() })} where id = ${r.id}`;
+      }
+    }
+    const n = read("new");
+    if (PLAN_COLS.some((c) => n[c])) {
+      const [row] = await tx<{ id: string }[]>`
+        insert into app.risk_management_plans ${tx({ ...n, participant, created_by: by })} returning id`;
+      await tx`insert into app.risk_assessments_risk_management_plan (risk_assessments_id, risk_management_plans_id) values (${assessment}, ${row.id})`;
+    }
+  });
+}
 
 /** The participant's document row (its id), from their link field or the newest one for them. */
 export async function docId(d: DocDef, participant: string): Promise<string | null> {
@@ -87,17 +183,19 @@ export async function docId(d: DocDef, participant: string): Promise<string | nu
 /** Saves the document, creating and linking it to the participant if they have none. */
 export async function saveDoc(d: DocDef, participant: string, f: FormData, by: string) {
   const db = dbValues(d.sections, readForm(d.sections, f));
-  const id = await docId(d, participant);
+  let id = await docId(d, participant);
   if (id) {
     await sql`update ${sql(`app.${d.table}`)} set ${sql({ ...db, updated_at: new Date() })} where id = ${id}`;
-    return id;
+  } else {
+    id = await sql.begin(async (tx) => {
+      const [row] = await tx<{ id: string }[]>`
+        insert into ${sql(`app.${d.table}`)} ${sql({ ...db, participant, created_by: by })} returning id`;
+      await tx`update app.users set ${sql({ [d.link]: row.id })} where id = ${participant}`;
+      return row.id;
+    });
   }
-  return sql.begin(async (tx) => {
-    const [row] = await tx<{ id: string }[]>`
-      insert into ${sql(`app.${d.table}`)} ${sql({ ...db, participant, created_by: by })} returning id`;
-    await tx`update app.users set ${sql({ [d.link]: row.id })} where id = ${participant}`;
-    return row.id;
-  });
+  if (d.key === "risk") await saveRiskPlans(participant, id, f, by);
+  return id;
 }
 
 /** The participant details on the Emergency Plan, grouped as in Bubble (from their profile and intake). */
