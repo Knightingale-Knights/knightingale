@@ -32,6 +32,7 @@ export default async function Participant({ params, searchParams }: { params: Pr
         <Link href="/participants">← All participants</Link>
       </TopBar>
       <main>
+        <div className="participant-centre">
         <div className="profile-head">
           <Portrait photo={p.photo} name={name} />
           <div>
@@ -46,6 +47,7 @@ export default async function Participant({ params, searchParams }: { params: Pr
             : <span key={s} className="side-btn off" title="Not built yet">{s}</span>)}
         </nav>
         <ParticipantCalendar participant={id} view={sp.view === "day" ? "day" : "month"} day={sp.d} base={`/participants/${id}`} />
+        </div>
       </main>
     </div>
   );

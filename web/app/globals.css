@@ -387,6 +387,11 @@ table.people .num { text-align: right; white-space: nowrap; }
 
 /* Long record forms (intake, staff questions) */
 .form-page { max-width: 980px; }
+/* Participant documents sit on the same white sheet as the participant page, centred, with text left aligned. */
+.shell > main.form-page { margin: 26px auto; padding: 44px 40px 60px; background: var(--paper); box-shadow: var(--shadow-sheet); animation: rise 420ms var(--ease); text-align: left; }
+.shell > main.form-page.list-doc { max-width: 680px; }
+@media (max-width: 700px) { .shell > main.form-page { margin: 12px; padding: 28px 18px 40px; } }
+.participant-centre { max-width: 980px; margin: 0 auto; }
 .form-section { border: 0; border-top: 1px solid var(--ink); margin: 0 0 26px; padding: 14px 0 0; }
 .form-section > legend { font-family: var(--serif); font-weight: 300; font-size: 24px; padding: 0 12px 0 0; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
@@ -902,7 +907,7 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 .plan-row { padding: 14px 0 22px; border-bottom: 1px solid var(--line); }
 .plan-row:last-of-type { border-bottom: 0; }
 .plan-add { margin: 18px 0 0; }
-.plan-generate { display: flex; justify-content: center; }
+.plan-generate { display: flex; justify-content: flex-start; }
 .home-risks { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0 0 22px; }
 .home-risks th { text-align: center; font-weight: 400; font-size: 13px; color: var(--ink-2); padding: 6px 4px; border-bottom: 1px solid var(--ink); width: 64px; }
 .home-risks th:first-child, .home-risks td:first-child { text-align: left; width: auto; }
@@ -911,13 +916,13 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
 .home-risks input[type="radio"] { width: 16px; height: 16px; margin: 0; }
 /* Bubble-style cards: one column, centred headings, pairs side by side */
 .doc-cards .form-section { border: 1px solid var(--line-2); border-radius: 14px; padding: 18px 16px 22px; margin: 0 0 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
-.doc-cards .form-section > legend { float: left; width: 100%; text-align: center; padding: 0; margin: 0 0 18px; }
+.doc-cards .form-section > legend { float: left; width: 100%; text-align: left; padding: 0; margin: 0 0 18px; }
 .doc-cards .form-section > legend + * { clear: both; }
 .doc-cards .form-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .doc-cards .form-grid input, .doc-cards .form-grid select { min-width: 0; max-width: 100%; }
 .doc-cards .form-grid > * { grid-column: 1 / -1; }
 .doc-cards .form-grid > .half { grid-column: auto; }
-.doc-cards .centre { text-align: center; }
+.doc-cards .centre { text-align: left; }
 .show-field { display: flex; flex-direction: column; gap: 6px; }
 .show-value { min-height: 38px; border: 1px solid var(--line); background: var(--paper-2, #f7f6f3); padding: 8px 10px; font-size: 14px; white-space: pre-wrap; }
 .show-empty { border: 1px solid var(--line); padding: 8px 10px; font-size: 14px; color: var(--ink-3); }
@@ -928,12 +933,12 @@ details.tags > summary::-webkit-details-marker { display: none; }
 details.tags .tag { background: var(--ink); color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 3px; }
 details.tags .tags-empty { color: var(--ink-3); font-size: 14px; }
 .tags-list { border-top: 1px solid var(--line); max-height: 260px; overflow: auto; padding: 8px 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px 14px; }
-.doc-link-row { display: flex; justify-content: center; margin: 0 0 24px; }
+.doc-link-row { display: flex; justify-content: flex-start; margin: 0 0 24px; }
 .doc-link-row .button { display: inline-flex; align-items: center; text-decoration: none; }
 .support-row { padding: 14px 0 22px; border-bottom: 1px solid var(--line); }
 .support-row:last-of-type { border-bottom: 0; }
 .doc-cards .doc-text { border: 1px solid var(--line-2); border-radius: 14px; padding: 18px 16px; margin: 0 0 24px; background: #fff; }
-.doc-cards .doc-text h3 { text-align: center; font-family: var(--serif); font-weight: 300; font-size: 22px; letter-spacing: 0; margin: 22px 0 10px; }
+.doc-cards .doc-text h3 { text-align: left; font-family: var(--serif); font-weight: 300; font-size: 22px; letter-spacing: 0; margin: 22px 0 10px; }
 .doc-cards .doc-text > div:first-child h3 { margin-top: 0; }
 .doc-cards .doc-text p { color: var(--ink); }
 .list-doc { max-width: 560px; }
@@ -951,9 +956,10 @@ details.tags .tags-empty { color: var(--ink-3); font-size: 14px; }
 .list-add { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
 .list-add input[name="text"] { flex: 1; min-width: 0; }
 .list-add.stack { flex-direction: column; align-items: stretch; }
-.list-add.stack button { align-self: center; }
-.funding-card h2, .doc-cards form.form-section > h2 { text-align: center; font-family: var(--serif); font-weight: 300; font-size: 22px; margin: 0 0 14px; }
-.funding-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 10px; text-align: center; }
+.list-add.stack button { align-self: flex-start; }
+.funding-card h2, .doc-cards form.form-section > h2 { text-align: left; font-family: var(--serif); font-weight: 300; font-size: 22px; margin: 0 0 14px; }
+.funding-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 10px; text-align: left; }
 .funding-stats span { display: block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
 .funding-stats b { font-size: 18px; font-weight: 400; }
 .list-box small { color: var(--ink-3); }
+.participant-centre .section-grid { max-width: none; }
