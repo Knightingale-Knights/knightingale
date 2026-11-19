@@ -871,3 +871,11 @@ button.is-done::after, .button.is-done::after { animation: none; width: 100%; tr
   .side nav .side-btn { justify-content: flex-start; padding: 0 14px; }
 }
 
+/* Timesheets: Pay button and popup (makes the carer's payslip) */
+.sheet-pay { display: grid; place-items: center; width: 100%; min-height: 40px; margin-top: 18px; text-decoration: none; }
+.pay-popup { display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 24px); overflow-y: auto; }
+.pay-popup h2 { text-align: center; text-transform: uppercase; letter-spacing: 0.08em; }
+.pay-popup label small.hint { display: block; margin-top: 4px; font-size: 11px; letter-spacing: 0; text-transform: none; }
+.pay-popup input { text-align: right; font-variant-numeric: tabular-nums; }
+.pay-popup input[type="date"] { text-align: left; }
+

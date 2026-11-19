@@ -33,3 +33,28 @@ export async function deleteTimesheetShiftAction(f: FormData) {
   revalidatePath("/timesheets");
   redirect(`/timesheets?${p}`);
 }
+
+// ---- Pay -------------------------------------------------------------------------
+import { createPayslip, PayError } from "@/lib/payroll/pay";
+
+/** The Pay popup's Submit: saves the payslip (and the carer's running totals), then returns to the same period. */
+export async function payAction(f: FormData) {
+  const staff = await requireStaff();
+  const p = new URLSearchParams();
+  for (const k of ["from", "to", "q"]) if (f.get(k)) p.set(k, String(f.get(k)));
+  const num = (k: string) => Number(String(f.get(k) ?? "").replace(/[$,\s]/g, ""));
+  const day = (k: string) => String(f.get(k) ?? "");
+  try {
+    await createPayslip(String(f.get("carer") ?? ""), staff.id, {
+      gross: num("gross"), tax: num("tax"), hours: num("hours"), reimbursements: num("reimbursements"),
+      super: Math.round(num("gross") * 12) / 100, net: Math.round((num("gross") - num("tax") + num("reimbursements")) * 100) / 100, start: day("start"), end: day("end"), paid: day("paid"),
+    });
+    p.set("msg", `Payslip saved for ${String(f.get("name") ?? "the carer")}.`);
+  } catch (e) {
+    if (!(e instanceof PayError)) console.error("pay failed", e);
+    p.set("error", e instanceof PayError ? e.message : "The payslip could not be saved. Please try again.");
+    p.set("pay", String(f.get("carer") ?? ""));
+  }
+  revalidatePath("/timesheets");
+  redirect(`/timesheets?${p}`);
+}

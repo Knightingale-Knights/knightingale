@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
-import { timesheets, type PayLine, type SheetShift } from "@/lib/timesheets/data";
+import { timesheets, type PayLine, type Sheet, type SheetShift } from "@/lib/timesheets/data";
 import { addDays, clockLabel, payWeekStart } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
-import { deleteTimesheetShiftAction } from "./actions";
+import { deleteTimesheetShiftAction, payAction } from "./actions";
+import { payDraft } from "@/lib/payroll/pay";
+import { PayFields } from "./PayFields";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +18,7 @@ const dayLabel = (day: string) =>
 const clock = (d: Date | null) =>
   d ? new Intl.DateTimeFormat("en-AU", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Australia/Melbourne" }).format(new Date(d)) : "";
 
-export default async function Timesheets({ searchParams }: { searchParams: Promise<{ from?: string; to?: string; q?: string; msg?: string; warn?: string; error?: string }> }) {
+export default async function Timesheets({ searchParams }: { searchParams: Promise<{ from?: string; to?: string; q?: string; msg?: string; warn?: string; error?: string; pay?: string }> }) {
   const staff = await requireStaff();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -26,6 +28,7 @@ export default async function Timesheets({ searchParams }: { searchParams: Promi
   const sheets = from <= to ? await timesheets(from, to, q) : [];
   const shifts = sheets.reduce((a, s) => a + s.shifts.length, 0);
   const hours = sheets.reduce((a, s) => a + s.hours, 0);
+  const payFor = sp.pay ? sheets.find((x) => x.carer === sp.pay) : undefined;
   const span = (f: string, t: string) => `/timesheets?${new URLSearchParams({ from: f, to: t, ...(q ? { q } : {}) })}`;
   return (
     <div className="shell">
@@ -59,6 +62,7 @@ export default async function Timesheets({ searchParams }: { searchParams: Promi
               <p className="sheet-figure">{money(s.receipts)}</p>
               <h3>Travel</h3>
               <p className="sheet-figure">{money(s.travel)} <span>{Number(s.travelKm.toFixed(1))} km</span></p>
+              <Link className="button secondary sheet-pay" href={`${span(from, to)}&pay=${s.carer}`} scroll={false}>Pay</Link>
             </div>
             <div className="sheet-shifts">
               {s.shifts.map((x) => <ShiftCard key={x.id} s={x} keep={{ from, to, q }} />)}
@@ -66,6 +70,36 @@ export default async function Timesheets({ searchParams }: { searchParams: Promi
           </section>
         ))}
       </main>
+      {payFor && <PayPopup sheet={payFor} from={from} to={to} q={q} close={span(from, to)} error={sp.error} />}
+    </div>
+  );
+}
+
+async function PayPopup({ sheet, from, to, q, close, error }: { sheet: Sheet; from: string; to: string; q: string; close: string; error?: string }) {
+  const gross = [...sheet.residential, ...sheet.ndis].reduce((a, l) => a + (l.pay ?? 0), 0);
+  const unpriced = [...sheet.residential, ...sheet.ndis].filter((l) => l.pay == null).reduce((a, l) => a + l.hours, 0);
+  const d = await payDraft(sheet.carer, from, to, { gross, hours: sheet.hours, reimbursements: sheet.receipts + sheet.travel });
+  const first = sheet.name.split(" ")[0].toUpperCase();
+  return (
+    <div className="popup-back">
+      <Link href={close} className="modal-shade" aria-label="Close" scroll={false} />
+      <form action={payAction} className="popup pay-popup">
+        <h2>{first}&apos;s pay</h2>
+        {error && <p className="banner error">{error}</p>}
+        {d.already && <p className="banner warn">{sheet.name.split(" ")[0]} already has a payslip for this pay period.</p>}
+        {unpriced > 0 && <p className="banner warn">{Number(unpriced.toFixed(2))} h have no pay rate and aren&apos;t in the gross pay.</p>}
+        <input type="hidden" name="carer" value={sheet.carer} />
+        <input type="hidden" name="name" value={sheet.name} />
+        <input type="hidden" name="from" value={from} />
+        <input type="hidden" name="to" value={to} />
+        {q && <input type="hidden" name="q" value={q} />}
+        <PayFields d={d} notes={{ gross: "From the shifts in this pay period", tax: d.taxNote, reimbursements: `Travel ${money(sheet.travel)} + receipts ${money(sheet.receipts)}` }} />
+        <label>Pay period start<input type="date" name="start" defaultValue={d.start} required /></label>
+        <label>Pay period end<input type="date" name="end" defaultValue={d.end} required /></label>
+        <label>Payment date<input type="date" name="paid" defaultValue={d.paid} required /></label>
+        <button className="big" disabled={d.already}>Submit</button>
+        <Link href={close} className="link popup-later" scroll={false}>Cancel</Link>
+      </form>
     </div>
   );
 }
