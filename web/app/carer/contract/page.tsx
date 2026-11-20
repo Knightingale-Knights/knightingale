@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireCarer } from "@/lib/auth";
 import { fileHref } from "@/lib/files";
@@ -13,6 +14,7 @@ export const dynamic = "force-dynamic";
 /** The casual employment contract. Unsigned carers are sent here first and can't use the app until they sign. */
 export default async function Contract({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const me = await requireCarer();
+  if (!me.approved && !me.viewAs) redirect("/carer"); // still being reviewed: the waiting popup, not the contract
   const sp = await searchParams;
   const state = await contractState(me.id);
   const signed = Boolean(state.signature);

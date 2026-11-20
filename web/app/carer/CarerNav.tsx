@@ -16,15 +16,17 @@ type On = "shifts" | "availability" | "chats" | "account" | "policies" | "stats"
 /** The carer's menu, down the left side like the admin pages. */
 export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; name: string; shiftsHref?: string }) {
   const me = await currentUser();
+  // A carer whose application is still being reviewed sees only a popup, with no way to close it.
+  const pending = me?.role === "carer" && !me.approved;
   // An unsigned carer signs the employment contract before anything else (an admin viewing as them is not stopped).
-  if (CONTRACT_GATE && me?.role === "carer" && !me.viewAs && !(await contractState(me.id)).signature) redirect("/carer/contract");
+  if (CONTRACT_GATE && me?.role === "carer" && !pending && !me.viewAs && !(await contractState(me.id)).signature) redirect("/carer/contract");
   const today = isoDate(new Date());
   const [unread, docs, nag] = me
     ? await Promise.all([unreadTotal(me), attentionCount(me.id, today), me.role === "carer" ? accountNag(me.id, today, !me.viewAs) : null])
     : [0, 0, null];
   // Past the two weeks' grace: the carer can only use their Account and Availability until it's sorted. The office is never stopped.
   const free = on === "account" || on === "availability";
-  if (nag?.blocked && !me!.viewAs && !free) redirect("/carer/account");
+  if (nag?.blocked && !pending && !me!.viewAs && !free) redirect("/carer/account");
   const items: { key: On; label: string; href: string; badge?: number }[] = [
     { key: "shifts", label: "My Shifts", href: shiftsHref },
     { key: "availability", label: "Availability", href: "/carer/availability" },
@@ -36,6 +38,15 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
   return (
     <>
       <ViewAsBar />
+      {pending && (
+        <div className="locked-back" role="dialog" aria-modal="true" aria-labelledby="pending-title">
+          <div className="popup locked-popup">
+            <h2 id="pending-title">Thanks for applying!</h2>
+            <p>We&apos;re reviewing your application and will be in touch.</p>
+            <form action={signOutAction}><button className="big secondary">Sign out</button></form>
+          </div>
+        </div>
+      )}
       {nag && nag.items.length > 0 && (
         <AccountNag nag={nag} closable={!nag.blocked || Boolean(me!.viewAs) || free}
           storeKey={`nag:${today}:${nag.blocked ? "b" : "s"}:${nag.items.map((i) => i.key).join(",")}`} />

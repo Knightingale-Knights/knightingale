@@ -46,7 +46,6 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
       )}
       <main className="carer-main">
         <div className="pay-top"><Link href="/carer/payslips" className="button secondary">Payslips</Link></div>
-        {!me.approved && <p className="banner ok">Thanks for applying! We&apos;re reviewing your application and will be in touch. Keep your documents up to date in the Documents tab.</p>}
         {day ? <DayList day={day} today={today} shifts={shifts} now={now} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
       {day && sp.details && <ShiftDetails s={shifts.find((s) => s.id === sp.details)} day={day} tab={sp.tab} email={me.email} msgs={sp} />}
