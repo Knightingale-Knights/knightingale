@@ -984,3 +984,6 @@ details.tags .tags-empty { color: var(--ink-3); font-size: 14px; }
 .locked-popup { max-width: 420px; text-align: left; }
 .locked-popup form { margin-top: 18px; }
 body:has(.locked-back) { overflow: hidden; }
+.locked-popup { max-height: calc(100vh - 32px); overflow: auto; }
+.locked-popup ul { margin: 8px 0 14px; padding-left: 20px; }
+.locked-popup li { margin: 0 0 6px; }

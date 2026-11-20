@@ -41,8 +41,18 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
       {pending && (
         <div className="locked-back" role="dialog" aria-modal="true" aria-labelledby="pending-title">
           <div className="popup locked-popup">
-            <h2 id="pending-title">Thanks for applying!</h2>
-            <p>We&apos;re reviewing your application and will be in touch.</p>
+            <p id="pending-title">Oh dear, looks like you&apos;ve landed on the wrong page. When you have a moment, please:</p>
+            <ul>
+              <li>Navigate to <a href="https://knightingale.com.au/signup">https://knightingale.com.au/signup</a></li>
+              <li>Click &quot;next&quot; on the checklist</li>
+              <li>Click the &quot;continue&quot; button</li>
+              <li>Sign in with your email and password</li>
+              <li>Follow the prompts to upload your documentation</li>
+              <li>After uploading your selfie and tapping FINISH, you&apos;ll receive an email with application video instructions. We look forward to seeing your application video</li>
+            </ul>
+            <p>Please email the team, <a href="mailto:care@knightingale.com.au">care@knightingale.com.au</a>, if you run into any issues or if you have already completed all these steps.</p>
+            <p>I&apos;m sure you&apos;ll do great.</p>
+            <p>Paul</p>
             <form action={signOutAction}><button className="big secondary">Sign out</button></form>
           </div>
         </div>
