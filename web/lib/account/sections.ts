@@ -4,11 +4,11 @@ import type { AccountDocKey, DocKey } from "@/lib/compliance/docs";
 
 type Key = DocKey | AccountDocKey;
 export type Section =
-  | { key: string; label: string; kind: "docs"; docs: Key[]; tick?: Key[]; nurses?: true }
+  | { key: string; label: string; kind: "docs"; docs: Key[]; tick?: Key[]; nurses?: true; dsw?: true }
   | { key: string; label: string; kind: "link"; href: string; external?: boolean }
   | { key: string; label: string; kind: "soon" };
 
-const doc = (key: string, label: string, k: Key, extra: { nurses?: true } = {}): Section => ({ key, label, kind: "docs", docs: [k], ...extra });
+const doc = (key: string, label: string, k: Key, extra: { nurses?: true; dsw?: true } = {}): Section => ({ key, label, kind: "docs", docs: [k], ...extra });
 
 export const SECTIONS: Section[] = ([] as Section[]).concat([
   { key: "personal", label: "Personal Details", kind: "link", href: "/carer/account/personal" },
@@ -20,7 +20,7 @@ export const SECTIONS: Section[] = ([] as Section[]).concat([
   { key: "handbook", label: "Handbook", kind: "link", href: "/docs/policies/handbook.pdf", external: true },
   doc("right-to-work", "Right to Work", "passport"),
   doc("licence", "Licence", "licence"),
-  doc("insurance", "Insurance", "insurance"),
+  doc("insurance", "Insurance", "insurance", { dsw: true }),
   doc("ndis", "NDIS Worker Screening", "ndis_screening"),
   doc("police", "Police Check", "police"),
   doc("wwcc", "WWCC", "wwcc"),
@@ -36,5 +36,12 @@ export const SECTIONS: Section[] = ([] as Section[]).concat([
 /** EN and RN carers see AHPRA. */
 export const isNurse = (roles: string[] | null) => (roles ?? []).some((r) => r === "en" || r === "rn");
 
-export const sectionsFor = (roles: string[] | null) => SECTIONS.filter((s) => !(s.kind === "docs" && s.nurses) || isNurse(roles));
+/** DSWs see Insurance (they may drive participants); nobody else is asked for it. */
+export const isDsw = (roles: string[] | null) => (roles ?? []).includes("dsw");
+
+/** The sections this carer sees: AHPRA for nurses, Insurance for DSWs, the rest for everyone. */
+export const showsFor = (s: Section, roles: string[] | null) =>
+  s.kind !== "docs" || ((!s.nurses || isNurse(roles)) && (!s.dsw || isDsw(roles)));
+
+export const sectionsFor = (roles: string[] | null) => SECTIONS.filter((s) => showsFor(s, roles));
 export const sectionOf = (k: string) => SECTIONS.find((s) => s.key === k) ?? null;

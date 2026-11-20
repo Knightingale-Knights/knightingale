@@ -30,8 +30,7 @@ export async function accountOverview(carer: string, today: string) {
   const done: Record<string, Done> = {};
   for (const s of sections) {
     done[s.key] =
-      s.kind === "docs" && s.key === "insurance" ? u.no_insurance || docsDone(s.docs)
-      : s.kind === "docs" ? docsDone(s.tick ?? s.docs)
+      s.kind === "docs" ? docsDone(s.tick ?? s.docs)
       : s.key === "personal" ? u.personal
       : s.key === "availability" ? u.avail
       : s.key === "contract" ? u.signed
@@ -40,10 +39,5 @@ export async function accountOverview(carer: string, today: string) {
       : s.key === "tfn" ? u.tfn
       : null;
   }
-  return { name: u.name, photo: u.photo, roles: u.roles, done, docs, sections, noInsurance: u.no_insurance };
-}
-
-/** "I don't have insurance": counts as done (they can't be rostered where a participant needs a car). */
-export async function setNoInsurance(carer: string, none: boolean) {
-  await sql`update app.users set no_insurance = ${none} where id = ${carer}`;
+  return { name: u.name, photo: u.photo, roles: u.roles, done, docs, sections };
 }

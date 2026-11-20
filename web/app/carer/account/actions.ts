@@ -7,7 +7,6 @@ import { ABOUT_FIELDS, saveAbout, type About } from "@/lib/account/about";
 import { isoDate } from "@/lib/invoicing/rules";
 import { BankError, saveBank } from "@/lib/account/bank";
 import { MoneyError, saveSuper, saveTfn } from "@/lib/account/money";
-import { setNoInsurance } from "@/lib/account/data";
 
 const s = (f: FormData, k: string) => String(f.get(k) ?? "");
 
@@ -85,9 +84,3 @@ export async function tfnAction(f: FormData) {
   redirect(dest);
 }
 
-export async function noInsuranceAction(f: FormData) {
-  const me = await requireCarer();
-  await setNoInsurance(me.id, f.get("none") === "1");
-  revalidatePath("/carer/account", "layout");
-  redirect("/carer/account/insurance?saved=1");
-}

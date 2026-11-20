@@ -4,12 +4,10 @@ import { requireCarer } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { accountDocs } from "@/lib/compliance/data";
 import { fileHref, STATUS_LABEL } from "@/lib/compliance/docs";
-import { isNurse, sectionOf } from "@/lib/account/sections";
+import { sectionOf, showsFor } from "@/lib/account/sections";
 import { auDate, isoDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "../../CarerNav";
 import { DocList } from "../../documents/DocList";
-import { noInsuranceAction } from "../actions";
-import { NoInsurance } from "../NoInsurance";
 import { PdfPreview } from "@/components/PdfPreview";
 
 export const dynamic = "force-dynamic";
@@ -29,13 +27,12 @@ export default async function AccountSection({ params, searchParams }: { params:
   const s = sectionOf(section);
   if (!s) notFound();
   if (s.kind === "link") redirect(s.href);
-  if (s.kind === "docs" && s.nurses && !isNurse(me.roles)) notFound();
+  if (!showsFor(s, me.roles)) notFound();
   const keys = s.kind === "docs" ? s.docs : [];
   const docs = keys.length ? await accountDocs(me.id, keys, isoDate(new Date())) : [];
   const doc = docs.find((d) => d.def.key === sp.tab) ?? docs[0];
   const file = doc?.files.at(-1) ?? null;
   const pdf = file ? await isPdf(file) : false;
-  const noInsurance = s.key === "insurance" && (await sql<{ v: boolean }[]>`select no_insurance as v from app.users where id = ${me.id}`)[0]?.v;
   const back = `/carer/account/${s.key}${docs.length > 1 ? `?tab=${doc.def.key}` : ""}`;
   return (
     <div className="carer">
@@ -60,14 +57,7 @@ export default async function AccountSection({ params, searchParams }: { params:
                 <p className="doc-exp">{doc.expiry ? `Expires ${auDate(doc.expiry)}` : STATUS_LABEL[doc.status]}</p>
               </div>
             )}
-            {s.key === "insurance" && (noInsurance ? (
-              <form action={noInsuranceAction} className="no-ins">
-                <p className="hint">You&apos;ve told us you don&apos;t have insurance, so you won&apos;t be offered shifts where a participant needs to be driven in your car.</p>
-                <input type="hidden" name="none" value="0" />
-                <button className="secondary">I have insurance now</button>
-              </form>
-            ) : !file && <div className="no-ins"><NoInsurance /></div>)}
-            {!(s.key === "insurance" && noInsurance) && <DocList docs={[doc]} back={back} />}
+            <DocList docs={[doc]} back={back} />
           </>
         )}
       </main>
