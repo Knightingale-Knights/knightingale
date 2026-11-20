@@ -2,7 +2,8 @@
 import { requestSummary } from "@/lib/carer/summary";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { requireCarer } from "@/lib/auth";
+import { currentUser, requireCarer } from "@/lib/auth";
+import { markRead } from "@/lib/notices/data";
 import { checkIn, checkOut, myShift, setAvailability, submitNote } from "@/lib/carer/data";
 import { CheckError, type Position } from "@/lib/carer/rules";
 import { isoDate } from "@/lib/invoicing/rules";
@@ -217,4 +218,11 @@ export async function removeAwayAction(f: FormData) {
   if (!me.viewAs) await removeAway(me.id, String(f.get("id") ?? ""));
   revalidatePath("/carer/availability");
   redirect("/carer/availability");
+}
+
+/** "Got it" on an office notice. Not recorded while the office is viewing as the carer. */
+export async function noticeReadAction(f: FormData) {
+  const me = await currentUser();
+  if (!me || me.role !== "carer" || me.viewAs) return;
+  await markRead(String(f.get("notice") ?? ""), me.id);
 }

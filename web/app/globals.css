@@ -992,3 +992,6 @@ body:has(.locked-back) { overflow: hidden; }
 .friends li > span { flex: 1; min-width: 0; }
 .friends li small { display: block; color: var(--ink-3); font-size: 12px; }
 .friends .button { min-height: 32px; padding: 0 12px; display: inline-flex; align-items: center; text-decoration: none; }
+.notice-back { z-index: 62; }
+.notice-body { white-space: pre-line; }
+.notice-form { max-width: 720px; margin: 0 0 30px; padding: 20px; border: 1px solid var(--line-2); background: #fff; }

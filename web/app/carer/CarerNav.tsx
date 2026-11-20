@@ -7,6 +7,9 @@ import { currentUser } from "@/lib/auth";
 import { unreadTotal } from "@/lib/chats/data";
 import { isoDate } from "@/lib/invoicing/rules";
 import { ViewAsBar } from "@/components/ViewAsBar";
+import { noticesFor } from "@/lib/notices/data";
+import { NoticePopup } from "./NoticePopup";
+import { noticeReadAction } from "./actions";
 import { AccountNag } from "@/components/AccountNag";
 import { accountNag } from "@/lib/account/nag";
 
@@ -20,9 +23,13 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
   // An unsigned carer signs the employment contract before anything else (an admin viewing as them is not stopped).
   if (CONTRACT_GATE && me?.role === "carer" && !pending && !me.viewAs && !(await contractState(me.id)).signature) redirect("/carer/contract");
   const today = isoDate(new Date());
-  const [unread, nag] = me
-    ? await Promise.all([unreadTotal(me), me.role === "carer" ? accountNag(me.id, today, !me.viewAs) : null])
-    : [0, null];
+  const [unread, nag, notices] = me
+    ? await Promise.all([
+        unreadTotal(me),
+        me.role === "carer" ? accountNag(me.id, today, !me.viewAs) : null,
+        me.role === "carer" && !pending ? noticesFor(me.id) : [],
+      ])
+    : [0, null, []];
   // Past the two weeks' grace: the carer can only use their Account and Availability until it's sorted. The office is never stopped.
   const free = on === "account" || on === "availability";
   if (nag?.blocked && !pending && !me!.viewAs && !free) redirect("/carer/account");
@@ -37,6 +44,7 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
   return (
     <>
       <ViewAsBar />
+      {notices.length > 0 && <NoticePopup key={notices[0].id} id={notices[0].id} title={notices[0].title} body={notices[0].body} action={noticeReadAction} />}
       {pending && (
         <div className="locked-back" role="dialog" aria-modal="true" aria-labelledby="pending-title">
           <div className="popup locked-popup">
