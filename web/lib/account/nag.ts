@@ -20,6 +20,7 @@ export async function accountNag(carer: string, today: string, record: boolean):
     if (SKIP.has(s.key) || a.done[s.key] === null) continue;
     const href = s.kind === "link" ? s.href : `/carer/account/${s.key}`;
     const docs = s.kind === "docs" ? (s.tick ?? s.docs).map((k) => byKey.get(k)).filter(Boolean) : [];
+    if (s.key === "insurance" && a.noInsurance) continue;
     if (a.done[s.key] === false) {
       const exp = docs.find((d) => d!.status === "expired");
       found.push({ key: s.key, label: s.label, href, why: exp ? "expired" : "missing", expiry: exp?.expiry ?? null });
