@@ -5,7 +5,6 @@ import { CONTRACT_GATE, contractState } from "@/lib/contract/data";
 import { signOutAction } from "@/app/invoicing/actions";
 import { currentUser } from "@/lib/auth";
 import { unreadTotal } from "@/lib/chats/data";
-import { attentionCount } from "@/lib/compliance/data";
 import { isoDate } from "@/lib/invoicing/rules";
 import { ViewAsBar } from "@/components/ViewAsBar";
 import { AccountNag } from "@/components/AccountNag";
@@ -21,9 +20,9 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
   // An unsigned carer signs the employment contract before anything else (an admin viewing as them is not stopped).
   if (CONTRACT_GATE && me?.role === "carer" && !pending && !me.viewAs && !(await contractState(me.id)).signature) redirect("/carer/contract");
   const today = isoDate(new Date());
-  const [unread, docs, nag] = me
-    ? await Promise.all([unreadTotal(me), attentionCount(me.id, today), me.role === "carer" ? accountNag(me.id, today, !me.viewAs) : null])
-    : [0, 0, null];
+  const [unread, nag] = me
+    ? await Promise.all([unreadTotal(me), me.role === "carer" ? accountNag(me.id, today, !me.viewAs) : null])
+    : [0, null];
   // Past the two weeks' grace: the carer can only use their Account and Availability until it's sorted. The office is never stopped.
   const free = on === "account" || on === "availability";
   if (nag?.blocked && !pending && !me!.viewAs && !free) redirect("/carer/account");
@@ -33,7 +32,7 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
     { key: "chats", label: "Chats", href: "/carer/chats", badge: unread },
     { key: "policies", label: "Policies", href: "/carer/policies" },
     { key: "stats", label: "My Stats", href: "/carer/stats" },
-    { key: "account", label: "Account", href: "/carer/account", badge: docs },
+    { key: "account", label: "Account", href: "/carer/account" },
   ];
   return (
     <>
