@@ -7,6 +7,8 @@ import { CarerNav } from "./CarerNav";
 import { CheckButton, CheckPopup } from "./check";
 import { checkButton, dueCheck, onShiftDay } from "@/lib/carer/rules";
 import { requestSummaryAction } from "./actions";
+import { shiftFriends, type Friend } from "@/lib/carer/friends";
+import { Portrait } from "@/components/CarerCells";
 import { PendingButton } from "@/components/PendingButton";
 import { ShiftDetails } from "./ShiftDetails";
 
@@ -26,7 +28,7 @@ function status(s: CarerShift) {
 }
 const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; sent?: string; summary_error?: string; details?: string; tab?: string; note?: string; view?: string; done?: string; saved?: string; error?: string; travel?: string; xerror?: string }> }) {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; friends?: string; sent?: string; summary_error?: string; details?: string; tab?: string; note?: string; view?: string; done?: string; saved?: string; error?: string; travel?: string; xerror?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -36,6 +38,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
   const [near, shifts] = await Promise.all([myShifts(me.id, today), myShiftsBetween(me.id, day ?? from, day ? addDays(day, 1) : to)]);
   const now = Date.now();
   const logins = day && sp.logins ? await myLeecareLogins(me.id, sp.logins) : null;
+  const friends = day && sp.friends ? await shiftFriends(me.id, sp.friends) : null;
   const due = near.map((s) => ({ s, kind: dueCheck(s, now) })).find((d) => d.kind);
 
   return (
@@ -49,6 +52,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
         {day ? <DayList day={day} today={today} shifts={shifts} now={now} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
       {day && sp.details && <ShiftDetails s={shifts.find((s) => s.id === sp.details)} day={day} tab={sp.tab} email={me.email} msgs={sp} />}
+      {day && friends && <FriendsPopup s={shifts.find((s) => s.id === sp.friends)} friends={friends} close={`/carer?date=${day}`} />}
       {day && logins && <LoginsPopup s={shifts.find((s) => s.id === sp.logins)} logins={logins} close={`/carer?date=${day}`} />}
       {day && sp.summary && <SummaryRequest s={shifts.find((s) => s.id === sp.summary && s.kind === "ndis")} email={me.email} close={`/carer?date=${day}`} day={day} sent={sp.sent} error={sp.summary_error} />}
     </div>
@@ -127,11 +131,43 @@ function ShiftCard({ s, day, now }: { s: CarerShift; day: string; now: number })
           <Link href={`/carer?date=${day}&logins=${s.id}`} className="button secondary">Leecare logins</Link>
         </div>
       )}
-      {ndis && (
+      {!s.cancelled && (
         <div className="shift-card-actions">
-          <Link href={`/carer?date=${day}&details=${s.id}`} className="button">Details</Link>
+          <Link href={`/carer?date=${day}&friends=${s.id}`} className="button secondary">Friends</Link>
+          {ndis && <Link href={`/carer?date=${day}&details=${s.id}`} className="button">Details</Link>}
         </div>
       )}
+    </div>
+  );
+}
+
+/** Friends: carers who have worked with the participant lately, or who are on the same residential shift. */
+function FriendsPopup({ s, friends, close }: { s?: CarerShift; friends: Friend[]; close: string }) {
+  if (!s) return null;
+  const ndis = s.kind === "ndis";
+  const who = (s.participant_name ?? s.place ?? "").split(" ")[0];
+  return (
+    <div className="popup-back">
+      <Link href={close} className="modal-shade" aria-label="Close" />
+      <div className="popup details-popup">
+        <h2>Friends</h2>
+        <p className="hint">{ndis ? `Carers who have worked with ${who || "this participant"} in the last 30 days.` : `Carers on the same shift as you at ${s.place ?? "this residence"}.`}</p>
+        {friends.length === 0 ? (
+          <p className="empty">{ndis ? "Nobody else in the last 30 days." : "Nobody else is on this shift."}</p>
+        ) : (
+          <ul className="friends">
+            {friends.map((f) => (
+              <li key={f.id}>
+                <Portrait photo={f.photo} name={f.name || "?"} />
+                <span><b>{f.name || "(no name)"}</b>{f.note && <small>{f.note}</small>}</span>
+                {f.phone && <a href={`tel:${f.phone}`} className="button secondary">Call</a>}
+                {f.phone && <a href={`sms:${f.phone}`} className="button secondary">Text</a>}
+              </li>
+            ))}
+          </ul>
+        )}
+        <Link href={close} className="button secondary popup-later">Close</Link>
+      </div>
     </div>
   );
 }
