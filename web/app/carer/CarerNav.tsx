@@ -43,12 +43,12 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
           <div className="popup locked-popup">
             <p id="pending-title">Oh dear, looks like you&apos;ve landed on the wrong page. When you have a moment, please:</p>
             <ul>
-              <li>Navigate to <a href="https://knightingale.com.au/signup">https://knightingale.com.au/signup</a></li>
-              <li>Click &quot;next&quot; on the checklist</li>
-              <li>Click the &quot;continue&quot; button</li>
-              <li>Sign in with your email and password</li>
-              <li>Follow the prompts to upload your documentation</li>
-              <li>After uploading your selfie and tapping FINISH, you&apos;ll receive an email with application video instructions. We look forward to seeing your application video</li>
+              <li>Navigate to <a href="https://knightingale.com.au/join">https://knightingale.com.au/join</a></li>
+              <li>Enter your email and tap &quot;Start my application&quot;</li>
+              <li>Open the sign-in link we email you</li>
+              <li>Work through each step: About you, Your role, NDIS screening, Certificates, and Photo and ID</li>
+              <li>Tap &quot;Submit my application&quot; on the last step</li>
+              <li>Once you submit, you&apos;ll receive an email with application video instructions. We look forward to seeing your application video</li>
             </ul>
             <p>Please email the team, <a href="mailto:care@knightingale.com.au">care@knightingale.com.au</a>, if you run into any issues or if you have already completed all these steps.</p>
             <p>I&apos;m sure you&apos;ll do great.</p>
