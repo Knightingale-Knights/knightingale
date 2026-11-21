@@ -124,10 +124,23 @@ h1.s-title { font-size: clamp(42px, 6vw, 76px); }
 .foot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
 .foot-legal { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(237, 232, 220, 0.18); font-size: 13px; color: rgba(237, 232, 220, 0.7); }
 
+/* Home page: image sizes, shapes and tilt match knightingale.com.au */
+.home .s-hero .s-wrap { max-width: 1604px; }
+.home .s-hero .s-grid { grid-template-columns: 1fr minmax(0, 590px); gap: 64px; }
+.home .s-hero-img { width: 100%; max-width: 590px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 10px; transform: rotate(-5deg); justify-self: end; }
+.home .s-split .s-wrap { max-width: 1278px; }
+.home .s-split .s-grid { grid-template-columns: minmax(0, 600px) minmax(0, 600px); gap: 30px; justify-content: center; }
+.home .s-split-img { width: 100%; max-width: 600px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 5px; }
+.home .s-logos .s-wrap { max-width: 1604px; }
+.home .s-logo-row { justify-content: space-around; gap: 32px; }
+.home .s-logo-row img { width: 150px; height: auto; max-width: 150px; filter: none; opacity: 1; }
+
 @media (max-width: 900px) {
   .site section { padding: 64px 0; }
   .s-grid, .s-grid.even { grid-template-columns: 1fr; gap: 32px; }
   .s-grid.flip > :first-child { order: 0; }
+  .home .s-hero .s-grid, .home .s-split .s-grid { grid-template-columns: 1fr; }
+  .home .s-hero-img { justify-self: center; }
   .s-card-grid.n3, .s-card-grid.n4 { grid-template-columns: repeat(2, 1fr); }
   .s-steps ol { grid-template-columns: repeat(2, 1fr); }
   .foot-grid { grid-template-columns: 1fr 1fr; }

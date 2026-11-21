@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return <>{HOME.sections.map((s, i) => <SiteSection key={i} s={s} i={i} />)}</>;
+  return <div className="home">{HOME.sections.map((s, i) => <SiteSection key={i} s={s} i={i} />)}</div>;
 }

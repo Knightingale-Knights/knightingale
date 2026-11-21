@@ -27,12 +27,7 @@ const page: Page = {
       "body": [
         "Knightingale helps care fit into the shape of everyday life for Aussies in Victoria. It's care built around dignity, relationships and the small moments that make a day easier.\n\nWe do it by finding the right person for the right moment; matching skilled healthcare professionals with the care organisations, families and individuals who need them.\n\nHelp us on our mission; to help every older adult live their best life."
       ],
-      "cta": [
-        {
-          "text": "Learn More About Us",
-          "href": "/about_us"
-        }
-      ]
+      "cta": null
     },
     {
       "kind": "text",
@@ -52,12 +47,7 @@ const page: Page = {
       ],
       "image": "https://460c4cc3302d6c3d3eb89b668d0e0508.cdn.bubble.io/f1788518641269x189607436259301440/knightingale_framed_photo%201%20%283%29.png",
       "side": "right",
-      "cta": [
-        {
-          "text": "Discover Nursing Agency",
-          "href": "/care_organisations"
-        }
-      ]
+      "cta": null
     },
     {
       "kind": "split",
@@ -117,12 +107,7 @@ const page: Page = {
           ]
         }
       ],
-      "cta": [
-        {
-          "text": "Learn More About Us",
-          "href": "/about_us"
-        }
-      ]
+      "cta": null
     },
     {
       "kind": "logos",
@@ -132,70 +117,6 @@ const page: Page = {
         "https://460c4cc3302d6c3d3eb89b668d0e0508.cdn.bubble.io/f1787002232942x309472060946787140/MCM%20logo_yourfuture.webp",
         "https://460c4cc3302d6c3d3eb89b668d0e0508.cdn.bubble.io/f1787002699824x644095009887354600/brotherhood-st-laurence-transparent_1.png",
         "https://460c4cc3302d6c3d3eb89b668d0e0508.cdn.bubble.io/f1787002514497x161789784284212860/Logo.webp"
-      ]
-    },
-    {
-      "kind": "statement",
-      "eyebrow": "WE MEET YOU WHERE YOU ARE",
-      "title": "Heard.\nLoved.\n[i][color=#008000]Appreciated.[/color][/i]",
-      "body": [
-        "We are an organisation who wants every human who comes in contact with us to feel heard, loved and appreciated. We accomplish this by treating everyone who enters our sphere as a beloved family member. Support Workers, Nurses, Participants and Clients, alike."
-      ],
-      "stat": "[size=6]100%[/size]\nPERSON-CENTRED, EVERY TIME.\nTO LEAVE THE WORLD A LITTLE BETTER THAN WE FOUND IT."
-    },
-    {
-      "kind": "cards",
-      "eyebrow": "OUR COMMITMENTS",
-      "title": "YOU, YOU, YOU!",
-      "intro": [],
-      "numbered": true,
-      "items": [
-        {
-          "kicker": "1.",
-          "title": "Residents Rights Rule",
-          "body": [
-            "Residents rights are to be encouraged, protected and prioritised."
-          ]
-        },
-        {
-          "kicker": "2.",
-          "title": "Do Whatever It Takes",
-          "body": [
-            "\"It always seems impossible until it's done\" - Nelson Mandela. Go above and beyond. Never stop striving to make the impossible, possible for clients."
-          ]
-        },
-        {
-          "kicker": "3.",
-          "title": "Kindness",
-          "body": [
-            "If someone speaks, care to listen. If someone is silent, care to ask why. If someone is struggling, care to lend a hand. In so doing, we give purely and selflessly, with kindness."
-          ]
-        },
-        {
-          "kicker": "4.",
-          "title": "Make Time For Fun",
-          "body": [
-            "Be present. Be kind. Be fun. Not every interaction need be clinical. It’s ok to let your hair down."
-          ]
-        }
-      ],
-      "cta": null
-    },
-    {
-      "kind": "weare",
-      "eyebrow": "WHO WE ARE",
-      "title": "We are.",
-      "yes": [
-        "Grounded in a philosophy of trust, consistency, presence and kindness.",
-        "Listening carefully, responding thoughtfully and showing up reliably.",
-        "Supporting you, caring for you, and leaving you uplifted after every visit."
-      ],
-      "noTitle": "[i]We are [/i][color=#800000]not.[/color]",
-      "no": [
-        "Distant and aloof.",
-        "Believers of clinical care trumping social and emotional care.",
-        "Treating residents or participants as numbers. Not ever!",
-        "Forgetting, the No#1 reason to attend work, is to care."
       ]
     },
     {
