@@ -133,7 +133,7 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
       {panel === "edit" && sp.edit && (
         <div className="modal-back">
           <Link href={keep({})} className="modal-shade" aria-label="Close" />
-          <EditPanel id={sp.edit} opts={opts} close={keep({})} mode={mode} date={date} view={view} who={sp.who} />
+          <EditPanel id={sp.edit} opts={opts} close={keep({})} mode={mode} date={date} view={view} who={sp.who} error={sp.error} />
         </div>
       )}
 
@@ -263,12 +263,13 @@ function Keep({ mode, date, view, who }: { mode: string; date: string; view: str
 }
 
 function ShiftForm({
-  opts, close, mode, date, view, who, kind, day, shift, free, toggle, children,
+  opts, close, mode, date, view, who, kind, day, shift, free, toggle, children, error,
 }: Ctx & {
   kind: "ndis" | "residential"; day: string; toggle?: (k: "ndis" | "residential") => string;
   shift?: Awaited<ReturnType<typeof getShift>>;
   free?: Awaited<ReturnType<typeof availableOn>>;
   children?: React.ReactNode;
+  error?: string;
 }) {
   const ndis = kind === "ndis";
   const items = ndis ? opts.ndisItems : opts.resPrices;
@@ -280,6 +281,7 @@ function ShiftForm({
         <h2>{shift ? "Edit shift" : "Create shift"}</h2>
         <Link href={close} aria-label="Close">✕</Link>
       </header>
+      {error && <p className="banner error">{error}</p>}
       {toggle && (
         <nav className="kind-toggle">
           <Link href={toggle("ndis")} className={ndis ? "on" : ""}>NDIS</Link>
@@ -344,13 +346,13 @@ function ShiftForm({
   );
 }
 
-async function EditPanel({ id, ...ctx }: Ctx & { id: string }) {
+async function EditPanel({ id, error, ...ctx }: Ctx & { id: string; error?: string }) {
   const shift = await getShift(id);
   if (!shift) return <aside className="panel modal"><p className="empty">That shift no longer exists.</p></aside>;
   const [free, travel, receipts] = await Promise.all([availableOn(shift.day), shiftTravel(id), shiftReceipts(id)]);
   const nextWeek = Array.from({ length: 7 }, (_, i) => addDays(shift.day, i + 1));
   return (
-    <ShiftForm {...ctx} kind={shift.kind} day={shift.day} shift={shift} free={free}>
+    <ShiftForm {...ctx} kind={shift.kind} day={shift.day} shift={shift} free={free} error={error}>
       <div className="shift-extras">
         <p className="figures">
           Fee ${Number(shift.fee ?? 0).toFixed(2)} · Wage ${Number(shift.wage ?? 0).toFixed(2)} · Revenue ${Number(shift.revenue ?? 0).toFixed(2)}
