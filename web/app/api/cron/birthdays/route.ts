@@ -2,16 +2,18 @@ import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { env } from "@/lib/env";
 import { bearerOk } from "@/lib/texts/auth";
+import { isMelbourneHour } from "@/lib/cron/at";
 import { sendTemplateEmail } from "@/lib/postmark";
 
 export const dynamic = "force-dynamic";
 
-// Daily (Vercel Cron, about 8am Melbourne): Paul gets the Postmark birthday email for each user whose birthday is today.
+// Daily (Vercel Cron, 6:55am Melbourne): Paul gets the Postmark birthday email for each user whose birthday is today.
 const TEMPLATE = 48691468;
 const TO = "paul@knightingale.com.au";
 
 export async function GET(req: Request) {
   if (!bearerOk(req, env.cronSecret)) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!isMelbourneHour(6) && !new URL(req.url).searchParams.has("now")) return NextResponse.json({ ok: true, skipped: "not 6:55am Melbourne" });
   const people = await sql<{ first_name: string | null; last_name: string | null; email: string | null; phone: string | null; birthday: string; age: number | null }[]>`
     select u.first_name, u.last_name, u.email, u.phone_number as phone,
            to_char(u.date_of_birth at time zone 'Australia/Melbourne', 'DD/MM/YYYY') as birthday,

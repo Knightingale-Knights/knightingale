@@ -8,16 +8,16 @@
       "schedule": "* * * * *"
     },
     {
-      "path": "/api/cron/compliance",
-      "schedule": "47 22 * * *"
-    },
-    {
       "path": "/api/cron/shift-conflicts",
       "schedule": "15 19 * * 5"
     },
     {
+      "path": "/api/cron/compliance",
+      "schedule": "55 19,20 * * *"
+    },
+    {
       "path": "/api/cron/birthdays",
-      "schedule": "13 21 * * *"
+      "schedule": "55 19,20 * * *"
     }
   ]
 }
