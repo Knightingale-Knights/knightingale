@@ -6,7 +6,7 @@ import { copyShift, createShifts, deleteShift, markAttended, setCancelled, updat
 import { weekStart } from "@/lib/roster/rules";
 import { sendWeeklyRoster } from "@/lib/roster/weekly";
 import { prepareDelete, pushShifts } from "@/lib/klarra/push";
-import { createEvents } from "@/lib/roster/events";
+import { createEvents, deleteEvent, updateEvent } from "@/lib/roster/events";
 import { deleteShiftInBubble, mirrorAvailability, mirrorEvents, mirrorShifts } from "@/lib/bubble/write";
 import { sql } from "@/lib/db";
 
@@ -85,14 +85,29 @@ export async function saveShiftAction(f: FormData) {
 export async function saveEventAction(f: FormData) {
   const staff = await requireStaff();
   const day = str(f, "day");
+  const id = str(f, "id");
   await run(f, async () => {
-    const ids = await createEvents({
+    const i = {
       participant: str(f, "participant"), details: str(f, "details"), day,
       time: str(f, "time"), where: str(f, "where"), repeatUntil: str(f, "repeat_until") || null,
-    }, staff.id);
+    };
+    if (id) {
+      await updateEvent(id, i);
+      const b = await toBubble(() => mirrorEvents([id]), undefined);
+      return { msg: "Event saved.", warnings: b.warn, date: day };
+    }
+    const ids = await createEvents(i, staff.id);
     const b = await toBubble(() => mirrorEvents(ids), undefined);
     return { msg: ids.length > 1 ? `${ids.length} events created.` : "Event created.", warnings: b.warn, date: day };
-  }, { event: "new" });
+  }, { event: id || "new" });
+}
+
+export async function deleteEventAction(f: FormData) {
+  const id = str(f, "id");
+  await run(f, async () => {
+    await deleteEvent(id);
+    return { msg: "Event deleted." };
+  }, { event: id });
 }
 
 export async function cancelShiftAction(f: FormData) {

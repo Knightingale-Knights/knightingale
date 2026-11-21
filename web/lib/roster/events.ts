@@ -52,3 +52,45 @@ export async function rangeEvents(from: string, to: string, participant?: string
 }
 
 export const dayEvents = (day: string, participant?: string) => rangeEvents(day, addDays(day, 1), participant);
+
+export type EventDetail = { id: string; participant: string | null; participant_name: string | null; day: string; time: string; details: string; address: string };
+
+export async function getEvent(id: string): Promise<EventDetail | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const [e] = await sql<(EventDetail & { time_text: string | null })[]>`
+    select e.id, e.participant, trim(concat_ws(' ', u.first_name, u.last_name)) as participant_name, ${melbDay("e.date")} as day,
+           e.time as time_text, coalesce(e.details, '') as details, coalesce(e.address->>'address', '') as address
+      from app.events e left join app.users u on u.id = e.participant where e.id = ${id}`;
+  if (!e) return null;
+  const t = parseClock(e.time_text);
+  const { time_text: _t, ...rest } = e;
+  void _t;
+  return { ...rest, time: t == null ? "" : `${String(Math.floor(t / 100)).padStart(2, "0")}:${String(t % 100).padStart(2, "0")}` };
+}
+
+/** Changes one event (who, what, when, where). */
+export async function updateEvent(id: string, i: EventInput) {
+  const time = checkEvent(i);
+  await sql.begin(async (tx) => {
+    const [p] = await tx<{ id: string; coordinator: string | null }[]>`select id, coordinator_2 as coordinator from app.users where id = ${i.participant}`;
+    if (!p) throw new Error("That participant no longer exists.");
+    const address = i.where ? sql.json({ address: i.where }) : null;
+    const [e] = await tx<{ id: string }[]>`
+      update app.events set date = ${fromDay(i.day)}, time = ${time}, details = ${i.details}, address = ${address},
+             participant = ${p.id}, coordinator = ${p.coordinator}, updated_at = now()
+       where id = ${id} returning id`;
+    if (!e) throw new Error("That event no longer exists.");
+    await tx`delete from app.users_events where events_id = ${id}`;
+    await tx`insert into app.users_events (users_id, events_id) values (${p.id}, ${id})`;
+  });
+}
+
+export async function deleteEvent(id: string) {
+  await sql.begin(async (tx) => {
+    await tx`delete from app.users_events where events_id = ${id}`;
+    await tx`delete from app.events where id = ${id}`;
+  });
+}
+
+/** A participant's events on one day (for the edit-shift sheet). */
+export const participantDayEvents = (participant: string, day: string) => rangeEvents(day, addDays(day, 1), participant);

@@ -1007,3 +1007,9 @@ body:has(.locked-back) { overflow: hidden; }
 .search-select-list li span { color: var(--ink-3); font-size: 12px; }
 .search-select-list li.muted { color: var(--ink-3); }
 .search-select-list li.none { color: var(--ink-3); cursor: default; }
+/* Events open for editing from the day view and the edit-shift sheet. */
+a.erow { color: inherit; text-decoration: none; cursor: pointer; }
+a.erow:hover { background: var(--desk); }
+.shift-events { display: flex; flex-direction: column; }
+.shift-events .erow { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.shift-events .erow .who { margin-left: auto; color: var(--ink-3); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
