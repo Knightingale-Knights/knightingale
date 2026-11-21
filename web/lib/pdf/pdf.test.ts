@@ -16,7 +16,7 @@ describe("pdf", () => {
     const shifts = [s({}), s({ id: "2", date: new Date("2026-11-03T13:00:00Z"), roles: ["pca"] })];
     const r = await residentialPdf({ ...common, location_name: "Sample site", line_items: residentialLineItems(shifts) });
     const n = await ndisPdf({ ...common, participant: "Sample", ndis_number: "000000000", location_name: "Sample plan manager",
-      shift_items: ndisShiftItems(shifts), travel_items: travelItems([{ id: "t", bubble_id: null, date: shifts[0].date, carer_first: "Sample", distance: 14 }], "04_590_0125_6_1", "Provider travel") });
+      shift_items: ndisShiftItems(shifts), travel_items: travelItems([{ id: "t", bubble_id: null, date: shifts[0].date, carer_first: "Sample", distance: 14 }], shifts, "04_590_0125_6_1") });
     expect(Buffer.from(r, "base64").subarray(0, 4).toString()).toBe("%PDF");
     expect(Buffer.from(n, "base64").subarray(0, 4).toString()).toBe("%PDF");
     if (process.env.WRITE_PDFS) { writeFileSync("/tmp/res.pdf", Buffer.from(r, "base64")); writeFileSync("/tmp/ndis.pdf", Buffer.from(n, "base64")); }

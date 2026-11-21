@@ -5,7 +5,7 @@ import {
   billableShifts, billableTravel, listLocations, listParticipants, nextInvoiceNumber, recentInvoices, wintringhamPending,
 } from "@/lib/invoicing/queries";
 import {
-  auDate, clock, feeMismatches, isoDate, lineDate, roleLabel, totals, type InvoiceKind,
+  TRAVEL_ITEMS, auDate, clock, feeMismatches, isoDate, lineDate, roleLabel, totals, travelItemFor, travelItemOptions, type InvoiceKind,
 } from "@/lib/invoicing/rules";
 import { TopBar } from "@/components/TopBar";
 import { createInvoiceAction, sendWintringhamAction, setInvoiceStateAction } from "./actions";
@@ -112,6 +112,9 @@ async function Preview({
     nextInvoiceNumber(),
   ]);
   const sum = totals(kind, shifts, travel);
+  const travelOk = travelItemOptions(shifts).map((o) => o.no as string);
+  const travelItem = new Map(travel.map((t) => [t.id, travelItemFor(t, shifts)]));
+  const unmatchedTravel = travel.filter((t) => !travelItem.get(t.id)).length;
   const mismatches = feeMismatches(shifts);
   const late = shifts.filter((s) => s.late).length;
   const opt = options.find((o) => o.id === target)!;
@@ -168,7 +171,7 @@ async function Preview({
           ))}
           {travel.map((t) => (
             <tr key={t.id} className="travel">
-              <td>{lineDate(t.date)}</td><td>Travel</td><td>{t.carer_first}</td><td></td>
+              <td>{lineDate(t.date)}</td><td>Travel</td><td>{t.carer_first}</td><td>{travelItem.get(t.id)?.no ?? "Choose below"}</td>
               <td className="num">{Number(t.distance ?? 0).toFixed(1)} km</td><td className="num">{money(1)}</td>
               <td className="num">{money(t.distance)}</td>
             </tr>
@@ -186,11 +189,14 @@ async function Preview({
           <label>Invoice date<input type="date" name="invoice_date" defaultValue={today()} required /></label>
           <label>Payment terms<input name="payment_terms" defaultValue={env.defaultPaymentTerms} required /></label>
           <label>Send to<input type="email" name="send_to" defaultValue={defaultTo} required /></label>
-          {!residential && (
-            <>
-              <label>Travel NDIS item<input name="travel_item_no" defaultValue="" placeholder="Item number" /></label>
-              <label>Travel description<input name="travel_item_description" defaultValue="" placeholder="Description" /></label>
-            </>
+          {!residential && unmatchedTravel > 0 && (
+            <label>Travel NDIS item ({unmatchedTravel} unmatched)
+              <select name="travel_item_no" defaultValue={travelOk[0]} required>
+                {TRAVEL_ITEMS.map((o) => (
+                  <option key={o.no} value={o.no} disabled={!travelOk.includes(o.no)}>{o.no} - {o.description}</option>
+                ))}
+              </select>
+            </label>
           )}
         </div>
         <button type="submit">Create and send invoice for {money(sum.amount)}</button>

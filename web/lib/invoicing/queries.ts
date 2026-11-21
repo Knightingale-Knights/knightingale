@@ -72,8 +72,10 @@ export async function billableShifts(
 
 export async function billableTravel(participant: string, through: string, tx = sql): Promise<TravelRow[]> {
   return tx<TravelRow[]>`
-    select t.id, t.bubble_id, t.date, c.first_name as carer_first, t.distance
+    select t.id, t.bubble_id, t.date, c.first_name as carer_first, t.distance, p.item_no as shift_item_no
       from app.uninvoiced_travel t left join app.users c on c.id = t.carer
+      left join app.shifts sh on sh.id = t.shift
+      left join app.ndis_price_items p on p.id = sh.ndis_pricing
      where t.participant = ${participant} and coalesce(t.date, t.created_at) < ${endOfDay(through)}
      order by t.created_at`;
 }

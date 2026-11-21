@@ -4,7 +4,7 @@ import { sendInvoiceEmail } from "@/lib/postmark";
 import { sendWeeklyRoster } from "@/lib/roster/weekly";
 import { billableShifts, billableTravel } from "./queries";
 import {
-  NDIA_HEADERS, auDate, dueDate, ndiaCsvRows, ndisShiftItems, residentialLineItems, toCsv, totals, travelItems,
+  NDIA_HEADERS, auDate, dueDate, ndiaCsvRows, ndisShiftItems, residentialLineItems, toCsv, totals, TRAVEL_ITEMS, travelItemFor, travelItems,
   type InvoiceKind, type TravelRow,
 } from "./rules";
 
@@ -17,7 +17,6 @@ export type CreateInvoiceInput = {
   paymentTerms: string;
   sendTo: string;
   travelItemNo: string;
-  travelItemDescription: string;
   expectedShiftIds: string[]; // what the person reviewed; must still match
   createdBy: string | null;
 };
@@ -78,6 +77,13 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<CreateIn
       throw new Error("The shifts changed since you loaded the page. Reload and check them again.");
     }
 
+    if (travel.length) {
+      const unmatched = travel.some((l) => !travelItemFor(l, shifts));
+      if (unmatched && !TRAVEL_ITEMS.some((o) => o.no === input.travelItemNo)) {
+        throw new Error("Choose a travel NDIS item for the travel that doesn't match a shift.");
+      }
+    }
+
     const sum = totals(input.kind, shifts, travel);
     const periodStart = shifts[0]?.date ?? null;
     const [inv] = await tx<{ id: string }[]>`
@@ -131,7 +137,7 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<CreateIn
           ndis_number: t.ndis_number ?? "",
           location_name: locName,
           shift_items: ndisShiftItems(created.shifts),
-          travel_items: travelItems(created.travel, input.travelItemNo, input.travelItemDescription),
+          travel_items: travelItems(created.travel, created.shifts, input.travelItemNo),
         });
     const filename = `${input.kind === "residential" ? t.name : firstName(t.name)} - Invoice ${number}.pdf`;
     await sql`insert into app.invoice_files (invoice_id, filename, pdf) values (${created.id}, ${filename}, ${Buffer.from(pdf, "base64")})`;

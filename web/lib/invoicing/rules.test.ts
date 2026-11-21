@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   auDate, clock, dueDate, feeMismatches, isoDate, lineDate, ndiaCsvRows, residentialLineItems,
-  roleLabel, toCsv, totals, travelItems, wintringhamRows, type ShiftRow, type TravelRow,
+  roleLabel, toCsv, totals, travelItemFor, travelItemOptions, travelItems, wintringhamRows, type ShiftRow, type TravelRow,
 } from "./rules";
 
 const shift = (o: Partial<ShiftRow> = {}): ShiftRow => ({
@@ -70,7 +70,26 @@ describe("line items and CSVs", () => {
     });
   });
   it("builds travel lines", () => {
-    expect(travelItems([travel()], "04_590", "Travel")[0]).toMatchObject({ ndis_item: "04_590", distance: 12.5, rate: 1 });
+    expect(travelItems([travel()], [], "04_590_0125_6_1")[0]).toMatchObject({
+      ndis_item: "04_590_0125_6_1", ndis_description: "Activity Based Transport", distance: 12.5, rate: 1,
+    });
+  });
+  it("offers only the travel item matching the shifts' 01/04 category", () => {
+    expect(travelItemOptions([{ ndis_item_no: "01_011_0107_1_1" }]).map((o) => o.no)).toEqual(["01_799_0107_1_1"]);
+    expect(travelItemOptions([{ ndis_item_no: "04_104_0125_6_1" }]).map((o) => o.no)).toEqual(["04_590_0125_6_1"]);
+    expect(travelItemOptions([{ ndis_item_no: null }])).toHaveLength(2);
+    expect(travelItemOptions([{ ndis_item_no: "01_011_0107_1_1" }, { ndis_item_no: "04_104_0125_6_1" }])).toHaveLength(2);
+  });
+  it("matches each travel log to its own shift, then same-day shifts, then the invoice", () => {
+    const d1 = new Date("2026-09-18T00:00:00Z"), d2 = new Date("2026-09-19T00:00:00Z");
+    const mixed = [{ ndis_item_no: "01_011_0107_1_1", date: d1 }, { ndis_item_no: "04_104_0125_6_1", date: d2 }];
+    expect(travelItemFor(travel({ date: d1 }), mixed)?.no).toBe("01_799_0107_1_1");
+    expect(travelItemFor(travel({ date: d2 }), mixed)?.no).toBe("04_590_0125_6_1");
+    expect(travelItemFor(travel({ date: d1, shift_item_no: "04_104_0125_6_1" }), mixed)?.no).toBe("04_590_0125_6_1");
+    expect(travelItemFor(travel({ date: new Date("2026-09-25T00:00:00Z") }), mixed)).toBeNull();
+    expect(travelItemFor(travel({ date: new Date("2026-09-25T00:00:00Z") }), [mixed[0]])?.no).toBe("01_799_0107_1_1");
+    const items = travelItems([travel({ date: d1 }), travel({ date: d2 })], mixed, "");
+    expect(items.map((i) => i.ndis_item)).toEqual(["01_799_0107_1_1", "04_590_0125_6_1"]);
   });
   it("uses the invoice number as the NDIA claim reference", () => {
     const r = ndiaCsvRows([shift()], "1201")[0];

@@ -1,6 +1,7 @@
 // End-to-end invoicing against a scratch database seeded through the sync.
 // Runs only when TEST_DATABASE_URL is set. Email is faked; the app makes no other outside calls.
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { travelItemOptions } from "./rules";
 
 const url = process.env.TEST_DATABASE_URL;
 const calls: { url: string; method: string; body: any }[] = [];
@@ -39,7 +40,7 @@ describe.skipIf(!url)("invoicing (scratch database)", () => {
     calls.length = 0;
     const r = await mod.createInvoice({
       kind: "residential", target: ids.LOC1, through: "2026-11-10", invoiceNumber: "1134", invoiceDate: "2026-11-11",
-      paymentTerms: "14 days", sendTo: "care@example.com", travelItemNo: "", travelItemDescription: "",
+      paymentTerms: "14 days", sendTo: "care@example.com", travelItemNo: "",
       expectedShiftIds: shifts.map((s) => s.id), createdBy: ids.ADM,
     });
     expect(r.warnings).toEqual([]);
@@ -60,7 +61,7 @@ describe.skipIf(!url)("invoicing (scratch database)", () => {
   it("refuses a reused number or a stale selection", async () => {
     const base = {
       kind: "ndis" as const, target: ids.P1, through: "2026-11-10", invoiceDate: "2026-11-11", paymentTerms: "7",
-      sendTo: "pm@example.com", travelItemNo: "04_590", travelItemDescription: "Travel", createdBy: null,
+      sendTo: "pm@example.com", travelItemNo: "04_590_0125_6_1", createdBy: null,
     };
     await expect(mod.createInvoice({ ...base, invoiceNumber: "1134", expectedShiftIds: [] })).rejects.toThrow(/already used/);
     await expect(mod.createInvoice({ ...base, invoiceNumber: "1135", expectedShiftIds: [] })).rejects.toThrow(/changed since/);
@@ -71,7 +72,7 @@ describe.skipIf(!url)("invoicing (scratch database)", () => {
     calls.length = 0;
     const r = await mod.createInvoice({
       kind: "ndis", target: ids.P1, through: "2026-11-10", invoiceNumber: "1135", invoiceDate: "2026-11-11", paymentTerms: "7 days",
-      sendTo: "pm@example.com", travelItemNo: "04_590", travelItemDescription: "Travel",
+      sendTo: "pm@example.com", travelItemNo: travelItemOptions(shifts)[0].no,
       expectedShiftIds: shifts.map((s) => s.id), createdBy: null,
     });
     expect(r).toMatchObject({ shifts: 1, travel: 1, amount: 380.4, warnings: [] }); // 5 x 73.58 + 12.5 km

@@ -32,6 +32,7 @@ export type TravelRow = {
   date: Date | null;
   carer_first: string | null;
   distance: number | null;
+  shift_item_no?: string | null; // NDIS item of the shift this travel was logged against
 };
 
 export const GST_RATE = 0.1;
@@ -121,15 +122,52 @@ export function ndisShiftItems(shifts: ShiftRow[]) {
   }));
 }
 
-export function travelItems(logs: TravelRow[], itemNo: string, itemDescription: string) {
-  return logs.map((l) => ({
-    date: lineDate(l.date, true),
-    carer: l.carer_first ?? "",
-    ndis_item: itemNo,
-    ndis_description: itemDescription,
-    distance: num(l.distance),
-    rate: TRAVEL_RATE,
-  }));
+/** The two NDIS items travel can be billed under. */
+export const TRAVEL_ITEMS = [
+  { no: "01_799_0107_1_1", description: "Provider travel - non-labour costs" },
+  { no: "04_590_0125_6_1", description: "Activity Based Transport" },
+] as const;
+
+const category = (itemNo: string | null | undefined) => (itemNo ?? "").trim().slice(0, 2);
+
+type TravelItem = (typeof TRAVEL_ITEMS)[number];
+const itemForCategory = (cat: string) => TRAVEL_ITEMS.find((t) => category(t.no) === cat);
+
+/** Travel items whose category (01 or 04) matches a shift item on the invoice. Both if no shift says. */
+export function travelItemOptions(shifts: Pick<ShiftRow, "ndis_item_no">[]) {
+  const cats = new Set(shifts.map((s) => category(s.ndis_item_no)));
+  const matching = TRAVEL_ITEMS.filter((t) => cats.has(category(t.no)));
+  return matching.length ? matching : [...TRAVEL_ITEMS];
+}
+
+/**
+ * The travel item for one travel log, matched to the shifts' 01/04 category:
+ * the shift it was logged against, else the shifts on the same day, else the
+ * whole invoice. Null when that is still ambiguous (the person then chooses).
+ */
+export function travelItemFor(log: TravelRow, shifts: Pick<ShiftRow, "ndis_item_no" | "date">[]): TravelItem | null {
+  const own = itemForCategory(category(log.shift_item_no));
+  if (own) return own;
+  const day = isoDate(log.date);
+  const sameDay = travelItemOptions(shifts.filter((s) => day && isoDate(s.date) === day));
+  if (sameDay.length === 1 && shifts.some((s) => day && isoDate(s.date) === day)) return sameDay[0];
+  const all = travelItemOptions(shifts);
+  return all.length === 1 ? all[0] : null;
+}
+
+export function travelItems(logs: TravelRow[], shifts: Pick<ShiftRow, "ndis_item_no" | "date">[], fallbackNo: string) {
+  const fallback = TRAVEL_ITEMS.find((t) => t.no === fallbackNo);
+  return logs.map((l) => {
+    const item = travelItemFor(l, shifts) ?? fallback;
+    return {
+      date: lineDate(l.date, true),
+      carer: l.carer_first ?? "",
+      ndis_item: item?.no ?? "",
+      ndis_description: item?.description ?? "",
+      distance: num(l.distance),
+      rate: TRAVEL_RATE,
+    };
+  });
 }
 
 // ---- totals ----------------------------------------------------------------

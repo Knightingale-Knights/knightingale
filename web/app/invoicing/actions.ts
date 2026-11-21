@@ -24,7 +24,6 @@ export async function createInvoiceAction(form: FormData) {
       paymentTerms: str(form, "payment_terms"),
       sendTo: str(form, "send_to"),
       travelItemNo: str(form, "travel_item_no"),
-      travelItemDescription: str(form, "travel_item_description"),
       expectedShiftIds: form.getAll("shift_id").map(String),
       createdBy: staff.id,
     });
