@@ -64,7 +64,7 @@ describe("dates", () => {
 
 describe("calendar", () => {
   it("groups shifts into AM, PM and NS by start time", () => {
-    expect([700, 1159, 1200, 2159, 2200, 0, 659, null].map(periodOf)).toEqual(["am", "am", "pm", "pm", "ns", "ns", "ns", "am"]);
+    expect([500, 600, 1159, 1200, 2159, 2200, 0, 459, null].map(periodOf)).toEqual(["am", "am", "am", "pm", "pm", "ns", "ns", "ns", "am"]);
   });
   it("builds Monday-first month grids", () => {
     expect(monthGrid("2026-11-15")).toEqual(["2026-10-26", "2026-12-07"]);
