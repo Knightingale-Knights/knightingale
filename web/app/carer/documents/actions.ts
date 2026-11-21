@@ -6,8 +6,28 @@ import { DocError, setDetails, uploadDoc } from "@/lib/compliance/data";
 import { docDef, STATUS_LABEL, type AccountDocKey, type DocKey } from "@/lib/compliance/docs";
 import { uploadProfileFile, SignupError } from "@/lib/onboarding/data";
 import { auDate, isoDate } from "@/lib/invoicing/rules";
+import { sql } from "@/lib/db";
+import { env } from "@/lib/env";
+import { sendPlainEmail } from "@/lib/postmark";
 
 export type DocResult = { ok: boolean; message: string };
+
+/** Emails the office when a carer uploads a document, with whether it was accepted. Never holds up the upload. */
+async function tellOffice(carer: string, label: string, outcome: string, detail: string) {
+  if (!env.automationsLive) return;
+  try {
+    const [u] = await sql<{ name: string | null }[]>`select nullif(trim(concat_ws(' ', first_name, last_name)), '') as name from app.users where id = ${carer}`;
+    const name = u?.name ?? "A carer";
+    await sendPlainEmail({
+      to: env.complianceAlertTo,
+      subject: `${name} uploaded ${label}: ${outcome}`,
+      text: `${name} uploaded their ${label}.\n\nResult: ${outcome}\n${detail}\n\nCheck it: https://knightingale.com.au/compliance/${carer}`,
+      attachments: [],
+    });
+  } catch (e) {
+    console.error("upload email failed", e);
+  }
+}
 
 /** Carers upload their own documents; staff can upload for any carer. */
 async function who(carerField: FormDataEntryValue | null) {
@@ -41,11 +61,20 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
     revalidatePath("/carer/account", "layout");
     revalidatePath("/join/[step]", "page");
     const label = docDef(key)?.label ?? "Document";
+    const tell = (outcome: string, detail: string) => (me.role === "admin" ? Promise.resolve() : tellOffice(carer, label, outcome, detail));
     if (r.reading?.reason === "document_type_mismatch") {
+      await tell("Rejected", `Not a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."}`);
       return { ok: false, message: `Saved, but this doesn't look like a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."} The office will check it.` };
     }
-    if (r.status === "expired") return { ok: false, message: `Saved, but this ${label} expired on ${auDate(r.expiry)}. Please upload a current one.` };
-    if (r.expiry) return { ok: true, message: `Thanks, your ${label} is saved. It expires on ${auDate(r.expiry)}.` };
+    if (r.status === "expired") {
+      await tell("Rejected", `It expired on ${auDate(r.expiry)}.`);
+      return { ok: false, message: `Saved, but this ${label} expired on ${auDate(r.expiry)}. Please upload a current one.` };
+    }
+    if (r.expiry) {
+      await tell("Accepted", `Expires ${auDate(r.expiry)}${r.reading?.expirySource === "calculated_from_issue_date" ? " (worked out from the issue date)" : ""}.`);
+      return { ok: true, message: `Thanks, your ${label} is saved. It expires on ${auDate(r.expiry)}.` };
+    }
+    await tell("Needs checking", r.reading ? "The expiry date couldn't be read, so please check it and enter it." : "Please check it.");
     return { ok: true, message: `Thanks, your ${label} is saved. ${r.status === "check" ? STATUS_LABEL.check + "." : ""}`.trim() };
   } catch (e) {
     if (!(e instanceof DocError)) console.error(e);
