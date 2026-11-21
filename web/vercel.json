@@ -18,6 +18,10 @@
     {
       "path": "/api/cron/birthdays",
       "schedule": "55 19,20 * * *"
+    },
+    {
+      "path": "/api/cron/monthly-summaries",
+      "schedule": "*/5 19-23 * * *"
     }
   ]
 }

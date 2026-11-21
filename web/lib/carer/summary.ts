@@ -55,8 +55,9 @@ ${notes.map((n) => `${auDate(n.date)}: ${n.summary}`).join("\n")}`;
   }
 }
 
-/** Drafts the participant's summary from the last months of progress notes. Returns the PDF and the period it covers. */
-export async function buildSummary(participant: string, monthsBack = 1) {
+/** Drafts the participant's summary from the last months of progress notes, or from one calendar month
+ *  (month = "YYYY-MM-01", Melbourne time). Returns the PDF and the period it covers. */
+export async function buildSummary(participant: string, monthsBack = 1, month?: string) {
   const [p] = await sql<{ first: string | null; full: string | null; setting: string | null; support: string | null }[]>`
     select coalesce(nullif(trim(u.first_name), ''), 'Participant') as first, trim(concat_ws(' ', u.first_name, u.last_name)) as full,
            u.current_location->>'address' as setting,
@@ -67,7 +68,10 @@ export async function buildSummary(participant: string, monthsBack = 1) {
   const notes = await sql<Note[]>`
     select coalesce(date, created_at) as date, summary from app.progress_notes
      where participant = ${participant} and nullif(trim(summary), '') is not null
-       and coalesce(date, created_at) > now() - make_interval(months => ${monthsBack})
+       and ${month
+         ? sql`coalesce(date, created_at) >= (${month}::date)::timestamp at time zone 'Australia/Melbourne'
+               and coalesce(date, created_at) < ((${month}::date) + interval '1 month')::timestamp at time zone 'Australia/Melbourne'`
+         : sql`coalesce(date, created_at) > now() - make_interval(months => ${monthsBack})`}
      order by coalesce(date, created_at)`;
   const first = (p.first ?? "Participant").split(/\s+/)[0];
   if (!notes.length) throw new Error(`There are no recent progress notes for ${first} yet, so there's nothing to summarise.`);
