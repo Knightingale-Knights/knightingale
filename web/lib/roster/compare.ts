@@ -1,4 +1,4 @@
-// Sunday 5am: last week's and next week's shifts side by side in a spreadsheet, matched by client, weekday and start
+// Sunday 5am: last week's and next week's NDIS shifts side by side in a spreadsheet, matched by client, weekday and start
 // time, so Paul can see at a glance which shifts repeated, which changed carer and which are new or missing.
 import ExcelJS from "exceljs";
 import { rangeShifts, type RosterShift } from "./queries";
@@ -26,7 +26,7 @@ export async function compareWeeks(nextMonday: string) {
     rangeShifts(lastMonday, nextMonday, {}),
     rangeShifts(nextMonday, addDays(nextMonday, 7), {}),
   ]);
-  const live = (l: RosterShift[]) => l.filter((s) => !s.cancelled);
+  const live = (l: RosterShift[]) => l.filter((s) => !s.cancelled && s.kind === "ndis");
   const key = (s: RosterShift) => `${weekdayOf(s.day)}|${clientOf(s)}|${s.kind}`;
 
   // Pair shifts of the same client on the same weekday, closest start time first.
@@ -86,7 +86,7 @@ export async function compareWorkbook(c: Awaited<ReturnType<typeof compareWeeks>
   const top = ws.addRow(["", `Last week (${label(c.lastMonday)} - ${label(lastEnd)})`, "", "", `Next week (${label(c.nextMonday)} - ${label(nextEnd)})`, "", ""]);
   ws.mergeCells(top.number, 2, top.number, 3);
   ws.mergeCells(top.number, 5, top.number, 6);
-  const head = ws.addRow(["Client", "Time", "Carer", "", "Time", "Carer", "Check"]);
+  const head = ws.addRow(["Participant", "Time", "Carer", "", "Time", "Carer", "Check"]);
   for (const r of [top, head]) {
     r.font = { bold: true, color: { argb: "FFFFFFFF" } };
     r.eachCell((cell, col) => { if (col !== 4) cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF213530" } }; });

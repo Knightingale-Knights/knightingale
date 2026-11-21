@@ -28,7 +28,7 @@ export async function GET(req: Request) {
   const s = summary(c.rows);
   const file = await compareWorkbook(c);
   const lines = [
-    "Last week's and next week's shifts are side by side in the attached spreadsheet, grouped by day.",
+    "Last week's and next week's NDIS shifts are side by side in the attached spreadsheet, grouped by day.",
     "",
     `Same as last week: ${s.same}`,
     `Carer changed: ${s.carer}`,
@@ -43,9 +43,9 @@ export async function GET(req: Request) {
   ];
   await sendPlainEmail({
     to: PAUL,
-    subject: `Shifts: last week vs next week (${s.carer + s.time + s.added + s.gone + s.open} to check)`,
+    subject: `NDIS shifts: last week vs next week (${s.carer + s.time + s.added + s.gone + s.open} to check)`,
     text: lines.join("\n"),
-    attachments: [{ Name: `Shifts week of ${nextMonday}.xlsx`, Content: file.toString("base64"), ContentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }],
+    attachments: [{ Name: `NDIS shifts week of ${nextMonday}.xlsx`, Content: file.toString("base64"), ContentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }],
   });
   return NextResponse.json({ ok: true, rows: c.rows.length, ...s });
 }
