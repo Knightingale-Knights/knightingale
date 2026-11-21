@@ -26,8 +26,7 @@ export async function GET(req: Request) {
     const first = (p.first_name ?? "").trim();
     const full = [first, (p.last_name ?? "").trim()].filter(Boolean).join(" ");
     await sendTemplateEmail(TEMPLATE, TO, {
-      name: full, full_name: full, first_name: first, last_name: (p.last_name ?? "").trim(),
-      email: p.email ?? "", phone: p.phone ?? "", birthday: p.birthday, age: p.age ?? "",
+      name: full, date: p.birthday.slice(0, 5), number: p.phone ?? "",
     });
     sent++;
   }
