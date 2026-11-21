@@ -113,10 +113,10 @@ export function addDays(day: string, n: number) {
 }
 
 export type Period = "am" | "pm" | "ns";
-/** Roster grouping by start time: AM 7:00 to before 12:00, PM 12:00 to before 22:00, NS 22:00 to before 7:00. */
+/** Roster grouping by start time: AM 5:00 to before 12:00, PM 12:00 to before 22:00, NS 22:00 to before 5:00. */
 export function periodOf(start: number | null): Period {
   if (start == null) return "am";
-  if (start >= 700 && start < 1200) return "am";
+  if (start >= 500 && start < 1200) return "am";
   if (start >= 1200 && start < 2200) return "pm";
   return "ns";
 }
