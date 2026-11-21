@@ -111,9 +111,16 @@ export function onShiftDay(s: { day: string; start_at: Date | null; end_at: Date
 
 const melbDayOf = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Melbourne", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
 
-/** Progress notes can only be written on the day of the shift (for an overnight shift, also the day it ends). */
+const nextDay = (day: string) => {
+  const d = new Date(`${day}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+};
+
+/** Progress notes can be written on the day of the shift and the day after (for an overnight shift, the day after it ends). */
 export function noteOpen(s: { day: string; end_at: Date | null }, now = new Date()) {
   const today = melbDayOf(now);
-  return today === s.day || (s.end_at != null && today === melbDayOf(s.end_at));
+  const last = s.end_at != null && melbDayOf(s.end_at) > s.day ? melbDayOf(s.end_at) : s.day;
+  return today >= s.day && today <= nextDay(last);
 }
-export const NOTE_CLOSED = "Progress notes can only be written on the day of the shift.";
+export const NOTE_CLOSED = "Progress notes can only be written on the day of the shift or the day after.";
