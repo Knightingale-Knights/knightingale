@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { availableOn, getShift, rangeShifts, rosterOptions, type RosterFilter, type RosterShift } from "@/lib/roster/queries";
-import { SLOTS, addDays, addMonths, clockLabel, monthGrid, periodOf, weekStart, type Period } from "@/lib/roster/rules";
+import { addDays, addMonths, clockLabel, monthGrid, periodOf, weekStart, type Period } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { fileHref } from "@/lib/files";
@@ -14,7 +14,6 @@ export const dynamic = "force-dynamic";
 type SP = Record<string, string | undefined>;
 const ROLES = [["en", "EN"], ["rn", "RN"], ["pca", "PCA"], ["dsw", "DSW"], ["cleaner", "CL"], ["student_nurse", "Student nurse"]] as const;
 const VIEWS = [["all", "Everyone"], ["participant", "Participant"], ["location", "Location"], ["carer", "Carer"]] as const;
-const SLOT_LABEL = Object.fromEntries(SLOTS.map((s) => [s.value, s.short]));
 const PERIODS: [Period, string][] = [["am", "AM"], ["pm", "PM"], ["ns", "NS"]];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -64,7 +63,7 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
         <Link href={keep({ event: "new", day: newDay })}>+ Create event</Link>
       </TopBar>
 
-      <main className={`page wide ${panel ? "with-panel" : ""} ${mode === "month" ? "roster-month" : ""}`}>
+      <main className={`page wide ${mode === "month" ? "roster-month" : ""}`}>
         <div>
           {sp.msg && <p className="banner ok">{sp.msg}</p>}
           {sp.warn && <p className="banner warn">{sp.warn}</p>}
@@ -128,8 +127,14 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
           )}
         </div>
 
-        {panel === "edit" && sp.edit && <EditPanel id={sp.edit} opts={opts} close={keep({})} mode={mode} date={date} view={view} who={sp.who} />}
       </main>
+
+      {panel === "edit" && sp.edit && (
+        <div className="modal-back">
+          <Link href={keep({})} className="modal-shade" aria-label="Close" />
+          <EditPanel id={sp.edit} opts={opts} close={keep({})} mode={mode} date={date} view={view} who={sp.who} />
+        </div>
+      )}
 
       {popup && (
         <div className="modal-back">
@@ -257,18 +262,19 @@ function Keep({ mode, date, view, who }: { mode: string; date: string; view: str
 }
 
 function ShiftForm({
-  opts, close, mode, date, view, who, kind, day, shift, free, toggle,
+  opts, close, mode, date, view, who, kind, day, shift, free, toggle, children,
 }: Ctx & {
   kind: "ndis" | "residential"; day: string; toggle?: (k: "ndis" | "residential") => string;
   shift?: Awaited<ReturnType<typeof getShift>>;
   free?: Awaited<ReturnType<typeof availableOn>>;
+  children?: React.ReactNode;
 }) {
   const ndis = kind === "ndis";
   const items = ndis ? opts.ndisItems : opts.resPrices;
   const role = shift?.roles?.[0] ?? (ndis ? "dsw" : "en");
   const freeIds = new Set((free ?? []).map((f) => f.carer));
   return (
-    <aside className={toggle ? "panel modal" : "panel"}>
+    <aside className="panel modal">
       <header>
         <h2>{shift ? "Edit shift" : "Create shift"}</h2>
         <Link href={close} aria-label="Close">✕</Link>
@@ -317,8 +323,8 @@ function ShiftForm({
         <div className="pair">
           <label>Start<input name="start" placeholder="09:30" defaultValue={shift ? clockLabel(shift.start_time) : ""} required /></label>
           <label>End<input name="end" placeholder="14:30" defaultValue={shift ? clockLabel(shift.end_time) : ""} required /></label>
-          <label>Hours<input name="hours" inputMode="decimal" placeholder="auto" defaultValue={shift?.hours ?? ""} /></label>
         </div>
+        <label>Hours<input name="hours" inputMode="decimal" placeholder="auto" defaultValue={shift?.hours ?? ""} /></label>
         <label>Carer
           <select name="carer" defaultValue={shift?.carer ?? ""}>
             <option value="">No carer yet</option>
@@ -341,27 +347,19 @@ function ShiftForm({
           <button type="submit">{shift ? "Save changes" : "Create shift"}</button>
         )}
       </form>
-      {free && free.length > 0 && !shift && (
-        <div className="free">
-          <h3>Available on {dayLabel(day)}</h3>
-          <ul>
-            {free.map((f) => <li key={f.carer}>{f.name} <span>{f.slots.map((s) => SLOT_LABEL[s] ?? s).join(", ")}</span></li>)}
-          </ul>
-        </div>
-      )}
+      {children}
     </aside>
   );
 }
 
 async function EditPanel({ id, ...ctx }: Ctx & { id: string }) {
   const shift = await getShift(id);
-  if (!shift) return <aside className="panel"><p className="empty">That shift no longer exists.</p></aside>;
+  if (!shift) return <aside className="panel modal"><p className="empty">That shift no longer exists.</p></aside>;
   const [free, travel, receipts] = await Promise.all([availableOn(shift.day), shiftTravel(id), shiftReceipts(id)]);
   const nextWeek = Array.from({ length: 7 }, (_, i) => addDays(shift.day, i + 1));
   return (
-    <div className="panel-stack">
-      <ShiftForm {...ctx} kind={shift.kind} day={shift.day} shift={shift} free={free} />
-      <aside className="panel slim">
+    <ShiftForm {...ctx} kind={shift.kind} day={shift.day} shift={shift} free={free}>
+      <div className="shift-extras">
         <p className="figures">
           Fee ${Number(shift.fee ?? 0).toFixed(2)} · Wage ${Number(shift.wage ?? 0).toFixed(2)} · Revenue ${Number(shift.revenue ?? 0).toFixed(2)}
         </p>
@@ -417,8 +415,8 @@ async function EditPanel({ id, ...ctx }: Ctx & { id: string }) {
             </div>
           </>
         )}
-      </aside>
-    </div>
+      </div>
+    </ShiftForm>
   );
 }
 

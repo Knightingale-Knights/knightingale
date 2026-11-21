@@ -995,3 +995,5 @@ body:has(.locked-back) { overflow: hidden; }
 .notice-back { z-index: 62; }
 .notice-body { white-space: pre-line; }
 .notice-form { max-width: 720px; margin: 0 0 30px; padding: 20px; border: 1px solid var(--line-2); background: #fff; }
+/* Edit shift: fee, attendance, copy and cancel sit under the form in the same sheet. */
+.shift-extras { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 18px; }
