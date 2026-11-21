@@ -9,6 +9,7 @@ import { auDate, isoDate } from "@/lib/invoicing/rules";
 import { sql } from "@/lib/db";
 import { env } from "@/lib/env";
 import { sendPlainEmail } from "@/lib/postmark";
+import { readDocTitle } from "@/lib/compliance/docTitle";
 
 export type DocResult = { ok: boolean; message: string };
 
@@ -61,7 +62,14 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
     revalidatePath("/carer/account", "layout");
     revalidatePath("/join/[step]", "page");
     const label = docDef(key)?.label ?? "Document";
-    const tell = (outcome: string, detail: string) => (me.role === "admin" ? Promise.resolve() : tellOffice(carer, label, outcome, detail));
+    const bytes = Buffer.from(await file.arrayBuffer());
+    // Certificates and qualifications: name which one in the office email.
+    const named = async () => {
+      if (key !== "certificate" && key !== "qualification") return label;
+      const title = await readDocTitle(bytes, file.type);
+      return title ?? `${label} (${file.name})`;
+    };
+    const tell = async (outcome: string, detail: string) => (me.role === "admin" ? undefined : tellOffice(carer, await named(), outcome, detail));
     if (r.reading?.reason === "document_type_mismatch") {
       await tell("Rejected", `Not a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."}`);
       return { ok: false, message: `Saved, but this doesn't look like a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."} The office will check it.` };
