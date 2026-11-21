@@ -21,13 +21,14 @@ async function admin(path: string, body: unknown) {
   return { ok: res.ok, status: res.status, body: (await res.json().catch(() => ({}))) as Record<string, unknown> };
 }
 
-/** A one-time sign-in token for this email, creating the sign-in account if it's new. */
+/**
+ * A one-time sign-in token for this email. The sign-in account is created already confirmed first:
+ * for a new or unconfirmed account, generate_link hands back a sign-up token that the magic-link
+ * check rejects as expired.
+ */
 async function hashedToken(email: string): Promise<string> {
-  let r = await admin("generate_link", { type: "magiclink", email });
-  if (!r.ok) {
-    await admin("users", { email, email_confirm: true });
-    r = await admin("generate_link", { type: "magiclink", email });
-  }
+  await admin("users", { email, email_confirm: true }); // fails harmlessly when the account exists
+  const r = await admin("generate_link", { type: "magiclink", email });
   const props = (r.body.properties ?? r.body) as { hashed_token?: string };
   if (!r.ok || !props.hashed_token) throw new Error("Couldn't create a sign-in link. Please try again.");
   return props.hashed_token;
