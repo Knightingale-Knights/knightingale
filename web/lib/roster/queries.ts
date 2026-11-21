@@ -12,7 +12,13 @@ export type RosterShift = {
   location: string | null; location_name: string | null; item_name: string | null; notes: string | null;
   requested_by: string | null; // set when a facility booked it
   revenue: number | null; carer_first: string | null; carer_photo: string | null;
+  weekly: boolean; // part of an active weekly series (Klarra's recurring shift generator)
 };
+
+/** True when the shift belongs to a weekly series that's still running. */
+export const weeklySql = sql`exists (
+  select 1 from public.shifts ps join public.recurring_shift_templates t on t.id = ps.recurring_template_id and t.active
+   where ps.bubble_shift_id = coalesce(s.bubble_id, s.id::text))`;
 
 export type RosterFilter = { participant?: string; location?: string; carer?: string };
 
@@ -38,7 +44,7 @@ export async function rangeShifts(from: string, to: string, f: RosterFilter): Pr
              where fu.account_type = 'location'
                and (fu.id = s.created_by or exists (select 1 from app.users_shifts_requested q where q.shifts_id = s.id and q.users_id = fu.id))
              limit 1) as requested_by,
-           s.revenue, nullif(trim(c.first_name), '') as carer_first, c.profile_photo as carer_photo
+           s.revenue, nullif(trim(c.first_name), '') as carer_first, c.profile_photo as carer_photo, ${weeklySql} as weekly
       from app.shifts s
       left join app.users c on c.id = s.carer
       left join app.users p on p.id = s.participant
@@ -66,7 +72,7 @@ export async function getShift(id: string): Promise<ShiftDetail | null> {
            s.location, l.name as location_name, null as item_name, s.notes, null as requested_by,
            nullif(trim(c.first_name), '') as carer_first, c.profile_photo as carer_photo,
            s.ndis_pricing, s.res_pricing, s.rate, s.fee, s.wage, s.revenue, s.supervisor, s.recurring,
-           s.attend_start, s.attend_end, s.bubble_id
+           s.attend_start, s.attend_end, s.bubble_id, ${weeklySql} as weekly
       from app.shifts s
       left join app.users c on c.id = s.carer
       left join app.users p on p.id = s.participant

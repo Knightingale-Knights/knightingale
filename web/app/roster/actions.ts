@@ -9,6 +9,7 @@ import { prepareDelete, pushShifts } from "@/lib/klarra/push";
 import { createEvents, deleteEvent, updateEvent } from "@/lib/roster/events";
 import { deleteShiftInBubble, mirrorAvailability, mirrorEvents, mirrorShifts } from "@/lib/bubble/write";
 import { sql } from "@/lib/db";
+import { setWeekly } from "@/lib/roster/series";
 
 /** Copies a change to Bubble. The change is already saved here, so a Bubble failure becomes a warning. */
 async function toBubble<T>(work: () => Promise<T>, fallback: T): Promise<{ value: T; warn: string[] }> {
@@ -68,6 +69,8 @@ export async function saveShiftAction(f: FormData) {
   await run(f, async () => {
     const since = new Date();
     const r = id ? await updateShift(id, i) : await createShifts(i, staff.id);
+    const weekly = id && f.has("weekly_shown") ? f.get("weekly") === "on" : null;
+    if (id && weekly !== null) await setWeekly(id, weekly);
     const b = await toBubble(async () => {
       const ids = await mirrorShifts(id ? [id] : r.ids);
       await mirrorAvailability(since);
@@ -75,7 +78,7 @@ export async function saveShiftAction(f: FormData) {
     }, id ? [id] : r.ids);
     await pushShifts(b.value);
     return {
-      msg: id ? "Shift saved." : r.ids.length > 1 ? `${r.ids.length} shifts created.` : "Shift created.",
+      msg: id ? (weekly === null ? "Shift saved." : weekly ? "Shift saved. It repeats weekly." : "Shift saved. It no longer repeats.") : r.ids.length > 1 ? `${r.ids.length} shifts created.` : "Shift created.",
       warnings: [...r.warnings, ...b.warn],
       date: i.day,
     };

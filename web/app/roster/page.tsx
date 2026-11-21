@@ -242,6 +242,7 @@ function ShiftRow({ s, events, href, active }: { s: RosterShift; events: DayEven
       <span className="time">
         {clockLabel(s.start_time)}–{clockLabel(s.end_time)}
         {s.cancelled ? " · cancelled" : s.requested_by && !s.carer ? " · requested" : ""}
+        {s.weekly && !s.cancelled ? " · weekly" : ""}
       </span>
       {events.length > 0 && (
         <span className="sevents">{events.map((e) => `${clockLabel(e.time)} ${e.details ?? ""}`).join(" · ")}</span>
@@ -337,6 +338,20 @@ function ShiftForm({
         {!ndis && <label>Supervisor<input name="supervisor" defaultValue={shift?.supervisor ?? ""} /></label>}
         <label>Notes<textarea name="notes" rows={2} defaultValue={shift?.notes ?? ""} /></label>
         {!shift && <label>Repeat weekly until (optional)<input type="date" name="repeat_until" /></label>}
+        {shift && ndis && (
+          <label className="check">
+            <input type="hidden" name="weekly_shown" value="1" />
+            <input type="checkbox" name="weekly" defaultChecked={shift.weekly} />
+            Repeats weekly
+          </label>
+        )}
+        {shift && ndis && (
+          <p className="hint">
+            {shift.weekly
+              ? "Klarra creates this shift again each week. Untick to stop; shifts already created stay. Changes here carry into future weeks."
+              : "Tick to have Klarra create this shift again each week from here."}
+          </p>
+        )}
         {shift?.invoiced ? (
           <p className="banner warn">This shift has been invoiced, so it can&apos;t be changed.</p>
         ) : (
