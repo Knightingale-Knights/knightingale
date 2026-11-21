@@ -182,15 +182,15 @@ export async function rosterProblems(carer: string, day: string, ndis: boolean, 
 
 export type ExpiryAlert = { doc: DocKey; label: string; record: string; carer: string; carer_id: string; email: string | null; first: string | null; expiry: string };
 
-export type AlertKind = "soon" | "expired" | "carer";
+export type AlertKind = "soon" | "expired" | "carer" | "carer_expired";
 
 /** Active carers' latest documents that haven't been emailed about yet: "soon" expire in the next 7 days (office email),
- *  "carer" in the next 14 (the carer's own heads-up), "expired" already have. */
+ *  "carer" in the next 14 (the carer's own heads-up), "expired" and "carer_expired" already have. */
 export async function expiryAlerts(today: string, kind: AlertKind, days = kind === "carer" ? 14 : 7) {
   const found: ExpiryAlert[] = [];
   const end = new Date(`${today}T00:00:00Z`);
   end.setUTCDate(end.getUTCDate() + days);
-  const range = kind === "expired"
+  const range = kind === "expired" || kind === "carer_expired"
     ? sql`x.e < ${fromDay(today)}`
     : sql`x.e >= ${fromDay(today)} and x.e < ${fromDay(end.toISOString().slice(0, 10))}`;
   for (const d of DOCS) {
