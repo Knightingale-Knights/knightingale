@@ -180,20 +180,24 @@ export async function rosterProblems(carer: string, day: string, ndis: boolean, 
   return out;
 }
 
-export type ExpiryAlert = { doc: DocKey; label: string; record: string; carer: string; expiry: string };
+export type ExpiryAlert = { doc: DocKey; label: string; record: string; carer: string; carer_id: string; email: string | null; first: string | null; expiry: string };
 
-/** Active carers' latest documents that haven't been emailed about yet: "soon" expire in the next 7 days, "expired" already have. */
-export async function expiryAlerts(today: string, kind: "soon" | "expired", days = 7) {
+export type AlertKind = "soon" | "expired" | "carer";
+
+/** Active carers' latest documents that haven't been emailed about yet: "soon" expire in the next 7 days (office email),
+ *  "carer" in the next 14 (the carer's own heads-up), "expired" already have. */
+export async function expiryAlerts(today: string, kind: AlertKind, days = kind === "carer" ? 14 : 7) {
   const found: ExpiryAlert[] = [];
   const end = new Date(`${today}T00:00:00Z`);
   end.setUTCDate(end.getUTCDate() + days);
-  const range = kind === "soon"
-    ? sql`x.e >= ${fromDay(today)} and x.e < ${fromDay(end.toISOString().slice(0, 10))}`
-    : sql`x.e < ${fromDay(today)}`;
+  const range = kind === "expired"
+    ? sql`x.e < ${fromDay(today)}`
+    : sql`x.e >= ${fromDay(today)} and x.e < ${fromDay(end.toISOString().slice(0, 10))}`;
   for (const d of DOCS) {
     if (!d.expiryCol) continue;
-    const rows = await sql<{ record: string; carer: string; expiry: string }[]>`
-      select x.id as record, trim(concat_ws(' ', u.first_name, u.last_name)) as carer, ${melb("x.e")} as expiry
+    const rows = await sql<{ record: string; carer: string; carer_id: string; email: string | null; first: string | null; expiry: string }[]>`
+      select x.id as record, trim(concat_ws(' ', u.first_name, u.last_name)) as carer, u.id as carer_id,
+             nullif(trim(u.email), '') as email, nullif(trim(u.first_name), '') as first, ${melb("x.e")} as expiry
         from (select distinct on (t.carer) t.id, t.carer, t.${id(d.expiryCol)} as e from app.${id(d.table)} t order by t.carer, t.created_at desc) x
         join app.users u on u.id = x.carer and u.account_type = 'carer'
          and coalesce(u.active, false) and coalesce(u.account_status, false)
@@ -209,6 +213,6 @@ export async function expiryAlerts(today: string, kind: "soon" | "expired", days
 /** Documents expiring in the next 7 days that haven't been emailed about yet (Bubble's daily expiry email). */
 export const expiringSoon = (today: string, days = 7) => expiryAlerts(today, "soon", days);
 
-export async function markAlerted(items: { doc: string; record: string; expiry: string }[], kind: "soon" | "expired" = "soon") {
+export async function markAlerted(items: { doc: string; record: string; expiry: string }[], kind: AlertKind = "soon") {
   for (const i of items) await sql`insert into app.compliance_alerts (doc, record, expiry, kind) values (${i.doc}, ${i.record}, ${i.expiry}::date, ${kind}) on conflict do nothing`;
 }

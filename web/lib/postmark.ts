@@ -37,9 +37,10 @@ export function sendInvoiceEmail(o: {
   });
 }
 
-export function sendPlainEmail(o: { to: string; subject: string; text: string; attachments: Attachment[] }) {
+export function sendPlainEmail(o: { to: string; subject: string; text: string; attachments: Attachment[]; cc?: string; from?: string }) {
   return post("email", {
-    From: env.fromEmail, To: o.to, Subject: o.subject, TextBody: o.text, Attachments: o.attachments, MessageStream: "outbound",
+    From: o.from ?? env.fromEmail, To: o.to, ...(o.cc ? { Cc: o.cc } : {}), Subject: o.subject, TextBody: o.text,
+    Attachments: o.attachments, MessageStream: "outbound",
   });
 }
 
