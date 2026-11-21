@@ -66,3 +66,14 @@ export async function prepareDelete(id: string) {
   if (!s?.ndis) return async () => {};
   return () => post("/shift-delete", { shift_bubble_id: ext(s.bubble_id, id) });
 }
+
+/** Upcoming NDIS shifts Klarra hasn't heard about (e.g. a push that failed). Sent again by the hourly catch-up. */
+export async function unsentShifts(limit = 50) {
+  const rows = await sql<{ id: string }[]>`
+    select s.id from app.shifts s
+     where s.participant is not null and s.carer is not null and not coalesce(s.cancelled, false)
+       and s.date >= now() - interval '1 day'
+       and not exists (select 1 from public.shifts ps where ps.bubble_shift_id = coalesce(s.bubble_id, s.id::text))
+     order by s.date limit ${limit}`;
+  return rows.map((r) => r.id);
+}

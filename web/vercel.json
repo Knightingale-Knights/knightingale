@@ -22,6 +22,14 @@
     {
       "path": "/api/cron/monthly-summaries",
       "schedule": "*/5 19-23 * * *"
+    },
+    {
+      "path": "/api/cron/week-compare",
+      "schedule": "0 18,19 * * 6"
+    },
+    {
+      "path": "/api/cron/klarra-catchup",
+      "schedule": "7 * * * *"
     }
   ]
 }
