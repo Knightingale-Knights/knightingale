@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SearchSelect } from "@/components/SearchSelect";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { availableOn, getShift, rangeShifts, rosterOptions, type RosterFilter, type RosterShift } from "@/lib/roster/queries";
@@ -291,17 +292,11 @@ function ShiftForm({
         {shift && <input type="hidden" name="id" value={shift.id} />}
         {ndis ? (
           <label>Participant
-            <select name="participant" defaultValue={shift?.participant ?? ""} required>
-              <option value="" disabled>Choose…</option>
-              {opts.participants.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-            </select>
+            <SearchSelect name="participant" options={opts.participants} defaultId={shift?.participant} defaultLabel={shift?.participant_name} placeholder="Search participants…" required />
           </label>
         ) : (
           <label>Location
-            <select name="location" defaultValue={shift?.location ?? ""} required>
-              <option value="" disabled>Choose…</option>
-              {opts.locations.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-            </select>
+            <SearchSelect name="location" options={opts.locations} defaultId={shift?.location} defaultLabel={shift?.location_name} placeholder="Search sites…" required />
           </label>
         )}
         <label>{ndis ? "NDIS item" : "Rate"}
@@ -326,17 +321,14 @@ function ShiftForm({
         </div>
         <label>Hours<input name="hours" inputMode="decimal" placeholder="auto" defaultValue={shift?.hours ?? ""} /></label>
         <label>Carer
-          <select name="carer" defaultValue={shift?.carer ?? ""}>
-            <option value="">No carer yet</option>
-            {free && free.length > 0 && (
-              <optgroup label="Available that day">
-                {opts.carers.filter((c) => freeIds.has(c.id)).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </optgroup>
-            )}
-            <optgroup label={free?.length ? "Everyone else" : "Carers"}>
-              {opts.carers.filter((c) => !freeIds.has(c.id)).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </optgroup>
-          </select>
+          <SearchSelect
+            name="carer"
+            options={[
+              ...opts.carers.filter((c) => freeIds.has(c.id)).map((c) => ({ id: c.id, name: c.name, note: "available" })),
+              ...opts.carers.filter((c) => !freeIds.has(c.id)).map((c) => ({ id: c.id, name: c.name })),
+            ]}
+            defaultId={shift?.carer} defaultLabel={shift?.carer_name} placeholder="Search active carers…" emptyLabel="No carer yet"
+          />
         </label>
         {!ndis && <label>Supervisor<input name="supervisor" defaultValue={shift?.supervisor ?? ""} /></label>}
         <label>Notes<textarea name="notes" rows={2} defaultValue={shift?.notes ?? ""} /></label>

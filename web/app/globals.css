@@ -997,3 +997,13 @@ body:has(.locked-back) { overflow: hidden; }
 .notice-form { max-width: 720px; margin: 0 0 30px; padding: 20px; border: 1px solid var(--line-2); background: #fff; }
 /* Edit shift: fee, attendance, copy and cancel sit under the form in the same sheet. */
 .shift-extras { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 18px; }
+/* Type-to-search picker (participants, sites, carers): matches drop down under the box. */
+.search-select { position: relative; display: flex; flex-direction: column; }
+.search-select input[type="text"] { width: 100%; }
+.search-select-list { position: absolute; top: 100%; left: 0; right: 0; z-index: 30; list-style: none; margin: 0; padding: 0; max-height: 280px; overflow-y: auto; background: var(--paper); border: 1px solid var(--ink); border-top: 0; box-shadow: var(--shadow-sheet); text-transform: none; letter-spacing: 0.02em; }
+.search-select-list li { padding: 11px 14px; font-size: 14px; color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); }
+.search-select-list li:first-child { border-top: 0; }
+.search-select-list li.hi, .search-select-list li:hover { background: var(--desk); }
+.search-select-list li span { color: var(--ink-3); font-size: 12px; }
+.search-select-list li.muted { color: var(--ink-3); }
+.search-select-list li.none { color: var(--ink-3); cursor: default; }

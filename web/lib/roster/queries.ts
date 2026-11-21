@@ -82,7 +82,7 @@ export async function rosterOptions() {
   const [carers, participants, locations, ndisItems, resPrices] = await Promise.all([
     sql<(Option & { roles: string[] | null })[]>`
       select id, trim(concat_ws(' ', first_name, last_name)) as name, roles from app.users
-       where account_type = 'carer' and coalesce(active, false) order by first_name, last_name`,
+       where account_type = 'carer' and coalesce(active, false) and coalesce(account_status, false) order by first_name, last_name`,
     sql<Option[]>`
       select id, trim(concat_ws(' ', first_name, last_name)) as name from app.users
        where account_type = 'participant' and coalesce(active, false) order by first_name, last_name`,
