@@ -37,7 +37,7 @@ export async function listParticipants(): Promise<ParticipantOption[]> {
         select l.* from app.users_locations ul join app.locations l on l.id = ul.locations_id
          where ul.users_id = u.id order by l.name limit 1) l on true
      where u.account_type = 'participant' and coalesce(u.active, false)
-     order by billable desc, name`;
+     order by lower(trim(concat_ws(' ', u.first_name, u.last_name)))`;
 }
 
 const shiftColumns = () => sql`

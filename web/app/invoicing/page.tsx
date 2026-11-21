@@ -8,6 +8,7 @@ import {
   TRAVEL_ITEMS, auDate, clock, feeMismatches, isoDate, lineDate, roleLabel, totals, travelItemFor, travelItemOptions, type InvoiceKind,
 } from "@/lib/invoicing/rules";
 import { TopBar } from "@/components/TopBar";
+import { AutoForm } from "./AutoForm";
 import { createInvoiceAction, sendWintringhamAction, setInvoiceStateAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -74,7 +75,7 @@ async function InvoiceTab({ kind, sp }: { kind: InvoiceKind; sp: SP }) {
             : "Bills the NDIA for a participant's shifts and travel. The claims CSV is attached to the same email."}
       </p>
 
-      <form className="row" method="get">
+      <AutoForm className="row">
         <input type="hidden" name="tab" value={kind} />
         <label className="grow">
           {residential ? "Location" : "Participant"}
@@ -91,8 +92,7 @@ async function InvoiceTab({ kind, sp }: { kind: InvoiceKind; sp: SP }) {
           Bill shifts up to
           <input type="date" name="through" defaultValue={through} required />
         </label>
-        <button type="submit" className="secondary">Show shifts</button>
-      </form>
+      </AutoForm>
 
       {target && <Preview kind={kind} target={target} through={through} options={options} />}
     </section>
