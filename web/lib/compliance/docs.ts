@@ -14,7 +14,7 @@ export type DocDef<K extends string = DocKey | AccountDocKey> = {
   expiryCol: string | null;
   numberCol: string | null;
   numberLabel: string | null;
-  ai: { label: string; fallbackMonths: number | null } | null; // read the expiry from the upload
+  ai: { label: string; fallbackMonths: number | null; fromIssueOnly?: boolean } | null; // read the expiry from the upload (fromIssueOnly: always issue date + fallbackMonths)
   roster: "all" | "ndis" | null; // warn on the roster when this has expired
   hint: string;
 };
@@ -27,7 +27,7 @@ export const DOCS: DocDef<DocKey>[] = [
     expiryCol: "expiry", numberCol: null, numberLabel: null, ai: { label: "First Aid (HLTAID011 Provide First Aid)", fallbackMonths: 36 }, roster: "all",
     hint: "Statement of Attainment for HLTAID011 from a registered training organisation." },
   { key: "police", label: "Police check", table: "police_checks", fileCols: ["image"], uploadCol: "image", uploadIsArray: false,
-    expiryCol: "expiry_date", numberCol: "reference_number", numberLabel: "Reference number", ai: { label: "National Police Check certificate", fallbackMonths: 36 }, roster: "all",
+    expiryCol: null, numberCol: "reference_number", numberLabel: "Reference number", ai: { label: "National Police Check certificate", fallbackMonths: null }, roster: "all",
     hint: "Your National Police Check certificate." },
   { key: "wwcc", label: "Working with Children Check", table: "wwcc_checks", fileCols: ["image"], uploadCol: "image", uploadIsArray: false,
     expiryCol: "expiry", numberCol: "card_number", numberLabel: "Card number", ai: { label: "Working with Children Check card", fallbackMonths: null }, roster: "all",
@@ -36,7 +36,7 @@ export const DOCS: DocDef<DocKey>[] = [
     fileOptional: true, expiryCol: "expiry_date", numberCol: "id_number", numberLabel: "Screening ID", ai: null, roster: "ndis",
     hint: "Your NDIS Worker Screening ID and its expiry date. A picture of your clearance is helpful too." },
   { key: "flu", label: "Flu vaccination", table: "vaccinations", fileCols: ["flu", "influenza[]"], uploadCol: "influenza", uploadIsArray: true,
-    expiryCol: "expiry", numberCol: null, numberLabel: null, ai: { label: "Influenza (flu) vaccination record", fallbackMonths: 12 }, roster: null,
+    expiryCol: "expiry", numberCol: null, numberLabel: null, ai: { label: "Influenza (flu) vaccination record. Report the date the flu vaccine was given (administered) as issue_date. Ignore any vaccine product or batch expiry date", fallbackMonths: 12, fromIssueOnly: true }, roster: null,
     hint: "Your flu vaccination record or immunisation history statement." },
   { key: "id", label: "Photo ID", table: "identity_documents", fileCols: ["passport", "license", "citizenship"], uploadCol: "license", uploadIsArray: false,
     expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null,

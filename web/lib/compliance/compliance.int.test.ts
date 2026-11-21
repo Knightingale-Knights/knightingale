@@ -67,7 +67,7 @@ describe.skipIf(!url)("compliance (scratch database)", () => {
     await c.setDetails(carer, "police", carer, { number: "NPC-123" }, today);
     await c.uploadDoc(carer, "police", png, carer, today, async () => reading({ expiryDate: "2029-01-01" }));
     const police = (await c.carerDocs(carer, today)).find((d) => d.def.key === "police")!;
-    expect(police).toMatchObject({ number: "NPC-123", expiry: "2029-01-01", status: "ok" });
+    expect(police).toMatchObject({ number: "NPC-123", expiry: null, status: "ok" });
   });
 
   it("takes a typed NDIS screening ID and expiry", async () => {

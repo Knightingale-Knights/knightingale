@@ -82,7 +82,8 @@ const empty: ExpiryReading = {
 };
 
 /** Same decisions as the onboarding endpoint, minus the Bubble write. Null when no API key is set. */
-export async function readExpiry(bytes: Buffer, mime: string, documentLabel: string, fallbackMonths: number | null, today: string): Promise<ExpiryReading | null> {
+/** fromIssueOnly: the expiry is always the issue date plus fallbackMonths (flu: 12 months after it was given), never a printed date. */
+export async function readExpiry(bytes: Buffer, mime: string, documentLabel: string, fallbackMonths: number | null, today: string, fromIssueOnly = false): Promise<ExpiryReading | null> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return null;
   const data = bytes.toString("base64");
@@ -105,7 +106,7 @@ export async function readExpiry(bytes: Buffer, mime: string, documentLabel: str
     const j = (await res.json()) as { content?: { type: string; input?: Record<string, any> }[] };
     const input = j.content?.find((b) => b.type === "tool_use")?.input;
     if (!input) return { ...empty, reason: "ai_error" };
-    return decide(input, fallbackMonths, today);
+    return decide(input, fallbackMonths, today, fromIssueOnly);
   } catch (e) {
     console.error("expiry read failed", e);
     return { ...empty, reason: "ai_error" };
@@ -113,10 +114,10 @@ export async function readExpiry(bytes: Buffer, mime: string, documentLabel: str
 }
 
 /** The onboarding endpoint's checks, in plain code (no date maths left to the model). */
-export function decide(input: Record<string, any>, fallbackMonths: number | null, today: string): ExpiryReading {
+export function decide(input: Record<string, any>, fallbackMonths: number | null, today: string, fromIssueOnly = false): ExpiryReading {
   const { is_expected_document_type, mismatch_reason, expiry_date, issue_date, matched_qualification, document_type, confidence } = input;
   const base = { ...empty, documentType: document_type ?? null, issueDate: issue_date ?? null, matchedQualification: matched_qualification ?? null, confidence: confidence ?? null };
-  let trusted: string | null = typeof expiry_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(expiry_date) ? expiry_date : null;
+  let trusted: string | null = !fromIssueOnly && typeof expiry_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(expiry_date) ? expiry_date : null;
   let warning: string | null = null;
   if (trusted && (!matched_qualification || !String(matched_qualification).includes(trusted.slice(0, 4)))) {
     trusted = null;

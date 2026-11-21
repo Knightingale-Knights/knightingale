@@ -66,6 +66,10 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
       await tell("Rejected", `Not a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."}`);
       return { ok: false, message: `Saved, but this doesn't look like a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."} The office will check it.` };
     }
+    if (!docDef(key)?.expiryCol) {
+      await tell("Accepted", r.reading ? "It looks like the right document." : "Please check it.");
+      return { ok: true, message: `Thanks, your ${label} is saved.` };
+    }
     if (r.status === "expired") {
       await tell("Rejected", `It expired on ${auDate(r.expiry)}.`);
       return { ok: false, message: `Saved, but this ${label} expired on ${auDate(r.expiry)}. Please upload a current one.` };
