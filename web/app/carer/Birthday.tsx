@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const COLOURS = ["#E8B4A0", "#C9A86A", "#8E3B2E", "#F2D7C9", "#A7B8A0", "#F6F4F0", "#D9A441"];
-const SPARKS = ["#FFD27A", "#FF9F80", "#FFFFFF", "#9FE0C8", "#F7B6D2", "#FFE9B8"];
+const COLOURS = ["#E08E6D", "#C9A86A", "#8E3B2E", "#D97A9A", "#7FA392", "#5A7FB0", "#D9A441"];
+const SPARKS = ["#E0A020", "#E2654A", "#8E3B2E", "#3F9C86", "#D45C8A", "#4A73B5"];
 type Phase = "confetti" | "title" | "fireworks" | "done";
 
 /**
@@ -79,14 +79,14 @@ export function Birthday({ name, day, preview = false }: { name: string; day: st
         const n = 90;
         for (let i = 0; i < n; i++) {
           const a = (i / n) * Math.PI * 2, s = 2.5 + Math.random() * 4.5;
-          sparks.push({ x: r.x, y: r.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, c: Math.random() < 0.3 ? "#FFF6E8" : r.c });
+          sparks.push({ x: r.x, y: r.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, c: Math.random() < 0.3 ? "#D9A441" : r.c });
         }
         return false;
       });
       sparks = sparks.filter((s) => {
         s.x += s.vx; s.y += s.vy; s.vx *= 0.97; s.vy = s.vy * 0.97 + 0.06; s.life -= 0.011;
-        ctx.globalAlpha = Math.max(0, s.life); ctx.fillStyle = s.c;
-        ctx.beginPath(); ctx.arc(s.x, s.y, 2.6, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = Math.min(1, Math.max(0, s.life * 1.6)); ctx.fillStyle = s.c;
+        ctx.beginPath(); ctx.arc(s.x, s.y, 3, 0, Math.PI * 2); ctx.fill();
         ctx.globalAlpha = 1;
         return s.life > 0;
       });
