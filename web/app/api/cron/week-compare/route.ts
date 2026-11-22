@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { bearerOk } from "@/lib/texts/auth";
 import { isMelbourneHour } from "@/lib/cron/at";
+import { currentStaff } from "@/lib/auth";
 import { sendPlainEmail } from "@/lib/postmark";
 import { addDays } from "@/lib/roster/rules";
 import { compareWeeks, compareWorkbook, summary } from "@/lib/roster/compare";
@@ -14,8 +15,10 @@ const PAUL = "paul@knightingale.com.au";
 
 // Sundays at 5am Melbourne: Paul gets last week's and next week's shifts side by side in a spreadsheet.
 export async function GET(req: Request) {
-  if (!bearerOk(req, env.cronSecret)) return NextResponse.json({ ok: false }, { status: 401 });
-  const forced = new URL(req.url).searchParams.has("now");
+  // The cron, or an admin opening this address while signed in (sends it now, for a test run).
+  const admin = !bearerOk(req, env.cronSecret) && (await currentStaff());
+  if (!bearerOk(req, env.cronSecret) && !admin) return NextResponse.json({ ok: false }, { status: 401 });
+  const forced = Boolean(admin) || new URL(req.url).searchParams.has("now");
   const today = isoDate(new Date());
   const sunday = new Date(`${today}T00:00:00Z`).getUTCDay() === 0;
   if (!forced && (!isMelbourneHour(5) || !sunday)) return NextResponse.json({ ok: true, skipped: "not Sunday 5am Melbourne" });
