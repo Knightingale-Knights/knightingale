@@ -97,13 +97,14 @@ async function releaseSlots(tx: Tx, carer: string | null, day: string) {
        and not (shift = any(${[...kept]}::text[]))`;
 }
 
-async function assertEditable(tx: Tx, id: string) {
+/** Locks the shift for a change. Invoiced shifts can still be edited by staff, but not deleted. */
+async function assertEditable(tx: Tx, id: string, allowInvoiced = true) {
   const [s] = await tx<{ invoiced: boolean; carer: string | null; day: string }[]>`
     select (coalesce(invoiced, false) or exists (select 1 from app.invoice_shifts x where x.shift_id = s.id)) as invoiced,
            carer, ${melbDay("date")} as day
       from app.shifts s where id = ${id} for update`;
   if (!s) throw new Error("That shift no longer exists.");
-  if (s.invoiced) throw new Error("This shift has been invoiced, so it can't be changed. Void the invoice first.");
+  if (s.invoiced && !allowInvoiced) throw new Error("This shift is on an invoice, so it can't be deleted. Void the invoice first.");
   return s;
 }
 
@@ -182,7 +183,7 @@ export async function setCancelled(id: string, cancelled: boolean) {
 export async function deleteShift(id: string) {
   await sql.begin(async (tx) => {
     const t = tx as unknown as Tx;
-    const s = await assertEditable(t, id);
+    const s = await assertEditable(t, id, false);
     const [{ notes }] = await t<{ notes: number }[]>`select count(*)::int as notes from app.progress_notes where shift = ${id}`;
     if (notes) throw new Error("This shift has a progress note, so cancel it instead of deleting it.");
     await t`delete from app.shifts where id = ${id}`;

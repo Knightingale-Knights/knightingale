@@ -91,9 +91,11 @@ describe.skipIf(!url)("roster (scratch database)", () => {
     expect(a).toEqual({ attended: true, s: "2026-11-18 22:00", e: "2026-11-19 06:30" });
   });
 
-  it("refuses to change invoiced shifts or delete ones with progress notes", async () => {
+  it("lets staff change invoiced shifts but not delete them, and refuses to delete ones with progress notes", async () => {
     const [inv] = await sql`select id from app.shifts where bubble_id = 'R5'`; // invoiced in Bubble
-    await expect(m.setCancelled(inv.id, true)).rejects.toThrow(/invoiced/);
+    await m.setCancelled(inv.id, true);
+    await m.setCancelled(inv.id, false);
+    await expect(m.deleteShift(inv.id)).rejects.toThrow(/on an invoice/);
     const [s] = await q.weekShifts("2026-11-16", { participant: ids.P1 });
     await sql`insert into app.progress_notes (shift, summary) values (${s.id}, 'note')`;
     await expect(m.deleteShift(s.id)).rejects.toThrow(/progress note/);

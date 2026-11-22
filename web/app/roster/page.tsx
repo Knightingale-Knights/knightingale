@@ -352,11 +352,8 @@ function ShiftForm({
               : "Tick to have Klarra create this shift again each week from here."}
           </p>
         )}
-        {shift?.invoiced ? (
-          <p className="banner warn">This shift has been invoiced, so it can&apos;t be changed.</p>
-        ) : (
-          <button type="submit">{shift ? "Save changes" : "Create shift"}</button>
-        )}
+        {shift?.invoiced && <p className="hint">This shift is on an invoice. Changes here don&apos;t change an invoice already sent.</p>}
+        <button type="submit">{shift ? "Save changes" : "Create shift"}</button>
       </form>
       {children}
     </aside>
@@ -403,7 +400,7 @@ async function EditPanel({ id, error, eventHref, ...ctx }: Ctx & { id: string; e
             {Number(receipts.total ?? 0) > 0 && <p className="hint">Receipts total ${Number(receipts.total).toFixed(2)}{receipts.oldFiles ? ` (incl. ${receipts.oldFiles} from Bubble)` : ""}</p>}
           </div>
         )}
-        {!shift.invoiced && (
+        {(
           <>
             <form action={attendedAction} className="pair end">
               <Keep {...ctx} />
@@ -430,14 +427,16 @@ async function EditPanel({ id, error, eventHref, ...ctx }: Ctx & { id: string; e
                 <input type="hidden" name="cancel" value={shift.cancelled ? "0" : "1"} />
                 <button className="secondary">{shift.cancelled ? "Restore shift" : "Cancel shift"}</button>
               </form>
-              <details className="confirm">
-                <summary>Delete</summary>
-                <form action={deleteShiftAction}>
-                  <Keep {...ctx} />
-                  <input type="hidden" name="id" value={id} />
-                  <button className="link danger">Confirm delete</button>
-                </form>
-              </details>
+              {!shift.invoiced && (
+                <details className="confirm">
+                  <summary>Delete</summary>
+                  <form action={deleteShiftAction}>
+                    <Keep {...ctx} />
+                    <input type="hidden" name="id" value={id} />
+                    <button className="link danger">Confirm delete</button>
+                  </form>
+                </details>
+              )}
             </div>
           </>
         )}
