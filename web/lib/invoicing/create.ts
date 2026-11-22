@@ -133,13 +133,13 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<CreateIn
       ? await residentialPdf({ ...common, location_name: t.name, line_items: residentialLineItems(created.shifts) })
       : await ndisPdf({
           ...common,
-          participant: firstName(t.name),
+          participant: t.name, // first and last name on the PDF
           ndis_number: t.ndis_number ?? "",
           location_name: locName,
           shift_items: ndisShiftItems(created.shifts),
           travel_items: travelItems(created.travel, created.shifts, input.travelItemNo),
         });
-    const filename = `${input.kind === "residential" ? t.name : firstName(t.name)} - Invoice ${number}.pdf`;
+    const filename = `${t.name} - Invoice ${number}.pdf`;
     await sql`insert into app.invoice_files (invoice_id, filename, pdf) values (${created.id}, ${filename}, ${Buffer.from(pdf, "base64")})`;
 
     // 3. Email it (NDIA also gets the claims CSV).
