@@ -11,6 +11,8 @@ import { shiftFriends, type Friend } from "@/lib/carer/friends";
 import { Portrait } from "@/components/CarerCells";
 import { PendingButton } from "@/components/PendingButton";
 import { ShiftDetails } from "./ShiftDetails";
+import { Birthday } from "./Birthday";
+import { birthdayName } from "@/lib/carer/birthday";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // the support summary takes a while to draft
@@ -28,14 +30,14 @@ function status(s: CarerShift) {
 }
 const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; friends?: string; sent?: string; summary_error?: string; details?: string; tab?: string; note?: string; view?: string; done?: string; saved?: string; error?: string; travel?: string; xerror?: string }> }) {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; friends?: string; sent?: string; summary_error?: string; details?: string; tab?: string; note?: string; view?: string; done?: string; saved?: string; error?: string; travel?: string; xerror?: string; bday?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());
   const day = validDay(sp.date);
   const month = /^\d{4}-\d{2}$/.test(sp.month ?? "") ? sp.month! : (day ?? today).slice(0, 7);
   const [from, to] = monthGrid(`${month}-01`);
-  const [near, shifts] = await Promise.all([myShifts(me.id, today), myShiftsBetween(me.id, day ?? from, day ? addDays(day, 1) : to)]);
+  const [near, shifts, bday] = await Promise.all([myShifts(me.id, today), myShiftsBetween(me.id, day ?? from, day ? addDays(day, 1) : to), birthdayName(me.id)]);
   const now = Date.now();
   const logins = day && sp.logins ? await myLeecareLogins(me.id, sp.logins) : null;
   const friends = day && sp.friends ? await shiftFriends(me.id, sp.friends) : null;
@@ -44,6 +46,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
   return (
     <div className="carer with-side">
       <CarerNav on="shifts" name={me.name} />
+      {(bday || sp.bday === "1") && <Birthday name={bday ?? me.name.split(" ")[0]} day={today} preview={sp.bday === "1"} />}
       {due && (
         <CheckPopup kind={due.kind!} shiftId={due.s.id} title={`${due.s.place ?? "Your shift"}, ${clockLabel(due.s.start_time)} – ${clockLabel(due.s.end_time)}`} detail={due.s.address_text ?? ""} />
       )}
