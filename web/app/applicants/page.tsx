@@ -41,7 +41,7 @@ export default async function Applicants({ searchParams }: { searchParams: Promi
         {sp.approved && <p className="banner ok">Approved.</p>}
         {sp.error && <p className="banner error">{sp.error}</p>}
         <div className="row filters">
-          <NameSearch people={everyone.map((a) => ({ id: a.id, name: a.name || a.email }))} q={q} role={role} />
+          <NameSearch people={everyone.map((a) => ({ id: a.id, name: a.name || a.email, email: a.email ?? "" }))} q={q} role={role} />
           <nav className="role-filter">
             {CARER_ROLES.map(([k, l]) => <Link key={k} href={href(role === k ? null : k)} className={role === k ? "on" : ""}>{l}</Link>)}
           </nav>
