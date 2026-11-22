@@ -132,8 +132,8 @@ async function Preview({
     <>
       <div className="summary">
         <div><span>Shifts</span><strong>{shifts.length}</strong></div>
+        <div><span>Shift total</span><strong>{money(sum.shiftTotal)}</strong></div>
         {!residential && <div><span>Travel</span><strong>{money(sum.travelTotal)}</strong></div>}
-        <div><span>Subtotal</span><strong>{money(sum.subtotal)}</strong></div>
         {residential && <div><span>GST</span><strong>{money(sum.gst)}</strong></div>}
         <div className="total"><span>Total</span><strong>{money(sum.amount)}</strong></div>
       </div>
