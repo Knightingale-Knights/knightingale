@@ -183,7 +183,7 @@ export async function submitApplication(id: string, today: string) {
 
 export type ApplicantRow = { id: string; name: string; email: string; phone: string | null; roles: string[] | null; created_at: Date; submitted: boolean };
 
-/** Applications: submitted and waiting for approval, or still in progress (last 90 days). */
+/** Applications, A to Z: submitted and waiting for approval, or still in progress (last 90 days). */
 export async function applications() {
   return sql<ApplicantRow[]>`
     select id, trim(concat_ws(' ', first_name, last_name)) as name, email, phone_number as phone, roles, created_at,
@@ -191,8 +191,8 @@ export async function applications() {
       from app.users
      where account_type = 'carer' and not coalesce(account_status, false)
        and (active or created_at > now() - interval '90 days')
-     order by coalesce(active, false) desc, created_at desc
-     limit 300`;
+     order by lower(trim(concat_ws(' ', first_name, last_name))), created_at desc
+     limit 2000`;
 }
 
 export async function approve(id: string) {
