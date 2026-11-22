@@ -54,9 +54,8 @@ export class RosterEmailError extends Error {}
 export async function sendWeeklyRoster(participantId: string, weekStart = nextMonday(), to?: string) {
   const r = await weeklyRoster(participantId, weekStart);
   if (!r) throw new RosterEmailError("That participant no longer exists.");
-  // Rosters go to the support coordinator only, never the participant's own email.
-  const recipient = (to || r.participant.coordinatorEmail || "").trim();
-  if (!recipient) throw new RosterEmailError(`${r.participant.name} has no support coordinator email to send the roster to.`);
+  // Rosters go to the support coordinator, never the participant's own email. No coordinator: to the office.
+  const recipient = (to || r.participant.coordinatorEmail || "care@knightingale.com.au").trim();
   const range = weekRangeText(weekStart);
   const shifts = r.shifts.map((s) => ({ ...s, carer: s.carer ?? "TBC", hours: s.hours ?? "" }));
   const who = { name: r.participant.name, ndisNumber: r.participant.ndisNumber };
