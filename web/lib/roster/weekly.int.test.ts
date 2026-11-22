@@ -32,7 +32,7 @@ describe.skipIf(!url)("weekly roster (scratch database)", () => {
     await roster.createShifts({ ...common, day: "2028-03-09", start: "16:00", end: "20:00", carer: null }, null);
     const c = await roster.createShifts({ ...common, day: "2028-03-10", start: "09:00", end: "10:00", carer: ids.U1 }, null);
     await roster.setCancelled(c.ids[0], true);
-    await sql`update app.users set coordinator = ${ids.ADM} where id = ${ids.P1}`;
+    await sql`update app.users set coordinator_2 = ${ids.ADM} where id = ${ids.P1}`;
   });
   afterAll(async () => { await sql?.end(); });
 

@@ -25,7 +25,7 @@ export type WeeklyRoster = {
 export async function weeklyRoster(participantId: string, weekStart: string): Promise<WeeklyRoster | null> {
   const [p] = await sql<{ name: string; ndis_number: string | null; email: string | null; coordinator_email: string | null }[]>`
     select trim(concat_ws(' ', u.first_name, u.last_name)) as name, u.ndis_number, u.email, c.email as coordinator_email
-      from app.users u left join app.users c on c.id = u.coordinator
+      from app.users u left join app.users c on c.id = u.coordinator_2 -- the participant's support coordinator
      where u.id = ${participantId} and u.account_type = 'participant'`;
   if (!p) return null;
   const rows = await sql<{ day: string; start_time: number | null; end_time: number | null; hours: number | null; carer: string | null }[]>`
@@ -54,8 +54,9 @@ export class RosterEmailError extends Error {}
 export async function sendWeeklyRoster(participantId: string, weekStart = nextMonday(), to?: string) {
   const r = await weeklyRoster(participantId, weekStart);
   if (!r) throw new RosterEmailError("That participant no longer exists.");
-  const recipient = (to || r.participant.coordinatorEmail || r.participant.email || "").trim();
-  if (!recipient) throw new RosterEmailError(`${r.participant.name} has no coordinator or email to send the roster to.`);
+  // Rosters go to the support coordinator only, never the participant's own email.
+  const recipient = (to || r.participant.coordinatorEmail || "").trim();
+  if (!recipient) throw new RosterEmailError(`${r.participant.name} has no support coordinator email to send the roster to.`);
   const range = weekRangeText(weekStart);
   const shifts = r.shifts.map((s) => ({ ...s, carer: s.carer ?? "TBC", hours: s.hours ?? "" }));
   const who = { name: r.participant.name, ndisNumber: r.participant.ndisNumber };

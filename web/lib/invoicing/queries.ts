@@ -32,7 +32,7 @@ export async function listParticipants(): Promise<ParticipantOption[]> {
            l.id as location_id, l.name as location_name, l.email as location_email, l.address->>'address' as location_address,
            (select count(*)::int from app.uninvoiced_shifts s where s.participant = u.id and s.date <= now()) as billable
       from app.users u
-      left join app.users c on c.id = u.coordinator
+      left join app.users c on c.id = u.coordinator_2
       left join lateral (
         select l.* from app.users_locations ul join app.locations l on l.id = ul.locations_id
          where ul.users_id = u.id order by l.name limit 1) l on true
