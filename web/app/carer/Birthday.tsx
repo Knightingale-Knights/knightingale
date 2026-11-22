@@ -104,7 +104,6 @@ export function Birthday({ name, day, preview = false }: { name: string; day: st
       <canvas ref={canvas} className="bday-canvas" />
       {phase !== "confetti" && (
         <div className="bday-title">
-          <span className="bday-eyebrow">Knightingale</span>
           <h1>Happy Birthday</h1>
           <p>{name}</p>
         </div>
