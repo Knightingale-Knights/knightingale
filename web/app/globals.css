@@ -37,6 +37,7 @@
 }
 
 * { box-sizing: border-box; }
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; } /* no double-tap zoom */
 body { margin: 0; font-size: 13px; line-height: 1.6; letter-spacing: 0.01em; }
 a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--line-2); }
 a:hover { text-decoration-color: var(--ink); }

@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import { NoZoom } from "@/components/NoZoom";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Suspense } from "react";
 import "./globals.css";
@@ -17,10 +18,13 @@ const serif = localFont({
 
 export const metadata: Metadata = { title: "Knightingale", robots: { index: false } };
 
+// Fixed scale, like a phone app: no pinch zoom, and no zooming in when a form field is tapped.
+export const viewport: Viewport = { width: "device-width", initialScale: 1, maximumScale: 1, userScalable: false };
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-AU" className={serif.variable}>
-      <body>{children}<Suspense fallback={null}><SaveProgress /></Suspense></body>
+      <body>{children}<NoZoom /><Suspense fallback={null}><SaveProgress /></Suspense></body>
     </html>
   );
 }
