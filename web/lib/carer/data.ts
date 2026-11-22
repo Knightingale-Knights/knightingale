@@ -8,8 +8,8 @@ import { fillNoteFields } from "./noteFields";
 type Tx = typeof sql;
 
 // Shift start and end as real times, worked out in Melbourne local time (safe across daylight saving).
-const startAt = () => sql.unsafe(`((s.date at time zone 'Australia/Melbourne') + make_interval(hours => (s.start_time / 100)::int, mins => (s.start_time % 100)::int)) at time zone 'Australia/Melbourne'`);
-const endAt = () => sql.unsafe(`((s.date at time zone 'Australia/Melbourne') + make_interval(days => case when s.end_time <= s.start_time then 1 else 0 end, hours => (s.end_time / 100)::int, mins => (s.end_time % 100)::int)) at time zone 'Australia/Melbourne'`);
+const startAt = () => sql.unsafe(`((s.date at time zone 'Australia/Melbourne') + make_interval(hours => ((s.start_time % 2400) / 100)::int, mins => (s.start_time % 100)::int)) at time zone 'Australia/Melbourne'`);
+const endAt = () => sql.unsafe(`((s.date at time zone 'Australia/Melbourne') + make_interval(days => case when s.end_time <= s.start_time % 2400 then 1 else 0 end, hours => (s.end_time / 100)::int, mins => (s.end_time % 100)::int)) at time zone 'Australia/Melbourne'`);
 
 export type CarerShift = {
   id: string; day: string; start_time: number | null; end_time: number | null; start_at: Date | null; end_at: Date | null;
@@ -129,6 +129,7 @@ export async function setAvailability(carer: { id: string; name: string; phone: 
         insert into app.availability (carer, date, shift, shift_text, available, accepted, role, nurse_name, nurse_phone, weekday, priority, created_by)
         values (${carer.id}, ${fromDay(day)}, ${slot}, ${meta.label}, true, 'pending', ${carer.roles?.[0] ?? null},
                 ${carer.name.split(" ")[0]}, ${carer.phone}, ${weekday}, 0, ${carer.id})`;
+      await t`update app.users set availability_set = true where id = ${carer.id} and not availability_set`;
     } else if (!on && existing.length) {
       await t`delete from app.availability where id = any(${existing.map((e) => e.id)}::uuid[])`;
     }

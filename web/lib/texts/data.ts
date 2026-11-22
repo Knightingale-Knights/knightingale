@@ -8,8 +8,8 @@ import { sendSms, type Sender } from "./sms";
 const MIN = 60_000;
 const HOUR = 60 * MIN;
 
-const startAt = `((s.date at time zone 'Australia/Melbourne') + make_interval(hours => (s.start_time / 100)::int, mins => (s.start_time % 100)::int)) at time zone 'Australia/Melbourne'`;
-const endAt = `((s.date at time zone 'Australia/Melbourne') + make_interval(days => case when s.end_time <= s.start_time then 1 else 0 end, hours => (s.end_time / 100)::int, mins => (s.end_time % 100)::int)) at time zone 'Australia/Melbourne'`;
+const startAt = `((s.date at time zone 'Australia/Melbourne') + make_interval(hours => ((s.start_time % 2400) / 100)::int, mins => (s.start_time % 100)::int)) at time zone 'Australia/Melbourne'`;
+const endAt = `((s.date at time zone 'Australia/Melbourne') + make_interval(days => case when s.end_time <= s.start_time % 2400 then 1 else 0 end, hours => (s.end_time / 100)::int, mins => (s.end_time % 100)::int)) at time zone 'Australia/Melbourne'`;
 
 export type TextShift = {
   id: string; day: string; start_at: Date; end_at: Date; track: Track; carer: string; first_name: string | null; phone: string | null;
