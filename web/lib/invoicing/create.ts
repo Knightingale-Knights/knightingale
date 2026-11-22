@@ -2,7 +2,7 @@ import { sql } from "@/lib/db";
 import { ndisPdf, residentialPdf } from "@/lib/pdf";
 import { sendInvoiceEmail } from "@/lib/postmark";
 import { sendWeeklyRoster } from "@/lib/roster/weekly";
-import { billableShifts, billableTravel } from "./queries";
+import { billableShifts, billableTravel, invoiceShifts } from "./queries";
 import {
   NDIA_HEADERS, auDate, dueDate, ndiaCsvRows, ndisShiftItems, residentialLineItems, toCsv, totals, TRAVEL_ITEMS, travelItemFor, travelItems,
   type InvoiceKind, type TravelRow,
@@ -176,6 +176,49 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<CreateIn
     invoiceId: created.id, amount: created.sum.amount, shifts: created.shifts.length,
     travel: created.travel.length, emailed, warnings,
   };
+}
+
+/**
+ * Emails a saved invoice again, with the PDF kept when it was made (NDIA invoices also
+ * get their claims CSV). For NDIS invoices, next week's roster goes to the coordinator too.
+ */
+export async function resendInvoice(id: string): Promise<{ to: string; warnings: string[] }> {
+  const [inv] = await sql<{ kind: InvoiceKind; invoice_number: string; emailed_to: string | null; participant: string | null; location: string | null; state: string }[]>`
+    select kind, invoice_number, emailed_to, participant, location, state from app.invoices where id = ${id} and created_in_app`;
+  if (!inv) throw new Error("Invoice not found.");
+  if (inv.state === "void") throw new Error("This invoice is void.");
+  if (!inv.emailed_to) throw new Error("This invoice has no email address to send to.");
+  const [file] = await sql<{ filename: string; pdf: Buffer }[]>`
+    select filename, pdf from app.invoice_files where invoice_id = ${id} order by created_at desc limit 1`;
+  if (!file) throw new Error("This invoice has no saved PDF to send.");
+  const [who] = inv.kind === "residential"
+    ? await sql<{ name: string }[]>`select coalesce(name, '') as name from app.locations where id = ${inv.location}`
+    : await sql<{ name: string }[]>`select trim(concat_ws(' ', first_name, last_name)) as name from app.users where id = ${inv.participant}`;
+  const attachments = [{ Name: file.filename, Content: Buffer.from(file.pdf).toString("base64"), ContentType: "application/pdf" }];
+  if (inv.kind === "ndia") {
+    const shifts = await invoiceShifts(id);
+    const csv = toCsv(NDIA_HEADERS, ndiaCsvRows(shifts, inv.invoice_number));
+    attachments.push({ Name: `ndia-claims-${inv.invoice_number}.csv`, Content: Buffer.from(csv, "utf8").toString("base64"), ContentType: "text/csv" });
+  }
+  try {
+    await sendInvoiceEmail({
+      to: inv.emailed_to,
+      participant: inv.kind === "residential" ? who?.name ?? "" : firstName(who?.name ?? ""),
+      locationName: (await locationName(inv.location)) ?? "",
+      invoiceNumber: inv.invoice_number,
+      attachments,
+    });
+  } catch (e) {
+    await sql`update app.invoices set email_error = ${String((e as Error).message ?? e)} where id = ${id}`;
+    throw e;
+  }
+  await sql`update app.invoices set emailed_at = now(), email_error = null where id = ${id}`;
+  const warnings: string[] = [];
+  if (inv.kind === "ndis" && inv.participant) {
+    try { await sendWeeklyRoster(inv.participant); }
+    catch (e) { warnings.push(`The invoice was sent, but next week's roster wasn't: ${String((e as Error).message ?? e)}`); }
+  }
+  return { to: inv.emailed_to, warnings };
 }
 
 async function locationName(id: string | null) {

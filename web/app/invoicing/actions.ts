@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireStaff } from "@/lib/auth";
 import { sql } from "@/lib/db";
-import { createInvoice } from "@/lib/invoicing/create";
+import { createInvoice, resendInvoice } from "@/lib/invoicing/create";
 import { sendWintringhamCsv } from "@/lib/invoicing/wintringham";
 import type { InvoiceKind } from "@/lib/invoicing/rules";
 
@@ -73,4 +73,19 @@ export async function signOutAction() {
   const supabase = await supabaseServer();
   await supabase.auth.signOut();
   redirect("/login");
+}
+
+/** Emails a saved invoice again (for one whose first send failed, or a copy). */
+export async function resendInvoiceAction(form: FormData) {
+  await requireStaff();
+  const id = str(form, "id");
+  let dest: string;
+  try {
+    const r = await resendInvoice(id);
+    dest = back({ tab: "sent", resent: r.to, ...(r.warnings.length ? { warn: r.warnings.join(" ") } : {}) });
+  } catch (e) {
+    dest = back({ tab: "sent", error: `Sending failed: ${String((e as Error).message ?? e)}` });
+  }
+  revalidatePath("/invoicing");
+  redirect(dest);
 }

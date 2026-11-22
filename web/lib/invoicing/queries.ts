@@ -52,6 +52,15 @@ const shiftJoins = () => sql`
   left join app.ndis_price_items p on p.id = s.ndis_pricing
   left join app.locations l on l.id = s.location`;
 
+/** The shifts on a saved invoice. */
+export async function invoiceShifts(invoiceId: string, tx = sql): Promise<ShiftRow[]> {
+  return tx<ShiftRow[]>`
+    select ${shiftColumns()}, false as late
+      from app.invoice_shifts x join app.shifts s on s.id = x.shift_id ${shiftJoins()}
+     where x.invoice_id = ${invoiceId}
+     order by s.date, s.start_time`;
+}
+
 /**
  * Shifts an invoice would bill. Same rules as Bubble's invoicing page (not yet
  * invoiced, dated on or before the cut-off, for this location or participant),

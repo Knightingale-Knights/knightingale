@@ -9,7 +9,7 @@ import {
 } from "@/lib/invoicing/rules";
 import { TopBar } from "@/components/TopBar";
 import { AutoForm } from "./AutoForm";
-import { createInvoiceAction, sendWintringhamAction, setInvoiceStateAction } from "./actions";
+import { createInvoiceAction, resendInvoiceAction, sendWintringhamAction, setInvoiceStateAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +47,7 @@ export default async function Invoicing({ searchParams }: { searchParams: Promis
           </p>
         )}
         {sp.sent && <p className="banner ok">Sent {sp.sent} rows to Wintringham.</p>}
+        {sp.resent && <p className="banner ok">Invoice emailed to {sp.resent}.</p>}
         {sp.warn && <p className="banner warn">{sp.warn}</p>}
         {sp.error && <p className="banner error">{sp.error}</p>}
 
@@ -262,6 +263,16 @@ async function SentTab() {
                 {i.emailed_at ? `Sent to ${i.emailed_to}` : i.email_error ? "Failed" : i.created_in_app ? "Not sent" : ""}
               </td>
               <td className="actions">
+                {i.created_in_app && i.state !== "void" && i.has_pdf && i.emailed_to && (
+                  i.emailed_at ? (
+                    <details className="confirm">
+                      <summary>Send again</summary>
+                      <form action={resendInvoiceAction}><input type="hidden" name="id" value={i.id} /><button className="link">Confirm send to {i.emailed_to}</button></form>
+                    </details>
+                  ) : (
+                    <form action={resendInvoiceAction}><input type="hidden" name="id" value={i.id} /><button className="link">Send now</button></form>
+                  )
+                )}
                 {i.created_in_app && i.state === "issued" && (
                   <>
                     <form action={setInvoiceStateAction}><input type="hidden" name="id" value={i.id} /><input type="hidden" name="state" value="paid" /><button className="link">Mark paid</button></form>
