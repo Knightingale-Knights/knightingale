@@ -25,7 +25,7 @@ export function SearchSelect({
     const found = words.length && !options.some((o) => o.id === id && o.name.toLowerCase() === q)
       ? options.filter((o) => words.every((w) => o.name.toLowerCase().includes(w)))
       : options;
-    return found.slice(0, 12);
+    return found.slice(0, 60); // the list scrolls; 12 hid sites like Ron Conn further down the alphabet
   }, [text, options, id]);
 
   const choose = (o: SearchOption | null) => {
