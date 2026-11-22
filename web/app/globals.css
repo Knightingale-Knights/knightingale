@@ -350,6 +350,8 @@ table.people td { vertical-align: middle; }
 table.people td.pic { width: 56px; }
 table.people .num { text-align: right; white-space: nowrap; }
 .portrait { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 0 0 1px var(--line-2); }
+.compliance .person { display: flex; align-items: center; gap: 10px; }
+.compliance .person .portrait { width: 32px; height: 32px; flex: none; }
 .portrait.blank { display: grid; place-items: center; background: var(--desk); color: var(--ink-2); font-family: var(--serif); font-size: 18px; }
 .period-cell { text-align: center; width: 64px; }
 .period-cell .tick { display: inline-block; min-width: 40px; padding: 3px 8px; border: 1px solid var(--ink); font-size: 10px; letter-spacing: 0.2em; }

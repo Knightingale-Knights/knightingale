@@ -141,12 +141,12 @@ export async function complianceFile(fileId: string, viewer: { id: string; role:
 
 // ---- office views -------------------------------------------------------------
 
-export type CarerRow = { id: string; name: string; phone: string | null; statuses: Record<DocKey, Status>; expiries: Record<DocKey, string | null> };
+export type CarerRow = { id: string; name: string; phone: string | null; photo: string | null; roles: string[] | null; statuses: Record<DocKey, Status>; expiries: Record<DocKey, string | null> };
 
 /** Every active carer with the status of each document. */
 export async function complianceTable(today: string): Promise<CarerRow[]> {
-  const carers = await sql<{ id: string; name: string; phone: string | null }[]>`
-    select id, trim(concat_ws(' ', first_name, last_name)) as name, phone_number as phone
+  const carers = await sql<{ id: string; name: string; phone: string | null; photo: string | null; roles: string[] | null }[]>`
+    select id, trim(concat_ws(' ', first_name, last_name)) as name, phone_number as phone, nullif(profile_photo, '') as photo, roles
       from app.users where account_type = 'carer' and active order by first_name, last_name`;
   const rows = new Map(carers.map((c) => [c.id, { ...c, statuses: {} as Record<DocKey, Status>, expiries: {} as Record<DocKey, string | null> }]));
   for (const d of DOCS) {

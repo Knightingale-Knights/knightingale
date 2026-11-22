@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { CarerTabs } from "@/components/CarerTabs";
+import { Portrait, roleList } from "@/components/CarerCells";
 import { complianceTable } from "@/lib/compliance/data";
 import { DOCS, STATUS_LABEL, type Status } from "@/lib/compliance/docs";
 import { auDate, isoDate } from "@/lib/invoicing/rules";
@@ -40,11 +41,17 @@ export default async function Compliance({ searchParams }: { searchParams: Promi
         </div>
         <div className="table-wrap">
           <table className="grid compliance">
-            <thead><tr><th>Carer</th>{DOCS.map((d) => <th key={d.key}>{d.label}</th>)}</tr></thead>
+            <thead><tr><th>Carer</th><th>Roles</th>{DOCS.map((d) => <th key={d.key}>{d.label}</th>)}</tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
-                  <td><Link href={`/compliance/${r.id}`}>{r.name || "(no name)"}</Link></td>
+                  <td>
+                    <Link href={`/compliance/${r.id}`} className="person">
+                      <Portrait photo={r.photo} name={r.name} generic />
+                      <span>{r.name || "(no name)"}</span>
+                    </Link>
+                  </td>
+                  <td>{roleList(r.roles)}</td>
                   {DOCS.map((d) => (
                     <td key={d.key} className={`cell ${r.statuses[d.key]}`} title={STATUS_LABEL[r.statuses[d.key]]}>
                       {r.statuses[d.key] === "missing" ? "Missing" : r.expiries[d.key] ? auDate(r.expiries[d.key]) : r.statuses[d.key] === "check" ? "Check" : "✓"}
