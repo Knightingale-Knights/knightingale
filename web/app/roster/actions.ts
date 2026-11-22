@@ -5,6 +5,7 @@ import { requireStaff } from "@/lib/auth";
 import { copyShift, createShifts, deleteShift, markAttended, setCancelled, updateShift, type ShiftInput } from "@/lib/roster/mutate";
 import { weekStart } from "@/lib/roster/rules";
 import { sendWeeklyRoster } from "@/lib/roster/weekly";
+import { removeTravelByStaff } from "@/lib/carer/travel";
 import { prepareDelete, pushShifts } from "@/lib/klarra/push";
 import { createEvents, deleteEvent, updateEvent } from "@/lib/roster/events";
 import { deleteShiftInBubble, mirrorAvailability, mirrorEvents, mirrorShifts } from "@/lib/bubble/write";
@@ -166,4 +167,13 @@ export async function sendRosterAction(f: FormData) {
     const r = await sendWeeklyRoster(str(f, "who"), weekStart(str(f, "week")));
     return { msg: `Roster emailed to ${r.to} (${r.shifts} shift${r.shifts === 1 ? "" : "s"}).` };
   }, {});
+}
+
+/** Removes a carer's travel entry from a shift (for mistakes). */
+export async function removeTravelAction(f: FormData) {
+  const id = str(f, "id");
+  await run(f, async () => {
+    await removeTravelByStaff(str(f, "travel"));
+    return { msg: "Travel removed." };
+  }, { edit: id });
 }

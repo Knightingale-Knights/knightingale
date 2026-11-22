@@ -7,7 +7,7 @@ import { addDays, addMonths, clockLabel, monthGrid, periodOf, weekStart, type Pe
 import { isoDate } from "@/lib/invoicing/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { fileHref } from "@/lib/files";
-import { attendedAction, cancelShiftAction, copyShiftAction, deleteEventAction, deleteShiftAction, saveEventAction, saveShiftAction, sendRosterAction } from "./actions";
+import { attendedAction, cancelShiftAction, copyShiftAction, deleteEventAction, deleteShiftAction, removeTravelAction, saveEventAction, saveShiftAction, sendRosterAction } from "./actions";
 import { dayEvents, getEvent, participantDayEvents, type DayEvent, type EventDetail } from "@/lib/roster/events";
 
 export const dynamic = "force-dynamic";
@@ -389,7 +389,20 @@ async function EditPanel({ id, error, eventHref, ...ctx }: Ctx & { id: string; e
         {(travel.length > 0 || receipts.files.length > 0 || Number(receipts.total ?? 0) > 0) && (
           <div className="extras-admin">
             {travel.map((t) => (
-              <p key={t.id} className="hint">Travel {Number(t.km).toFixed(1)} km: {t.from} → {t.to}{t.invoiced ? " (invoiced)" : ""}</p>
+              <div key={t.id} className="row tight">
+                <p className="hint">Travel {Number(t.km).toFixed(1)} km: {t.from} → {t.to}{t.invoiced ? " (invoiced)" : ""}</p>
+                {!t.invoiced && (
+                  <details className="confirm">
+                    <summary>Remove</summary>
+                    <form action={removeTravelAction}>
+                      <Keep {...ctx} />
+                      <input type="hidden" name="id" value={id} />
+                      <input type="hidden" name="travel" value={t.id} />
+                      <button className="link danger">Confirm remove</button>
+                    </form>
+                  </details>
+                )}
+              </div>
             ))}
             {receipts.files.map((r) => (
               <p key={r.id} className="hint">

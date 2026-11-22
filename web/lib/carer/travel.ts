@@ -71,6 +71,16 @@ export async function removeTravel(carer: string, logId: string) {
   await sql`delete from app.shift_logs where id = ${logId}`;
 }
 
+/** Staff remove a carer's travel log entered by mistake. Not once it is on an invoice. */
+export async function removeTravelByStaff(logId: string) {
+  const [l] = await sql<{ invoiced: boolean }[]>`
+    select (coalesce(l.invoiced, false) or exists (select 1 from app.invoice_travel x where x.shift_log_id = l.id)) as invoiced
+      from app.shift_logs l where l.id = ${logId}`;
+  if (!l) throw new TravelError("That travel was already removed.");
+  if (l.invoiced) throw new TravelError("That travel is on an invoice, so it can't be removed. Void the invoice first.");
+  await sql`delete from app.shift_logs where id = ${logId}`;
+}
+
 export type Receipt = { id: string; file_name: string; total: number | null; merchant: string | null; needs_review: boolean; at: Date };
 
 export async function shiftReceipts(shiftId: string) {
