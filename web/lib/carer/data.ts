@@ -138,7 +138,8 @@ export async function setAvailability(carer: { id: string; name: string; phone: 
 // ---- progress notes ---------------------------------------------------------
 
 /** Saves the carer's summary, links it to the shift, then (best effort) sorts it into the note's fields. */
-export async function submitNote(carer: string, id: string, summary: string, extra: { comms?: string; bestDay?: string } = {}) {
+/** Saves a carer's progress note for their NDIS shift. `anyDate` lifts the 2-day window (notes the carer emailed in). */
+export async function submitNote(carer: string, id: string, summary: string, extra: { comms?: string; bestDay?: string; anyDate?: boolean } = {}) {
   const text = summary.trim();
   const comms = (extra.comms ?? "").trim().slice(0, 4000) || "Nothing to report.";
   const bestDay = (extra.bestDay ?? "").trim().slice(0, 4000) || null;
@@ -151,7 +152,7 @@ export async function submitNote(carer: string, id: string, summary: string, ext
     if (s.kind !== "ndis") throw new Error("Progress notes are only needed for NDIS shifts.");
     if (s.cancelled) throw new Error("This shift has been cancelled.");
     if (s.note_submitted) throw new Error("A progress note has already been submitted for this shift.");
-    if (!noteOpen(s)) throw new Error(NOTE_CLOSED);
+    if (!extra.anyDate && !noteOpen(s)) throw new Error(NOTE_CLOSED);
     const [row] = await t<{ id: string }[]>`
       insert into app.progress_notes (carer, participant, coordinator, shift, date, summary, comms, best_day, submit, created_by)
       select ${carer}, s.participant, s.coordinator, s.id, s.date, ${text}, ${comms}, ${bestDay}, true, ${carer} from app.shifts s where s.id = ${id}
