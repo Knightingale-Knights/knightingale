@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireStaff } from "@/lib/auth";
 import { sql } from "@/lib/db";
 
-/** Deactivates or reactivates a carer. Inactive carers can't sign in and drop off the active lists. */
+/** Deactivates or reactivates a carer. Inactive carers can still sign in, but drop off the active lists and their availability is hidden. */
 export async function setCarerActiveAction(form: FormData) {
   await requireStaff();
   const id = String(form.get("id") ?? "");

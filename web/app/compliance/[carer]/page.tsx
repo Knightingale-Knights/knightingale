@@ -36,7 +36,7 @@ export default async function CarerCompliance({ params, searchParams }: { params
         {sp.status === "off" && <p className="banner ok">{u.name} is deactivated.</p>}
         {sp.status === "on" && <p className="banner ok">{u.name} is active again.</p>}
         <div className="row">
-          <p className="hint">{u.active ? "Active carer" : "Inactive: can't sign in and isn't offered shifts."}</p>
+          <p className="hint">{u.active ? "Active carer" : "Inactive: can still sign in, but the availability they mark doesn't show to you."}</p>
           <details className="confirm">
             <summary>{u.active ? "Deactivate" : "Reactivate"}</summary>
             <form action={setCarerActiveAction}>

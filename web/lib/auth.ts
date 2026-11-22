@@ -21,7 +21,8 @@ function roleOf(u: UserRow): Role | null {
   const email = (u.email ?? "").toLowerCase();
   return u.account_type === "admin" || extraAdmins().includes(email)
     ? "admin"
-    : u.account_type === "carer" && u.active ? "carer"
+    // Deactivated (approved but inactive) carers still sign in; their availability is hidden from staff.
+    : u.account_type === "carer" && (u.active || u.account_status) ? "carer"
     : u.account_type === "location" && u.active !== false ? "facility"
     : u.account_type === "carer" && !u.active && !u.account_status ? "applicant"
     : u.account_type === "resident" && u.active !== false ? "coordinator" : null;
