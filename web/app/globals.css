@@ -331,6 +331,9 @@ table.grid td { padding: 10px 8px; border-top: 1px solid var(--line); }
 .side-btn.off:hover { background: transparent; color: var(--ink-4); }
 .side form { margin-top: auto; }
 .side-out { width: 100%; min-height: 40px; }
+.side-feedback { width: 100%; min-height: 0; padding: 0; background: transparent; font-family: inherit; cursor: pointer; }
+.side-feedback:hover { background: var(--ink); color: var(--paper); }
+.popup textarea { width: 100%; box-sizing: border-box; }
 .shell .top { padding: 0 26px; }
 @media (max-width: 900px) {
   .shell { padding-left: 0; }

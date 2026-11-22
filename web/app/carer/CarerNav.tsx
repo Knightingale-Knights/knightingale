@@ -9,6 +9,7 @@ import { isoDate } from "@/lib/invoicing/rules";
 import { ViewAsBar } from "@/components/ViewAsBar";
 import { noticesFor } from "@/lib/notices/data";
 import { NoticePopup } from "./NoticePopup";
+import { FeedbackButton } from "./FeedbackButton";
 import { noticeReadAction } from "./actions";
 import { AccountNag } from "@/components/AccountNag";
 import { accountNag } from "@/lib/account/nag";
@@ -78,6 +79,7 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
               {i.label}{i.badge ? <span className={i.key === "chats" ? "badge dot" : "badge"}>{i.badge}</span> : null}
             </Link>
           ))}
+          {!pending && <FeedbackButton />}
         </nav>
         <form action={signOutAction}><button className="side-out">Logout</button></form>
       </aside>
