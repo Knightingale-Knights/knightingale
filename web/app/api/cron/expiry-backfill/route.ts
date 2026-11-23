@@ -4,7 +4,8 @@ import { sql } from "@/lib/db";
 import { bearerOk } from "@/lib/texts/auth";
 import { ACCOUNT_DOCS, DOCS } from "@/lib/compliance/docs";
 import { readExpiry } from "@/lib/compliance/expiryReader";
-import { copied, fromStorage } from "@/lib/files";
+import { fileBytes } from "@/lib/compliance/fileBytes";
+import { removeDoc } from "@/lib/compliance/data";
 import { melbMidnight } from "@/lib/forms/fields";
 
 export const dynamic = "force-dynamic";
@@ -16,20 +17,6 @@ export const maxDuration = 300;
 // Runs in small batches; each record is noted in app.expiry_backfill so it is only read once.
 const BATCH = 12;
 const OK_MIME = /^(application\/pdf|image\/(png|jpeg|gif|webp))$/;
-
-async function fileBytes(url: string): Promise<{ bytes: Buffer; mime: string } | null> {
-  const own = url.match(/^\/files\/([0-9a-f-]{36})$/i);
-  if (own) {
-    const [f] = await sql<{ bytes: Buffer; mime: string }[]>`select bytes, mime from app.compliance_files where id = ${own[1]}`;
-    return f ? { bytes: Buffer.from(f.bytes), mime: f.mime } : null;
-  }
-  const abs = url.startsWith("//") ? `https:${url}` : url;
-  const c = (await copied(abs)) ?? (await copied(url));
-  const res = c ? await fromStorage(c.path) : await fetch(abs).catch(() => null);
-  if (!res || !res.ok) return null;
-  const mime = (c?.mime ?? res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
-  return { bytes: Buffer.from(await res.arrayBuffer()), mime };
-}
 
 export async function GET(req: Request) {
   if (!bearerOk(req, env.cronSecret)) return NextResponse.json({ ok: false }, { status: 401 });
@@ -64,9 +51,10 @@ export async function GET(req: Request) {
           }
           if (reading?.reason === "document_type_mismatch") {
             result = "not this document";
-            // Wrong CPR / first aid documents are taken off, so the carer is asked to upload the right one (Paul, 23 Nov).
-            if (d.key === "cpr" || d.key === "first_aid") {
-              await sql`insert into ${sql(`app.${d.table}`)} (carer) select carer from ${sql(`app.${d.table}`)} where id = ${r.id}`;
+            // Wrong CPR, first aid, WWCC and car insurance documents are taken off, so the carer is asked to upload the right one (Paul, 23 Nov).
+            if (["cpr", "first_aid", "wwcc", "insurance"].includes(d.key)) {
+              const [c] = await sql<{ carer: string }[]>`select carer from ${sql(`app.${d.table}`)} where id = ${r.id}`;
+              if (c) await removeDoc(c.carer, d.key);
               result = "not this document (removed)";
             }
           }

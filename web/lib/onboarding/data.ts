@@ -52,7 +52,8 @@ export async function progress(id: string, today: string): Promise<Progress> {
   const p = {
     details: Boolean(a?.first_name && a?.last_name && a?.phone && a?.dob && a?.address),
     role: Boolean(a?.roles?.length && q.n > 0),
-    screening: Boolean(docs.find((d) => d.def.key === "ndis_screening")?.expiry),
+    // Done once the clearance is uploaded (its expiry is read from it, or the office checks it) and it hasn't expired.
+    screening: ((s) => Boolean(s && s.files.length && s.status !== "expired"))(docs.find((d) => d.def.key === "ndis_screening")),
     documents: SIGNUP_DOCS.every(has),
     photo: Boolean(a?.photo) && has("id"),
   };
@@ -92,7 +93,7 @@ export async function saveDetails(id: string, i: DetailsInput, today: string) {
   return { firstTime: !before?.first_name };
 }
 
-export type RoleInput = { roles: string[]; skill: string; ahpraNumber: string; ahpraExpiry: string };
+export type RoleInput = { roles: string[]; skill: string; ahpraNumber: string };
 
 /** Role and qualification, as Bubble's QualificationsNextButton: student nurses can also work as PCA and DSW. */
 export async function saveRole(id: string, i: RoleInput, today: string) {
@@ -103,27 +104,20 @@ export async function saveRole(id: string, i: RoleInput, today: string) {
   const nurse = roles.includes("en") || roles.includes("rn");
   const ahpra = i.ahpraNumber.trim().toUpperCase().slice(0, 30);
   if (nurse && !/^NMW\d{10}$/.test(ahpra)) throw new SignupError("Enter your AHPRA registration number, like NMW0001234567.");
-  if (nurse && (!/^\d{4}-\d{2}-\d{2}$/.test(i.ahpraExpiry) || i.ahpraExpiry < today)) throw new SignupError("Enter your AHPRA registration expiry date.");
   const skill = SKILLS.find(([k]) => k === i.skill)?.[0] ?? null;
   // PCA and DSW qualifications don't expire; Bubble set them 10 years out.
-  const expiry = nurse ? i.ahpraExpiry : roles.some((r) => r === "pca" || r === "dsw") ? addDays(today, 3652) : null;
+  // A nurse's AHPRA expiry is read from their uploaded registration, never typed in: keep whatever is on file.
   await sql.begin(async (txx) => {
     const tx = txx as unknown as Tx;
     await tx`update app.users set roles = ${roles}::text[] where id = ${id}`;
-    const [q] = await tx<{ id: string; transcript: string[] | null; ahpra: string[] | null }[]>`
-      select id, transcript, ahpra from app.qualifications where carer = ${id} order by created_at desc limit 1`;
+    const [q] = await tx<{ id: string; transcript: string[] | null; ahpra: string[] | null; expiry: Date | null }[]>`
+      select id, transcript, ahpra, expiry from app.qualifications where carer = ${id} order by created_at desc limit 1`;
     await tx`
       insert into app.qualifications (carer, role, qualifications, registration_number, expiry, transcript, ahpra, created_by)
-      values (${id}, ${roles}::text[], ${skill ? [skill] : []}::text[], ${nurse ? ahpra : null}, ${expiry ? fromDay(expiry) : null},
+      values (${id}, ${roles}::text[], ${skill ? [skill] : []}::text[], ${nurse ? ahpra : null}, ${nurse ? (q?.expiry ?? null) : roles.some((r) => r === "pca" || r === "dsw") ? fromDay(addDays(today, 3652)) : null},
               ${q?.transcript ?? null}, ${q?.ahpra ?? null}, ${id})`;
   });
   return roles;
-}
-
-export async function saveScreening(id: string, number: string, expiry: string, today: string) {
-  if (number.trim().length < 4) throw new SignupError("Enter your NDIS Worker Screening ID.");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(expiry) || expiry < today) throw new SignupError("Enter your NDIS screening expiry date.");
-  await setDetails(id, "ndis_screening", id, { number, expiry }, today);
 }
 
 export type ProfileFile = "photo" | "resume" | "ndis_induction";

@@ -49,16 +49,16 @@ describe.skipIf(!url)("carer sign-up (scratch database)", () => {
   });
 
   it("saves the role: student nurses also get PCA and DSW, nurses need AHPRA", async () => {
-    await expect(o.saveRole(id, { roles: ["en"], skill: "en_degree", ahpraNumber: "123", ahpraExpiry: "2027-05-31" }, today)).rejects.toThrow("AHPRA");
-    expect(await o.saveRole(id, { roles: ["student_nurse"], skill: "student_nurse", ahpraNumber: "", ahpraExpiry: "" }, today)).toEqual(["student_nurse", "pca", "dsw"]);
-    await o.saveRole(id, { roles: ["en", "bogus"], skill: "en_degree", ahpraNumber: "nmw0001234567", ahpraExpiry: "2027-05-31" }, today);
+    await expect(o.saveRole(id, { roles: ["en"], skill: "en_degree", ahpraNumber: "123" }, today)).rejects.toThrow("AHPRA");
+    expect(await o.saveRole(id, { roles: ["student_nurse"], skill: "student_nurse", ahpraNumber: "" }, today)).toEqual(["student_nurse", "pca", "dsw"]);
+    await o.saveRole(id, { roles: ["en", "bogus"], skill: "en_degree", ahpraNumber: "nmw0001234567" }, today);
     const [q] = await sql`select role, qualifications, registration_number from app.qualifications where carer = ${id} order by created_at desc limit 1`;
     expect(q).toEqual({ role: ["en"], qualifications: ["en_degree"], registration_number: "NMW0001234567" });
   });
 
   it("can't be submitted until NDIS screening, a photo and CPR are in", async () => {
     await expect(o.submitApplication(id, today)).rejects.toThrow(/NDIS worker screening.*CPR.*profile photo/);
-    await o.saveScreening(id, "4-1234567", "2030-01-01", today);
+    await c.uploadDoc(id, "ndis_screening", png, id, today, async () => null);
     await o.uploadProfileFile(id, "photo", png);
     await expect(o.uploadProfileFile(id, "photo", { ...png, type: "application/pdf" })).rejects.toThrow("photo");
     await c.uploadDoc(id, "cpr", png, id, today, async () => null);

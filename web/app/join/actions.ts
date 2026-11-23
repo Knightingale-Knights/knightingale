@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireApplicant } from "@/lib/auth";
-import { saveDetails, saveRole, saveScreening, sendWelcome, SignupError, submitApplication, uploadProfileFile, type ProfileFile } from "@/lib/onboarding/data";
+import { saveDetails, saveRole, sendWelcome, SignupError, submitApplication, uploadProfileFile, type ProfileFile } from "@/lib/onboarding/data";
 import { isoDate } from "@/lib/invoicing/rules";
 
 const s = (f: FormData, k: string) => String(f.get(k) ?? "");
@@ -26,18 +26,8 @@ export async function roleAction(f: FormData) {
   const me = await requireApplicant();
   let dest = "/join/role?saved=1";
   try {
-    await saveRole(me.id, { roles: f.getAll("roles").map(String), skill: s(f, "skill"), ahpraNumber: s(f, "ahpra"), ahpraExpiry: s(f, "ahpra_expiry") }, isoDate(new Date()));
+    await saveRole(me.id, { roles: f.getAll("roles").map(String), skill: s(f, "skill"), ahpraNumber: s(f, "ahpra") }, isoDate(new Date()));
   } catch (e) { dest = fail("role", e); }
-  revalidatePath("/join/[step]", "page");
-  redirect(dest);
-}
-
-export async function screeningAction(f: FormData) {
-  const me = await requireApplicant();
-  let dest = "/join/documents";
-  try {
-    await saveScreening(me.id, s(f, "number"), s(f, "expiry"), isoDate(new Date()));
-  } catch (e) { dest = fail("screening", e); }
   revalidatePath("/join/[step]", "page");
   redirect(dest);
 }

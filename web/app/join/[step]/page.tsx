@@ -10,7 +10,7 @@ import { signOutAction } from "@/app/invoicing/actions";
 import { AddressInput } from "@/app/carer/extras";
 import { DocList } from "@/app/carer/documents/DocList";
 import { DocUpload } from "@/app/carer/documents/DocUpload";
-import { detailsAction, roleAction, screeningAction, submitAction } from "../actions";
+import { detailsAction, roleAction, submitAction } from "../actions";
 import { ProfileUpload } from "../ProfileUpload";
 
 export const dynamic = "force-dynamic";
@@ -87,10 +87,8 @@ export default async function JoinStep({ params, searchParams }: { params: Promi
                 </select>
               </label>
               <p className="hint">Nurses (EN or RN): add your AHPRA registration.</p>
-              <div className="row tight">
-                <label>AHPRA number<input name="ahpra" defaultValue={qual.number ?? ""} placeholder="NMW0001234567" /></label>
-                <label>AHPRA expiry<input name="ahpra_expiry" type="date" defaultValue={qual.expiry ?? ""} /></label>
-              </div>
+              <label>AHPRA number<input name="ahpra" defaultValue={qual.number ?? ""} placeholder="NMW0001234567" /></label>
+              <p className="hint">Upload your AHPRA registration below and we&apos;ll read its expiry date.</p>
               <button type="submit" className="big">Save role</button>
               {sp.saved && <p className="banner ok">Saved. Add your documents below, then continue.</p>}
             </form>
@@ -106,12 +104,11 @@ export default async function JoinStep({ params, searchParams }: { params: Promi
         )}
 
         {step === "screening" && (
-          <form action={screeningAction} className="stack block">
-            <p className="hint">You need NDIS worker screening to work with NDIS participants. You can find your ID and expiry in your NDIS worker screening clearance email.</p>
-            <label>NDIS Worker Screening ID<input name="number" defaultValue={screening.number ?? ""} required maxLength={60} /></label>
-            <label>Expiry date<input name="expiry" type="date" defaultValue={screening.expiry ?? ""} required min={today} /></label>
-            <button type="submit" className="big">Save and continue</button>
-          </form>
+          <>
+            <p className="hint">You need NDIS worker screening to work with NDIS participants. Upload your clearance (a screenshot or PDF of the clearance email or letter is fine) and we&apos;ll read your ID and expiry date from it.</p>
+            <DocList docs={[screening]} back="/join/screening" />
+            {done.screening && <Link className="big button" href="/join/documents">Continue</Link>}
+          </>
         )}
 
         {step === "documents" && (

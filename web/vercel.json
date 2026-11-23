@@ -36,6 +36,10 @@
       "schedule": "30 14 * * *"
     },
     {
+      "path": "/api/cron/doc-recheck",
+      "schedule": "2-59/5 * * * *"
+    },
+    {
       "path": "/api/cron/expiry-backfill",
       "schedule": "*/5 * * * *"
     }

@@ -23,13 +23,13 @@ export function DocList({ docs, carer, admin, back }: { docs: DocState[]; carer?
               ))}
             </p>
           )}
-          {(def.numberCol || (def.expiryCol && (!def.uploadCol || !def.ai || admin))) && (
+          {(def.numberCol || (def.expiryCol && admin)) && (
             <form action={detailsAction} className="pair end">
               {carer && <input type="hidden" name="carer" value={carer} />}
               <input type="hidden" name="doc" value={def.key} />
               {back && <input type="hidden" name="back" value={back} />}
               {def.numberCol && <label>{def.numberLabel}<input name="number" defaultValue={number ?? ""} maxLength={60} /></label>}
-              {def.expiryCol && (!def.uploadCol || !def.ai || admin) && <label>Expiry<input type="date" name="expiry" defaultValue={expiry ?? ""} /></label>}
+              {def.expiryCol && admin && <label>Expiry<input type="date" name="expiry" defaultValue={expiry ?? ""} /></label>}
               <button className="secondary">Save</button>
             </form>
           )}
@@ -40,7 +40,7 @@ export function DocList({ docs, carer, admin, back }: { docs: DocState[]; carer?
               <form action={removeDocAction}>
                 <input type="hidden" name="carer" value={carer} />
                 <input type="hidden" name="doc" value={def.key} />
-                <p className="hint">This shows as Missing and they&apos;ll be asked to upload it again.</p>
+                <p className="hint">The file is deleted for good. This shows as Missing and they&apos;ll be asked to upload it again.</p>
                 <button className="link danger">Confirm remove {def.label}</button>
               </form>
             </details>

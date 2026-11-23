@@ -117,7 +117,7 @@ export async function removeDocAction(f: FormData) {
   const key = String(f.get("doc") ?? "") as DocKey | AccountDocKey;
   let dest = `/compliance/${carer}?removed=${encodeURIComponent(docDef(key)?.label ?? "Document")}#${key}`;
   try {
-    await removeDoc(carer, key, me.id);
+    await removeDoc(carer, key);
   } catch (e) {
     if (!(e instanceof DocError)) console.error(e);
     dest = `/compliance/${carer}?error=${encodeURIComponent(e instanceof DocError ? e.message : "Something went wrong. Please try again.")}`;
@@ -136,9 +136,8 @@ export async function detailsAction(f: FormData) {
   try {
     const v: { number?: string; expiry?: string } = {};
     if (f.has("number")) v.number = String(f.get("number") ?? "");
-    // Carers can type the expiry only for documents with no file to read it from; staff can always correct it.
-    const d = docDef(key);
-    if (f.has("expiry") && (me.role === "admin" || (d && (!d.uploadCol || !d.ai)))) v.expiry = String(f.get("expiry") ?? "");
+    // Expiry dates are read from the uploaded document. Only the office can type or correct one.
+    if (f.has("expiry") && me.role === "admin") v.expiry = String(f.get("expiry") ?? "");
     await setDetails(carer, key, me.id, v, isoDate(new Date()));
   } catch (e) {
     if (!(e instanceof DocError)) console.error(e);

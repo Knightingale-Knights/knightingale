@@ -54,7 +54,7 @@ describe.skipIf(!url)("compliance (scratch database)", () => {
     expect(r).toMatchObject({ status: "check", expiry: null });
     r = await c.uploadDoc(carer, "first_aid", png, carer, today, async () => reading({ success: false, needsReview: true, reason: "expired", expiryDate: "2026-10-01" }));
     expect(r).toMatchObject({ status: "expired", expiry: "2026-10-01" });
-    await expect(c.uploadDoc(carer, "ndis_screening", png, carer, today)).rejects.toThrow("can't be uploaded");
+    await expect(c.uploadDoc(carer, "resume", png, carer, today)).rejects.toThrow("can't be uploaded");
     await expect(c.uploadDoc(carer, "cpr", { ...png, type: "text/html" }, carer, today)).rejects.toThrow("photo or a PDF");
   });
 

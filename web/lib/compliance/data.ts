@@ -111,20 +111,36 @@ export async function uploadDoc(
 
 const dayValue = async (tx: Tx, day: string) => (await tx<{ v: Date }[]>`select ${fromDay(day)} as v`)[0].v;
 
-/** Office only: takes a wrong document off the carer, so it shows as Missing and they're asked to upload it again.
- *  The old record stays in the history (a new, empty record is added on top). */
-export async function removeDoc(carer: string, key: DocKey | AccountDocKey, by: string) {
+/** Takes a wrong document off the carer for good, so it shows as Missing and they're asked to upload it again.
+ *  The file is wiped from every record in the history (and deleted, if it was uploaded to the new app). */
+/** `only`: remove just these files (e.g. one wrong certificate among several), leaving the expiry and number. */
+export async function removeDoc(carer: string, key: DocKey | AccountDocKey, only?: string[]) {
   const d = docDef(key);
   if (!d || !d.uploadCol || d.table === "users") throw new DocError("That document can't be removed.");
   await sql.begin(async (txx) => {
     const tx = txx as unknown as Tx;
     const prev = await current(d, carer, tx);
-    if (!prev.has_record) return;
-    const set: Record<string, unknown> = {};
-    for (const c of d.fileCols) set[c.replace("[]", "")] = null;
-    if (d.expiryCol) set[d.expiryCol] = null;
-    if (d.numberCol) set[d.numberCol] = null;
-    await newRecord(tx, d, carer, by, prev, set);
+    if (!prev.record) return;
+    const links = only ? prev.files.filter((f) => only.includes(f)) : prev.files;
+    if (only && !links.length) return;
+    const t = `app.${d.table}`;
+    if (links.length) {
+      for (const c of d.fileCols) {
+        const col = c.replace("[]", "");
+        if (c.endsWith("[]")) {
+          await tx`update ${sql(t)} set ${sql(col)} = nullif(array(select x from unnest(${sql(col)}) x where x <> all(${links}::text[])), '{}')
+                    where carer = ${carer} and ${sql(col)} && ${links}::text[]`;
+        } else {
+          await tx`update ${sql(t)} set ${sql(col)} = null where carer = ${carer} and ${sql(col)} = any(${links}::text[])`;
+        }
+      }
+      const own = links.map((l) => l.match(/^\/files\/([0-9a-f-]{36})$/i)?.[1]).filter(Boolean) as string[];
+      if (own.length) await tx`delete from app.compliance_files where id = any(${own}::uuid[]) and carer = ${carer}`;
+    }
+    const clear: Record<string, null> = {};
+    if (d.expiryCol) clear[d.expiryCol] = null;
+    if (d.numberCol) clear[d.numberCol] = null;
+    if (!only && Object.keys(clear).length) await tx`update ${sql(t)} set ${sql(clear)}, updated_at = now() where id = ${prev.record}`;
   });
 }
 
