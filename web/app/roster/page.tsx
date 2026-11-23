@@ -432,7 +432,7 @@ async function EditPanel({ id, error, eventHref, noteHref, ...ctx }: Ctx & { id:
             ))}
           </div>
         )}
-        {shift.kind === "ndis" && <Link href={noteHref} className="button secondary">Create prog note</Link>}
+        {shift.kind === "ndis" && <Link href={noteHref} className="button secondary note-btn">Create prog note</Link>}
         <p className="figures">
           Fee ${Number(shift.fee ?? 0).toFixed(2)} · Wage ${Number(shift.wage ?? 0).toFixed(2)} · Revenue ${Number(shift.revenue ?? 0).toFixed(2)}
         </p>

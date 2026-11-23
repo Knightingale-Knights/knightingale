@@ -1042,3 +1042,5 @@ a.erow:hover { background: var(--desk); }
 .location-help li p { margin: 0 0 8px; font-size: 14px; text-transform: none; letter-spacing: normal; }
 .location-help img { display: block; width: 100%; max-width: 260px; height: auto; border: 1px solid var(--line); border-radius: 10px; }
 .popup .location-help { max-height: 45vh; overflow-y: auto; }
+
+.note-btn { display: inline-grid; place-items: center; text-align: center; text-decoration: none; }
