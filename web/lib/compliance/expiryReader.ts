@@ -26,7 +26,7 @@ const TOOL = {
                 },
                 issue_date: {
                   type: ['string', 'null'],
-                  description: 'The issue/completion/attainment date in YYYY-MM-DD format, ONLY if explicitly printed on the document (e.g. "Issue Date: 28 September 2023"). Null if not printed. Report this even when expiry_date is also found.',
+                  description: 'The issue/completion/attainment/award date in YYYY-MM-DD format, as printed on the document (e.g. "Issue Date: 28 September 2023", "Date of attainment", "Completed on", or the date printed with the issuer\'s signature). If the document shows only one date and it is not an expiry date, that is the issue date. Null only if no such date is printed. Report this even when expiry_date is also found.',
                 },
                 matched_qualification: {
                   type: 'string',
@@ -96,7 +96,7 @@ export async function readExpiry(bytes: Buffer, mime: string, documentLabel: str
       headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
         model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-5-5",
-        max_tokens: 300,
+        max_tokens: 1200, // room for the quoted line and every field; 300 cut readings short
         tools: [TOOL],
         tool_choice: { type: "tool", name: "record_expiry_date" },
         messages: [{ role: "user", content: [docBlock, { type: "text", text: promptFor(documentLabel) }] }],
