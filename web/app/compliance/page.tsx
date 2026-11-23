@@ -41,7 +41,7 @@ export default async function Compliance({ searchParams }: { searchParams: Promi
         </div>
         <div className="table-wrap">
           <table className="grid compliance">
-            <thead><tr><th>Carer</th><th>Roles</th>{DOCS.map((d) => <th key={d.key}>{d.label}</th>)}</tr></thead>
+            <thead><tr><th>Carer</th><th>Roles</th>{DOCS.map((d) => <th key={d.key}>{d.label}</th>)}<th title="DSWs only">Insurance</th></tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
@@ -57,6 +57,11 @@ export default async function Compliance({ searchParams }: { searchParams: Promi
                       {r.statuses[d.key] === "missing" ? "Missing" : r.expiries[d.key] ? auDate(r.expiries[d.key]) : r.statuses[d.key] === "check" ? "Check" : "✓"}
                     </td>
                   ))}
+                  {r.insurance ? (
+                    <td className={`cell ${r.insurance.status === "none" ? "ok" : r.insurance.status}`} title={r.insurance.status === "none" ? "Said they have no insurance" : STATUS_LABEL[r.insurance.status]}>
+                      {r.insurance.status === "none" ? "None" : r.insurance.status === "missing" ? "Missing" : r.insurance.expiry ? auDate(r.insurance.expiry) : r.insurance.status === "check" ? "Check" : "✓"}
+                    </td>
+                  ) : <td className="cell na">–</td>}
                 </tr>
               ))}
             </tbody>

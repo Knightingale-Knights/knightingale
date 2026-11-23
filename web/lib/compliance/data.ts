@@ -141,14 +141,19 @@ export async function complianceFile(fileId: string, viewer: { id: string; role:
 
 // ---- office views -------------------------------------------------------------
 
-export type CarerRow = { id: string; name: string; phone: string | null; photo: string | null; roles: string[] | null; statuses: Record<DocKey, Status>; expiries: Record<DocKey, string | null> };
+export type CarerRow = {
+  id: string; name: string; phone: string | null; photo: string | null; roles: string[] | null;
+  statuses: Record<DocKey, Status>; expiries: Record<DocKey, string | null>;
+  /** DSWs only (they may drive participants): null for everyone else; "none" when they said they have no insurance. */
+  insurance: { status: Status | "none"; expiry: string | null } | null;
+};
 
 /** Every active carer with the status of each document. */
 export async function complianceTable(today: string): Promise<CarerRow[]> {
   const carers = await sql<{ id: string; name: string; phone: string | null; photo: string | null; roles: string[] | null }[]>`
     select id, trim(concat_ws(' ', first_name, last_name)) as name, phone_number as phone, nullif(profile_photo, '') as photo, roles
       from app.users where account_type = 'carer' and active order by first_name, last_name`;
-  const rows = new Map(carers.map((c) => [c.id, { ...c, statuses: {} as Record<DocKey, Status>, expiries: {} as Record<DocKey, string | null> }]));
+  const rows = new Map(carers.map((c) => [c.id, { ...c, statuses: {} as Record<DocKey, Status>, expiries: {} as Record<DocKey, string | null>, insurance: null as CarerRow["insurance"] }]));
   for (const d of DOCS) {
     const fileTest = d.fileCols.length
       ? sql.unsafe(d.fileCols.map((c) => c.replace("[]", "")).map((c) => `(t.${c} is not null and t.${c}::text not in ('', '{}'))`).join(" or "))
@@ -165,6 +170,24 @@ export async function complianceTable(today: string): Promise<CarerRow[]> {
       row.statuses[d.key] = statusOf(d, r ? { ...r, has_record: true } : undefined, today);
       row.expiries[d.key] = r?.expiry ?? null;
     }
+  }
+  // Insurance, for DSWs.
+  const ins = ACCOUNT_DOCS.find((d) => d.key === "insurance")!;
+  const insRecs = await sql<{ carer: string; has_file: boolean; expiry: string | null; no_insurance: boolean }[]>`
+    select u.id as carer, coalesce(u.no_insurance, false) as no_insurance,
+           coalesce(x.has_file, false) as has_file, x.expiry
+      from app.users u
+      left join lateral (
+        select (t.insurance is not null and t.insurance <> '') as has_file, ${melb("t.insurance_expiry")} as expiry
+          from app.identity_documents t where t.carer = u.id
+         order by (t.insurance is not null and t.insurance <> '') desc, t.created_at desc limit 1) x on true
+     where u.account_type = 'carer' and u.active and 'dsw' = any(u.roles)`;
+  for (const r of insRecs) {
+    const row = rows.get(r.carer);
+    if (!row) continue;
+    row.insurance = r.no_insurance && !r.has_file
+      ? { status: "none", expiry: null }
+      : { status: statusOf(ins, { has_file: r.has_file, has_record: r.has_file, expiry: r.expiry, number: null }, today), expiry: r.expiry };
   }
   return [...rows.values()];
 }
@@ -219,10 +242,10 @@ export async function markAlerted(items: { doc: string; record: string; expiry: 
 
 /**
  * Whether the office should hear about this upload: only an active carer renewing a document that has
- * expired or expires within 30 days. Uploads while signing up (or for new documents) send nothing.
+ * expired or expires within 14 days. Uploads while signing up (or for new documents) send nothing.
  * Call before saving the new upload.
  */
-export async function isRenewal(carer: string, key: string, today: string, withinDays = 30): Promise<boolean> {
+export async function isRenewal(carer: string, key: string, today: string, withinDays = 14): Promise<boolean> {
   const d = DOCS.find((x) => x.key === key);
   if (!d?.expiryCol) return false;
   const [r] = await sql<{ active: boolean; expiry: string | null }[]>`
