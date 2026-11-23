@@ -8,7 +8,7 @@ import { sql } from "@/lib/db";
 import { accountDocs, carerDocs } from "@/lib/compliance/data";
 import { isoDate } from "@/lib/invoicing/rules";
 import { DocList } from "@/app/carer/documents/DocList";
-import { setCarerActiveAction } from "./actions";
+import { approveCarerAction, setCarerActiveAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +17,8 @@ export default async function CarerCompliance({ params, searchParams }: { params
   const { carer } = await params;
   const sp = await searchParams;
   if (!/^[0-9a-f-]{36}$/i.test(carer)) notFound();
-  const [u] = await sql<{ name: string; phone: string | null; email: string | null; active: boolean; no_insurance: boolean; upcoming: number }[]>`
-    select trim(concat_ws(' ', first_name, last_name)) as name, phone_number as phone, email, coalesce(active, false) as active, coalesce(no_insurance, false) as no_insurance,
+  const [u] = await sql<{ name: string; phone: string | null; email: string | null; active: boolean; approved: boolean; no_insurance: boolean; upcoming: number }[]>`
+    select trim(concat_ws(' ', first_name, last_name)) as name, phone_number as phone, email, coalesce(active, false) as active, coalesce(account_status, false) as approved, coalesce(no_insurance, false) as no_insurance,
            (select count(*)::int from app.shifts s
              where s.carer = u.id and not coalesce(s.cancelled, false) and s.date >= date_trunc('day', now() at time zone 'Australia/Melbourne') at time zone 'Australia/Melbourne') as upcoming
       from app.users u where id = ${carer} and account_type = 'carer'`;
@@ -39,8 +39,15 @@ export default async function CarerCompliance({ params, searchParams }: { params
         {sp.removed && <p className="banner ok">{sp.removed} removed. {u.name} will be asked to upload it again.</p>}
         {sp.status === "off" && <p className="banner ok">{u.name} is deactivated.</p>}
         {sp.status === "on" && <p className="banner ok">{u.name} is active again.</p>}
+        {sp.status === "approved" && <p className="banner ok">{u.name} is approved and active.</p>}
         <div className="row">
-          <p className="hint">{u.active ? "Active carer" : "Inactive: can still sign in, but the availability they mark doesn't show to you."}</p>
+          <p className="hint">{!u.approved ? "Applicant: not approved yet." : u.active ? "Active carer" : "Inactive: can still sign in, but the availability they mark doesn't show to you."}</p>
+          {!u.approved && (
+            <form action={approveCarerAction}>
+              <input type="hidden" name="id" value={carer} />
+              <button className="secondary">Approve</button>
+            </form>
+          )}
           <details className="confirm">
             <summary>{u.active ? "Deactivate" : "Reactivate"}</summary>
             <form action={setCarerActiveAction}>
