@@ -35,7 +35,7 @@ export const DOCS: DocDef<DocKey>[] = [
     expiryCol: "expiry", numberCol: "card_number", numberLabel: "Card number", ai: { label: "Working with Children Check card", fallbackMonths: 60 }, roster: "all",
     hint: "A photo of your WWCC card." },
   { key: "ndis_screening", label: "NDIS worker screening", table: "ndis_screening_checks", fileCols: ["image"], uploadCol: "image", uploadIsArray: false,
-    fileOptional: true, expiryCol: "expiry_date", numberCol: "id_number", numberLabel: "Screening ID",
+    expiryCol: "expiry_date", numberCol: "id_number", numberLabel: "Screening ID",
     ai: { label: "NDIS Worker Screening Clearance (the clearance notice, email or letter). The expiry is written in the text, e.g. 'expires on DD/MM/YYYY'", fallbackMonths: 60 }, roster: "ndis",
     hint: "Upload your NDIS Worker Screening clearance (the email or letter). We read your ID and expiry date from it." },
   { key: "flu", label: "Flu vaccination", table: "vaccinations", fileCols: ["flu", "influenza[]"], uploadCol: "influenza", uploadIsArray: true,

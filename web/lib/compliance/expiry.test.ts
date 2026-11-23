@@ -33,7 +33,7 @@ describe("statusOf", () => {
     expect(statusOf(cpr, { has_file: true, has_record: true, expiry: "2026-11-14", number: null }, "2026-11-15")).toBe("expired");
     expect(statusOf(cpr, { has_file: true, has_record: true, expiry: "2026-12-10", number: null }, "2026-11-15")).toBe("soon");
     expect(statusOf(cpr, { has_file: true, has_record: true, expiry: "2027-12-10", number: null }, "2026-11-15")).toBe("ok");
-    expect(statusOf(ndis, { has_file: false, has_record: true, expiry: "2030-01-01", number: "123" }, "2026-11-15")).toBe("ok");
+    expect(statusOf(ndis, { has_file: false, has_record: true, expiry: "2030-01-01", number: "123" }, "2026-11-15")).toBe("missing");
     expect(statusOf(id, { has_file: true, has_record: true, expiry: null, number: null }, "2026-11-15")).toBe("ok");
   });
 });
