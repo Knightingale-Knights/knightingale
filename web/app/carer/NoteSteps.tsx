@@ -26,7 +26,9 @@ const BEST_EG = `- We shared a good laugh over politics
 - We listened to his favourite song and he sang along which made he reminisce about the good old days.`;
 
 /** The progress note in three steps: summary, communication book, best day. Saved only on Submit. */
-export function NoteSteps({ shiftId, error }: { shiftId: string; error?: string }) {
+export function NoteSteps({ shiftId, error, action = noteAction, hidden = {} }: {
+  shiftId: string; error?: string; action?: (f: FormData) => Promise<void>; hidden?: Record<string, string>;
+}) {
   const [step, setStep] = useState(0);
   const [summary, setSummary] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
@@ -37,8 +39,9 @@ export function NoteSteps({ shiftId, error }: { shiftId: string; error?: string 
   };
 
   return (
-    <form action={noteAction} className="note-steps">
+    <form action={action} className="note-steps">
       <input type="hidden" name="id" value={shiftId} />
+      {Object.entries(hidden).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
       {error && <p className="banner error">{error}</p>}
 
       <fieldset hidden={step !== 0}>

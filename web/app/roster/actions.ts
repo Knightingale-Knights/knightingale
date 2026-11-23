@@ -11,6 +11,8 @@ import { createEvents, deleteEvent, updateEvent } from "@/lib/roster/events";
 import { deleteShiftInBubble, mirrorAvailability, mirrorEvents, mirrorShifts } from "@/lib/bubble/write";
 import { sql } from "@/lib/db";
 import { setWeekly } from "@/lib/roster/series";
+import { submitNote } from "@/lib/carer/data";
+import { getShift } from "@/lib/roster/queries";
 
 /** Copies a change to Bubble. The change is already saved here, so a Bubble failure becomes a warning. */
 async function toBubble<T>(work: () => Promise<T>, fallback: T): Promise<{ value: T; warn: string[] }> {
@@ -176,4 +178,20 @@ export async function removeTravelAction(f: FormData) {
     await removeTravelByStaff(str(f, "travel"));
     return { msg: "Travel removed." };
   }, { edit: id });
+}
+
+/** Staff write a progress note for any NDIS shift, any time. It is filed under the shift's carer. */
+export async function adminNoteAction(f: FormData) {
+  const staff = await requireStaff();
+  const id = str(f, "id");
+  await run(f, async () => {
+    const s = await getShift(id);
+    if (!s) throw new Error("That shift no longer exists.");
+    if (!s.carer) throw new Error("Assign a carer to this shift first.");
+    await submitNote(s.carer, id, String(f.get("summary") ?? ""), {
+      comms: String(f.get("comms") ?? ""), bestDay: String(f.get("best_day") ?? ""), anyDate: true, createdBy: staff.id,
+    });
+    revalidatePath("/carer");
+    return { msg: "Progress note saved.", date: s.day };
+  }, { edit: id, note: "1" });
 }

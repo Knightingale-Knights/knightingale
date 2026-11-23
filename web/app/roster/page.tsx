@@ -8,7 +8,9 @@ import { addDays, addMonths, clockLabel, monthGrid, periodOf, weekStart, type Pe
 import { isoDate } from "@/lib/invoicing/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { fileHref } from "@/lib/files";
-import { attendedAction, cancelShiftAction, copyShiftAction, deleteEventAction, deleteShiftAction, removeTravelAction, saveEventAction, saveShiftAction, sendRosterAction } from "./actions";
+import { adminNoteAction, attendedAction, cancelShiftAction, copyShiftAction, deleteEventAction, deleteShiftAction, removeTravelAction, saveEventAction, saveShiftAction, sendRosterAction } from "./actions";
+import { NoteSteps } from "@/app/carer/NoteSteps";
+import { sql } from "@/lib/db";
 import { dayEvents, getEvent, participantDayEvents, type DayEvent, type EventDetail } from "@/lib/roster/events";
 
 export const dynamic = "force-dynamic";
@@ -135,7 +137,11 @@ export default async function Roster({ searchParams }: { searchParams: Promise<S
       {panel === "edit" && sp.edit && (
         <div className="modal-back">
           <Link href={keep({})} className="modal-shade" aria-label="Close" />
-          <EditPanel id={sp.edit} opts={opts} close={keep({})} mode={mode} date={date} view={view} who={sp.who} error={sp.error} eventHref={(id) => keep({ event: id })} />
+          {sp.note ? (
+            <NotePanel id={sp.edit} back={keep({ edit: sp.edit })} mode={mode} date={date} view={view} who={sp.who} error={sp.error} />
+          ) : (
+            <EditPanel id={sp.edit} opts={opts} close={keep({})} mode={mode} date={date} view={view} who={sp.who} error={sp.error} eventHref={(id) => keep({ event: id })} noteHref={keep({ edit: sp.edit, note: "1" })} />
+          )}
         </div>
       )}
 
@@ -361,7 +367,49 @@ function ShiftForm({
   );
 }
 
-async function EditPanel({ id, error, eventHref, ...ctx }: Ctx & { id: string; error?: string; eventHref: (id: string) => string }) {
+type ShiftNote = { summary: string | null; comms: string | null; best_day: string | null; carer: string | null };
+
+/** The shift's submitted progress note, if there is one. */
+async function shiftNote(id: string) {
+  const [n] = await sql<ShiftNote[]>`
+    select n.summary, n.comms, n.best_day, nullif(trim(concat_ws(' ', c.first_name, c.last_name)), '') as carer
+      from app.progress_notes n left join app.users c on c.id = n.carer
+     where n.shift = ${id} and (coalesce(n.submit, false) or coalesce(length(trim(n.summary)), 0) > 0)
+     order by n.created_at desc limit 1`;
+  return n ?? null;
+}
+
+/** CREATE PROG NOTE: staff write the progress note for this shift. No time limit. */
+async function NotePanel({ id, back, error, mode, date, view, who }: { id: string; back: string; error?: string; mode: string; date: string; view: string; who?: string }) {
+  const [shift, note] = await Promise.all([getShift(id), shiftNote(id)]);
+  return (
+    <aside className="panel modal">
+      <header>
+        <h2>Progress note</h2>
+        <Link href={back} aria-label="Back to the shift">✕</Link>
+      </header>
+      {!shift ? <p className="empty">That shift no longer exists.</p> : (
+        <>
+          <p className="hint">{shift.participant_name ?? "Shift"} · {dayLabel(shift.day)} · {clockLabel(shift.start_time)} – {clockLabel(shift.end_time)}{shift.carer_name ? ` · ${shift.carer_name}` : ""}</p>
+          {note ? (
+            <div className="note-view">
+              <p className="banner ok">A progress note has been submitted{note.carer ? ` for ${note.carer}` : ""}.</p>
+              <h3>Summary</h3><p style={{ whiteSpace: "pre-wrap" }}>{note.summary}</p>
+              <h3>Communication book</h3><p style={{ whiteSpace: "pre-wrap" }}>{note.comms}</p>
+              {note.best_day && <><h3>Best day</h3><p style={{ whiteSpace: "pre-wrap" }}>{note.best_day}</p></>}
+            </div>
+          ) : !shift.carer ? (
+            <p className="banner warn">Assign a carer to this shift first. The note is filed under them.</p>
+          ) : (
+            <NoteSteps shiftId={id} error={error} action={adminNoteAction} hidden={{ mode, date, view, ...(who ? { who } : {}) }} />
+          )}
+        </>
+      )}
+    </aside>
+  );
+}
+
+async function EditPanel({ id, error, eventHref, noteHref, ...ctx }: Ctx & { id: string; error?: string; eventHref: (id: string) => string; noteHref: string }) {
   const shift = await getShift(id);
   if (!shift) return <aside className="panel modal"><p className="empty">That shift no longer exists.</p></aside>;
   const [free, travel, receipts, events] = await Promise.all([
@@ -384,6 +432,7 @@ async function EditPanel({ id, error, eventHref, ...ctx }: Ctx & { id: string; e
             ))}
           </div>
         )}
+        {shift.kind === "ndis" && <Link href={noteHref} className="button secondary">Create prog note</Link>}
         <p className="figures">
           Fee ${Number(shift.fee ?? 0).toFixed(2)} · Wage ${Number(shift.wage ?? 0).toFixed(2)} · Revenue ${Number(shift.revenue ?? 0).toFixed(2)}
         </p>
