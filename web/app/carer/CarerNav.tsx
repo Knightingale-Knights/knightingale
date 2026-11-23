@@ -1,3 +1,4 @@
+import { sql } from "@/lib/db";
 import Link from "next/link";
 import { MenuBurger } from "@/components/MenuBurger";
 import { redirect } from "next/navigation";
@@ -21,6 +22,8 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
   const me = await currentUser();
   // A carer whose application is still being reviewed sees only a popup, with no way to close it.
   const pending = me?.role === "carer" && !me.approved;
+  // Applied in the new app: thank them instead of sending them back to the application.
+  const applied = pending && Boolean((await sql<{ v: Date | null }[]>`select applied_at as v from app.users where id = ${me!.id}`)[0]?.v);
   // An unsigned carer signs the employment contract before anything else (an admin viewing as them is not stopped).
   if (CONTRACT_GATE && me?.role === "carer" && !pending && !me.viewAs && !(await contractState(me.id)).signature) redirect("/carer/contract");
   const today = isoDate(new Date());
@@ -47,12 +50,23 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
     <>
       <ViewAsBar />
       {notices.length > 0 && <NoticePopup key={notices[0].id} id={notices[0].id} title={notices[0].title} body={notices[0].body} action={noticeReadAction} />}
-      {pending && (
+      {pending && applied && (
+        <div className="locked-back" role="dialog" aria-modal="true" aria-labelledby="pending-title">
+          <div className="popup locked-popup">
+            <p id="pending-title">Thank you for applying, {name.split(" ")[0]}.</p>
+            <p>We&apos;ve received your application and emailed you the application video instructions. We look forward to seeing your application video.</p>
+            <p>Once the team has reviewed everything, we&apos;ll be in touch. Please email <a href="mailto:care@knightingale.com.au">care@knightingale.com.au</a> if you have any questions.</p>
+            <p>Paul</p>
+            <form action={signOutAction}><button className="big secondary">Sign out</button></form>
+          </div>
+        </div>
+      )}
+      {pending && !applied && (
         <div className="locked-back" role="dialog" aria-modal="true" aria-labelledby="pending-title">
           <div className="popup locked-popup">
             <p id="pending-title">Oh dear, looks like you&apos;ve landed on the wrong page. When you have a moment, please:</p>
             <ul>
-              <li>Navigate to <a href="https://knightingale.com.au/join">https://knightingale.com.au/join</a></li>
+              <li>Navigate to <a href="/join">https://knightingale.com.au/join</a></li>
               <li>Enter your email and tap &quot;Start my application&quot;</li>
               <li>Open the sign-in link we email you</li>
               <li>Work through each step: About you, Your role, NDIS screening, Certificates, and Photo and ID</li>

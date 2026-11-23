@@ -19,7 +19,7 @@ const DOCS = [
 // Carer sign-up starts here: an email sign-in link, then the steps.
 export default async function Join({ searchParams }: { searchParams: Promise<{ sent?: string; error?: string }> }) {
   const me = await currentUser();
-  if (me) redirect(homePath(me.role));
+  if (me) redirect(me.role === "carer" && !me.approved ? "/join/details" : homePath(me.role));
   const sp = await searchParams;
   return (
     <main className="login">

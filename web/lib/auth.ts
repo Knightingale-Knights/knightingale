@@ -113,7 +113,8 @@ export async function requireFacility(): Promise<AppUser> {
 export async function requireApplicant(): Promise<AppUser> {
   const u = await currentUser();
   if (!u) redirect("/join");
-  if (u.role !== "applicant") redirect(homePath(u.role));
+  // Carers waiting for approval can (re)do the application steps too: the "wrong page" popup sends them here.
+  if (u.role !== "applicant" && !(u.role === "carer" && !u.approved)) redirect(homePath(u.role));
   return u;
 }
 

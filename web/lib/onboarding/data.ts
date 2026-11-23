@@ -169,7 +169,7 @@ export async function submitApplication(id: string, today: string) {
   const p = await progress(id, today);
   if (p.missing.length) throw new SignupError(`Please add ${p.missing.join(", ")} first.`);
   const [u] = await sql<{ email: string; first_name: string }[]>`
-    update app.users set active = true, account_status = false, notification = true where id = ${id} returning email, first_name`;
+    update app.users set active = true, account_status = coalesce(account_status, false), notification = true, applied_at = now() where id = ${id} returning email, first_name`;
   await postmarkTemplate(NEW_SIGNUP_TEMPLATE, u.email, u.first_name, env.ccEmail);
 }
 
