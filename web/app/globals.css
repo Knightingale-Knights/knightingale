@@ -1057,3 +1057,7 @@ a.erow:hover { background: var(--desk); }
 .appt-info { display: flex; flex-direction: column; gap: 4px; }
 .appt-info b { font-weight: 500; }
 .appt-info small { color: var(--ink-2); font-size: 13px; }
+
+.status-toggle { align-items: center; gap: 10px; flex-wrap: wrap; }
+.status-toggle form { margin: 0; }
+.status-toggle button[disabled] { opacity: 1; cursor: default; background: var(--ink); border-color: var(--ink); color: var(--paper); }

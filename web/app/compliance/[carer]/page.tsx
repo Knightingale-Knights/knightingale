@@ -23,6 +23,7 @@ export default async function CarerCompliance({ params, searchParams }: { params
              where s.carer = u.id and not coalesce(s.cancelled, false) and s.date >= date_trunc('day', now() at time zone 'Australia/Melbourne') at time zone 'Australia/Melbourne') as upcoming
       from app.users u where id = ${carer} and account_type = 'carer'`;
   if (!u) notFound();
+  const on = u.approved && u.active;
   const [docs, other] = await Promise.all([
     carerDocs(carer, isoDate(new Date())),
     accountDocs(carer, ["insurance", "licence", "passport", "certificate", "ahpra", "covid", "resume"], isoDate(new Date())),
@@ -40,26 +41,19 @@ export default async function CarerCompliance({ params, searchParams }: { params
         {sp.status === "off" && <p className="banner ok">{u.name} is deactivated.</p>}
         {sp.status === "on" && <p className="banner ok">{u.name} is active again.</p>}
         {sp.status === "approved" && <p className="banner ok">{u.name} is approved and active.</p>}
-        <div className="row">
+        <div className="row status-toggle">
           <p className="hint">{!u.approved ? "Applicant: not approved yet." : u.active ? "Active carer" : "Inactive: can still sign in, but the availability they mark doesn't show to you."}</p>
-          {!u.approved && (
-            <form action={approveCarerAction}>
-              <input type="hidden" name="id" value={carer} />
-              <button className="secondary">Approve</button>
-            </form>
-          )}
-          <details className="confirm">
-            <summary>{u.active ? "Deactivate" : "Reactivate"}</summary>
-            <form action={setCarerActiveAction}>
-              <input type="hidden" name="id" value={carer} />
-              <input type="hidden" name="active" value={u.active ? "0" : "1"} />
-              {u.active && u.upcoming > 0 && (
-                <p className="banner warn">{u.name} still has {u.upcoming} upcoming shift{u.upcoming === 1 ? "" : "s"}. Reassign them in the roster.</p>
-              )}
-              <button className={u.active ? "link danger" : "link"}>{u.active ? `Confirm deactivate ${u.name}` : `Confirm reactivate ${u.name}`}</button>
-            </form>
-          </details>
+          <form action={approveCarerAction}>
+            <input type="hidden" name="id" value={carer} />
+            <button className={on ? "" : "secondary"} disabled={on} aria-pressed={on}>{on ? "Approved" : "Approve"}</button>
+          </form>
+          <form action={setCarerActiveAction}>
+            <input type="hidden" name="id" value={carer} />
+            <input type="hidden" name="active" value="0" />
+            <button className={on ? "secondary" : ""} disabled={!on} aria-pressed={!on}>{on ? "Deactivate" : "Deactivated"}</button>
+          </form>
         </div>
+        {on && u.upcoming > 0 && <p className="hint">{u.name} has {u.upcoming} upcoming shift{u.upcoming === 1 ? "" : "s"}. Reassign them in the roster before deactivating.</p>}
         <DocList docs={docs} carer={carer} admin />
         <h2>Other documents</h2>
         {u.no_insurance && <p className="hint">{u.name} said they don&apos;t have car insurance.</p>}
