@@ -13,6 +13,7 @@ import { PendingButton } from "@/components/PendingButton";
 import { ShiftDetails } from "./ShiftDetails";
 import { Birthday } from "./Birthday";
 import { birthdayName } from "@/lib/carer/birthday";
+import { chatList } from "@/lib/chats/data";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // the support summary takes a while to draft
@@ -37,7 +38,8 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
   const day = validDay(sp.date);
   const month = /^\d{4}-\d{2}$/.test(sp.month ?? "") ? sp.month! : (day ?? today).slice(0, 7);
   const [from, to] = monthGrid(`${month}-01`);
-  const [near, shifts, bday] = await Promise.all([myShifts(me.id, today), myShiftsBetween(me.id, day ?? from, day ? addDays(day, 1) : to), birthdayName(me.id)]);
+  const [near, shifts, bday, chats] = await Promise.all([myShifts(me.id, today), myShiftsBetween(me.id, day ?? from, day ? addDays(day, 1) : to), birthdayName(me.id), chatList(me).catch(() => [])]);
+  const unread = new Map(chats.map((c) => [c.participant, c.unread]));
   const now = Date.now();
   const logins = day && sp.logins ? await myLeecareLogins(me.id, sp.logins) : null;
   const friends = day && sp.friends ? await shiftFriends(me.id, sp.friends) : null;
@@ -52,7 +54,7 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
       )}
       <main className="carer-main">
         <div className="pay-top"><Link href="/carer/payslips" className="button secondary">Payslips</Link></div>
-        {day ? <DayList day={day} today={today} shifts={shifts} now={now} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
+        {day ? <DayList day={day} today={today} shifts={shifts} now={now} unread={unread} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
       {day && sp.details && <ShiftDetails s={shifts.find((s) => s.id === sp.details)} day={day} tab={sp.tab} email={me.email} msgs={sp} />}
       {day && friends && <FriendsPopup s={shifts.find((s) => s.id === sp.friends)} friends={friends} close={`/carer?date=${day}`} />}
@@ -90,7 +92,7 @@ function MonthCal({ month, from, to, today, shifts }: { month: string; from: str
   );
 }
 
-function DayList({ day, today, shifts, now }: { day: string; today: string; shifts: CarerShift[]; now: number }) {
+function DayList({ day, today, shifts, now, unread }: { day: string; today: string; shifts: CarerShift[]; now: number; unread: Map<string, number> }) {
   return (
     <>
       <div className="cal-nav">
@@ -100,7 +102,7 @@ function DayList({ day, today, shifts, now }: { day: string; today: string; shif
       </div>
       <p className="lede"><Link href={`/carer?month=${day.slice(0, 7)}`}>← Back to the month</Link></p>
       {shifts.length === 0 && <p className="empty">No shifts on this day.</p>}
-      {shifts.map((s) => <ShiftCard key={s.id} s={s} day={day} now={now} />)}
+      {shifts.map((s) => <ShiftCard key={s.id} s={s} day={day} now={now} unread={s.participant ? unread.get(s.participant) ?? 0 : 0} />)}
     </>
   );
 }
@@ -108,7 +110,7 @@ function DayList({ day, today, shifts, now }: { day: string; today: string; shif
 const money = (n: number) => `$${n.toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 /** One shift on the carer's day, laid out like the Bubble card. */
-function ShiftCard({ s, day, now }: { s: CarerShift; day: string; now: number }) {
+function ShiftCard({ s, day, now, unread = 0 }: { s: CarerShift; day: string; now: number; unread?: number }) {
   const ndis = s.kind === "ndis";
   const check = checkButton(s, now);
   const name = ndis ? s.participant_name ?? s.place : s.place;
@@ -117,10 +119,13 @@ function ShiftCard({ s, day, now }: { s: CarerShift; day: string; now: number })
       {ndis ? <Link href={`/carer?date=${day}&details=${s.id}`} className="shift-card-name">{name ?? "Shift"}</Link> : <span className="shift-card-name">{name ?? "Shift"}</span>}
       {ndis && s.participant && (
         <div className="shift-card-actions">
-          <Link href={`/carer/chats/${s.participant}`} className="button secondary">Communication book</Link>
+          <Link href={`/carer/chats/${s.participant}`} className="button secondary chat-btn" aria-label={unread ? `Communication book, ${unread} new` : undefined}>
+            Communication book{unread > 0 && <span className="unread-badge">{unread > 9 ? "9+" : unread}</span>}
+          </Link>
           <Link href={`/carer?date=${day}&summary=${s.id}`} className="button secondary">About {(name ?? "").split(" ")[0]}</Link>
         </div>
       )}
+      {ndis && s.participant && unread > 0 && <p className="unread-note">{unread} new message{unread === 1 ? "" : "s"}</p>}
       <dl className="shift-card-facts">
         <div><dt>Date</dt><dd>{day.slice(8)}/{day.slice(5, 7)}/{day.slice(2, 4)}</dd></div>
         <div><dt>Time</dt><dd>{clockLabel(s.start_time)} – {clockLabel(s.end_time)}</dd></div>

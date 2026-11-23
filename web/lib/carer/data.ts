@@ -172,6 +172,7 @@ export async function submitNote(carer: string, id: string, summary: string, ext
   } catch (e) {
     console.error("note field filling failed", e);
   }
+  await commsToChat(noteId);
   await analyseNoteSafely(noteId);
   return { noteId, filled };
 }
@@ -179,3 +180,18 @@ export async function submitNote(carer: string, id: string, summary: string, ext
 export const slotsForShift = slotsFor;
 
 import { analyseNoteSafely } from "./noteAlert";
+
+/** A communication book entry (anything but "Nothing to report.") goes into the participant's chat, from the carer. */
+async function commsToChat(noteId: string) {
+  try {
+    const [n] = await sql<{ participant: string | null; carer: string | null; first: string | null; comms: string | null }[]>`
+      select n.participant, n.carer, split_part(trim(c.first_name), ' ', 1) as first, n.comms
+        from app.progress_notes n left join app.users c on c.id = n.carer where n.id = ${noteId}`;
+    const text = (n?.comms ?? "").trim();
+    if (!n?.participant || !n.carer || !text || /^nothing to report\.?$/i.test(text)) return;
+    await postAs(n.participant, { id: n.carer, firstName: n.first ?? "" }, text);
+  } catch (e) {
+    console.error("communication book to chat failed", noteId, e);
+  }
+}
+import { postAs } from "@/lib/chats/data";

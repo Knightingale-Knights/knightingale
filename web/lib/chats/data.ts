@@ -99,3 +99,17 @@ export async function postMessage(u: Who, participant: string, text: string, now
     return m.id;
   });
 }
+
+/** Posts on someone's behalf without the visibility check (e.g. a carer's communication book entry from a progress note). */
+export async function postAs(participant: string, author: { id: string; firstName: string }, text: string, now = new Date()) {
+  const content = text.trim().slice(0, MAX_MESSAGE);
+  if (!content) return null;
+  return sql.begin(async (txx) => {
+    const tx = txx as unknown as Tx;
+    const chat = await chatFor(participant, tx);
+    const [m] = await tx<{ id: string }[]>`
+      insert into app.messages (comms_book, content, sender, created_by, created_at)
+      values (${chat}, ${content}, ${author.firstName || "Knightingale"}, ${author.id}, ${now}) returning id`;
+    return m.id;
+  });
+}
