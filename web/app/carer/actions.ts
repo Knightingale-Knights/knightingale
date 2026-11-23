@@ -65,6 +65,10 @@ export async function availabilityAction(f: FormData) {
   // Carers finish the Culture of Care videos before giving availability (staff viewing as them can still change it).
   if (!me.viewAs && !(await cultureProgress(me.id)).complete) redirect("/carer/availability");
   try {
+    // Past the two weeks to sort out missing documents: no new availability until they're uploaded.
+    if (!me.viewAs && f.get("on") === "1" && (await accountNag(me.id, isoDate(new Date()), false)).blocked) {
+      throw new Error("Please upload your missing documents in Account first, then add your availability.");
+    }
     await setAvailability(me, day, String(f.get("slot") ?? ""), f.get("on") === "1", isoDate(new Date()));
   } catch (e) {
     dest += `&error=${encodeURIComponent(String((e as Error).message ?? e))}`;
