@@ -8,6 +8,9 @@ import { checkIn, checkOut, myShift, setAvailability, submitNote } from "@/lib/c
 import { CheckError, type Position } from "@/lib/carer/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 import { accountNag } from "@/lib/account/nag";
+import { signAgreement } from "@/lib/participants/docs";
+import { sendPlainEmail } from "@/lib/postmark";
+import { sql } from "@/lib/db";
 
 export type CheckResult = { ok: true; message: string } | { ok: false; message: string };
 
@@ -225,4 +228,34 @@ export async function noticeReadAction(f: FormData) {
   const me = await currentUser();
   if (!me || me.role !== "carer" || me.viewAs) return;
   await markRead(String(f.get("notice") ?? ""), me.id);
+}
+
+/** The participant signs their Service Agreement on the carer's phone. The office is told by email. */
+export async function carerAgreementAction(f: FormData) {
+  const me = await requireCarer();
+  const id = String(f.get("id") ?? "");
+  let tab = "agreement", q: Record<string, string> = { done: "Thank you, the Service Agreement is signed." };
+  try {
+    const p = await shiftParticipant(me.id, id);
+    if (!p) throw new Error("We couldn't find this shift.");
+    const str = (k: string) => { const v = f.get(k); return typeof v === "string" ? v : null; };
+    await signAgreement(p, {
+      participantSignature: str("participant_signature"),
+      representativeSignature: str("representative_signature"),
+      representative: str("representative"),
+    }, me.id);
+    const [u] = await sql<{ name: string }[]>`select trim(concat_ws(' ', first_name, last_name)) as name from app.users where id = ${p}`;
+    await sendPlainEmail({
+      to: "care@knightingale.com.au",
+      subject: `Service Agreement signed: ${u?.name ?? "participant"}`,
+      text: `${u?.name ?? "A participant"} signed their Service Agreement with ${me.name}.\n\nhttps://knightingale.com.au/participants/${p}/service`,
+      attachments: [],
+    }).catch((e) => console.error("agreement email failed", e));
+    tab = "";
+  } catch (e) {
+    console.error("agreement sign failed", e);
+    q = { error: (e as Error).message };
+  }
+  revalidatePath("/carer");
+  redirect(await detailsDest(me.id, id, tab, q));
 }

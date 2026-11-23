@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { CarerShift } from "@/lib/carer/data";
 import { NOTE_CLOSED, noteOpen, onShiftDay } from "@/lib/carer/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
-import { carerIntakeAction, incidentAction, removeReceiptAction, removeTravelAction, requestSummaryAction, travelAction } from "./actions";
+import { carerAgreementAction, carerIntakeAction, incidentAction, removeReceiptAction, removeTravelAction, requestSummaryAction, travelAction } from "./actions";
 import { ReceiptDrop } from "./extras";
 import { TripPlanner } from "./TripPlanner";
 import { PendingButton } from "@/components/PendingButton";
@@ -14,6 +14,10 @@ import { loadOptions, planManagers, readRecord } from "@/lib/forms/fields";
 import { INCIDENT_HARM, INCIDENT_TYPES, INJURY_LOCATION, INJURY_NATURE, NOT_NDIS, REPORTABLE_TYPES } from "@/lib/participants/incident";
 import { isoDate } from "@/lib/invoicing/rules";
 import { sql } from "@/lib/db";
+import { agreementForCarer } from "@/lib/participants/docs";
+import { Blocks, SERVICE_AGREEMENT } from "@/lib/participants/docText";
+import { SignaturePad } from "@/components/SignaturePad";
+import { fileHref } from "@/lib/files";
 
 export type DetailsMsgs = { note?: string; done?: string; view?: string; saved?: string; error?: string; travel?: string; xerror?: string; sent?: string; summary_error?: string };
 
@@ -41,6 +45,7 @@ const TITLES: Record<string, (n: string) => string> = {
   receipts: (n) => `${n} receipts`,
   intake: (n) => `${n} intake form`,
   incident: (n) => `${n}'s incident report`,
+  agreement: (n) => `${n}'s Service Agreement`,
   note: (n) => `${n}'s progress note`,
 };
 
@@ -137,6 +142,8 @@ export async function ShiftDetails({ s, day, tab, email, msgs }: { s?: CarerShif
 }
 
 async function Section({ s, day, tab, first, email, msgs }: { s: CarerShift; day: string; tab: string; first: string; email: string; msgs: DetailsMsgs }) {
+  // The Service Agreement is always available, so the participant can sign it at any visit.
+  if (tab === "agreement") return <AgreementSection s={s} msgs={msgs} />;
   if (s.cancelled) return <p className="banner warn">This shift has been cancelled.</p>;
   const onDay = onShiftDay(s);
 
@@ -306,4 +313,50 @@ async function Section({ s, day, tab, first, email, msgs }: { s: CarerShift; day
   }
 
   return <p className="hint">Coming soon.</p>;
+}
+
+const money = (n: number | null) => (n == null ? "" : n.toLocaleString("en-AU", { style: "currency", currency: "AUD" }));
+
+/** The participant's Service Agreement: read it together, then the participant (or representative) signs on the phone. */
+async function AgreementSection({ s, msgs }: { s: CarerShift; msgs: DetailsMsgs }) {
+  if (!s.participant) return <p className="hint">This shift has no participant.</p>;
+  const a = await agreementForCarer(s.participant);
+  const signed = Boolean(a.participantSignature || a.representativeSignature);
+  return (
+    <div className="stack record-in-popup agreement">
+      {msgs.error && <p className="banner error">{msgs.error}</p>}
+      {signed
+        ? <p className="banner ok">Signed{a.signedDate ? ` on ${a.signedDate}` : ""}{a.representative ? ` by ${a.representative} (representative)` : ""}.</p>
+        : <p className="banner warn">Not signed yet. Read it through with {a.name.split(" ")[0] || "the participant"}, then ask them to sign at the bottom.</p>}
+      <Blocks blocks={[["Parties To The Agreement", `This Service Agreement is made between:\n\n${[a.name, a.address].filter(Boolean).join(", ")}\n\nAND\n\nKnightingale (ABN 50 405 424 095) of 22 Kavanagh St, Southbank VIC 3006.\n\nThis Service Agreement will commence from today and continue until either you or Knightingale terminates it in accordance with the termination conditions set out below.`]]} />
+      <Blocks blocks={SERVICE_AGREEMENT} />
+      <h3>Schedule of Supports</h3>
+      {a.supports.length ? (
+        <table className="grid">
+          <thead><tr><th>Support</th><th>Hours</th><th>Total</th></tr></thead>
+          <tbody>{a.supports.map((x, i) => <tr key={i}><td>{x.item}</td><td>{x.hours ?? ""}</td><td>{money(x.total)}</td></tr>)}</tbody>
+        </table>
+      ) : <p className="hint">The office hasn&apos;t added the supports yet.</p>}
+      {a.knSignature && (<><h3>Knightingale</h3><img className="doc-sig" src={fileHref(a.knSignature)} alt="Knightingale signature" /></>)}
+      {signed ? (
+        <>
+          <h3>Signed</h3>
+          {a.participantSignature && <img className="doc-sig" src={fileHref(a.participantSignature)} alt="Participant signature" />}
+          {a.representativeSignature && <img className="doc-sig" src={fileHref(a.representativeSignature)} alt="Representative signature" />}
+        </>
+      ) : (
+        <form action={carerAgreementAction} className="stack">
+          <input type="hidden" name="id" value={s.id} />
+          <h3>{a.name || "Participant"}&apos;s signature</h3>
+          <SignaturePad name="participant_signature" />
+          <details>
+            <summary>Signing for the participant? (representative)</summary>
+            <label>Representative&apos;s name<input name="representative" /></label>
+            <SignaturePad name="representative_signature" />
+          </details>
+          <PendingButton className="big" pending="Saving…">Sign Service Agreement</PendingButton>
+        </form>
+      )}
+    </div>
+  );
 }

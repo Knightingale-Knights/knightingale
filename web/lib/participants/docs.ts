@@ -637,3 +637,59 @@ export async function emergencyDetails(participant: string): Promise<{ title: st
     g("Requirements", [["Mobility aids", r.mobility], ["Diet", r.diet], ["Living situation", r.living]]),
   ].filter((x) => x.rows.length);
 }
+
+// ---- the Service Agreement on the carer's side -----------------------------------
+
+export type AgreementView = {
+  id: string | null;
+  name: string; address: string | null;
+  participantSignature: string | null; representativeSignature: string | null; representative: string | null;
+  signedDate: string | null; knSignature: string | null;
+  supports: { item: string; hours: number | null; total: number | null }[];
+};
+
+/** Everything a carer needs to show a participant their Service Agreement and have it signed. */
+export async function agreementForCarer(participant: string): Promise<AgreementView> {
+  const id = await docId(SERVICE, participant);
+  const [[u], shown, rows] = await Promise.all([
+    sql<{ name: string }[]>`select trim(concat_ws(' ', first_name, last_name)) as name from app.users where id = ${participant}`,
+    riskShowValues(participant),
+    id ? sql<{ item: string | null; hours: number | null; total: number | null }[]>`
+      select coalesce(p.item_name, '') as item, a.hours::float as hours, a.total::float as total
+        from app.support_arrangements a left join app.ndis_price_items p on p.id = a.ndis_pricing
+       where a.service_agreement = ${id} order by a.no nulls last, a.created_at` : Promise.resolve([]),
+  ]);
+  const [sa] = id
+    ? await sql<{ participant_signature: string | null; representative_signature: string | null; representative: string | null; signed: string | null }[]>`
+        select nullif(participant_signature, '') as participant_signature, nullif(representative_signature, '') as representative_signature,
+               nullif(representative, '') as representative,
+               to_char(signed_date at time zone 'Australia/Melbourne', 'DD/MM/YYYY') as signed
+          from app.service_agreements where id = ${id}`
+    : [];
+  return {
+    id, name: u?.name ?? "", address: shown.ro_address ?? null,
+    participantSignature: sa?.participant_signature ?? null, representativeSignature: sa?.representative_signature ?? null,
+    representative: sa?.representative ?? null, signedDate: sa?.signed ?? null, knSignature: shown.ro_kn_sig ?? null,
+    supports: rows.map((r) => ({ item: r.item ?? "", hours: r.hours, total: r.total })),
+  };
+}
+
+/** Saves the participant's (or their representative's) signature, dated today, creating the agreement if needed. */
+export async function signAgreement(participant: string, s: { participantSignature: string | null; representativeSignature: string | null; representative: string | null }, by: string) {
+  const png = (v: string | null) => (v && v.startsWith("data:image/png;base64,") ? v : null);
+  const p = png(s.participantSignature), r = png(s.representativeSignature);
+  if (!p && !r) throw new Error("Please have the participant (or their representative) sign first.");
+  if (r && !s.representative?.trim()) throw new Error("Please enter the representative's name.");
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Melbourne" }).format(new Date());
+  const values = {
+    participant_signature: p, representative_signature: r, representative: r ? s.representative!.trim() : null,
+    signed_date: melbMidnight(today), updated_at: new Date(),
+  };
+  const id = await docId(SERVICE, participant);
+  if (id) { await sql`update app.service_agreements set ${sql(values)} where id = ${id}`; return id; }
+  return sql.begin(async (tx) => {
+    const [row] = await tx<{ id: string }[]>`insert into app.service_agreements ${tx({ ...values, participant, created_by: by })} returning id`;
+    await tx`update app.users set service_agreement = ${row.id} where id = ${participant}`;
+    return row.id;
+  });
+}
