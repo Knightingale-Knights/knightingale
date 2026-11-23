@@ -1047,6 +1047,5 @@ a.erow:hover { background: var(--desk); }
 .shift-extras .note-btn { min-height: 44px; width: 100%; }
 
 .chat-btn { position: relative; overflow: visible; }
-.unread-badge { position: absolute; top: -9px; right: -9px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--accent, #8E3B2E); color: #fff; font-size: 11px; letter-spacing: 0; display: grid; place-items: center; box-sizing: border-box; }
-.unread-note { margin: -6px 0 0; font-size: 12px; color: var(--accent, #8E3B2E); text-align: center; }
-.carer-nav .badge.dot, .badge.dot { background: #8E3B2E; color: #fff; border-radius: 8px; }
+.unread-badge { position: absolute; top: -9px; right: -9px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--alert); color: #fff; font-size: 11px; letter-spacing: 0; display: grid; place-items: center; box-sizing: border-box; }
+.unread-note { margin: -6px 0 0; font-size: 12px; color: var(--alert); text-align: center; }
