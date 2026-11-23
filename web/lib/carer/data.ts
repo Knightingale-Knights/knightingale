@@ -172,7 +172,10 @@ export async function submitNote(carer: string, id: string, summary: string, ext
   } catch (e) {
     console.error("note field filling failed", e);
   }
+  await analyseNoteSafely(noteId);
   return { noteId, filled };
 }
 
 export const slotsForShift = slotsFor;
+
+import { analyseNoteSafely } from "./noteAlert";
