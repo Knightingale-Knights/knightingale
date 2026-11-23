@@ -1,6 +1,7 @@
 // Reads the expiry date on a compliance document with Claude.
 // The tool, rules and prompt are copied from the onboarding repo (api/extract-expiry.js) so results match Bubble's CPR check.
 /* eslint-disable */
+import { callTool } from "@/lib/ai/tool";
 
 export const DISALLOWED_CPR_PROVIDERS = ['National CPR Foundation', 'NationalCPRFoundation', 'NCPRF'];
 
@@ -41,6 +42,10 @@ const TOOL = {
                   enum: ['high', 'medium', 'low'],
                   description: 'Confidence that expiry_date is correct.',
                 },
+                document_number: {
+                  type: ['string', 'null'],
+                  description: 'The document\'s own number as printed (e.g. a Working with Children Check card number, police check reference number, AHPRA registration number), copied exactly. Null if none is printed or it is unclear.',
+                },
                 nrt_logo_visible: {
                   type: 'boolean',
                   description: 'True if the "Nationally Recognised Training" triangle logo (a stylised triangle made of layered red/green arrow shapes) is visible anywhere on the document. False if not visible, unclear, or cropped out. This is informational only — do not let its absence affect is_expected_document_type.',
@@ -74,6 +79,7 @@ export type ExpiryReading = {
   success: boolean; needsReview: boolean; reason: string | null; mismatchReason: string | null; documentType: string | null;
   expiryDate: string | null; expirySource: "printed" | "calculated_from_issue_date" | null; issueDate: string | null;
   matchedQualification: string | null; confidence: string | null; warning: string | null;
+  documentNumber?: string | null;
 };
 
 const empty: ExpiryReading = {
@@ -83,33 +89,17 @@ const empty: ExpiryReading = {
 
 /** Same decisions as the onboarding endpoint, minus the Bubble write. Null when no API key is set. */
 /** fromIssueOnly: the expiry is always the issue date plus fallbackMonths (flu: 12 months after it was given), never a printed date. */
-export async function readExpiry(bytes: Buffer, mime: string, documentLabel: string, fallbackMonths: number | null, today: string, fromIssueOnly = false): Promise<ExpiryReading | null> {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
+export async function readExpiry(bytes: Buffer, mime: string, documentLabel: string, fallbackMonths: number | null, today: string, fromIssueOnly = false, numberLabel: string | null = null): Promise<ExpiryReading | null> {
+  if (!process.env.ANTHROPIC_API_KEY) return null;
   const data = bytes.toString("base64");
   const docBlock = mime === "application/pdf"
     ? { type: "document", source: { type: "base64", media_type: "application/pdf", data } }
     : { type: "image", source: { type: "base64", media_type: mime, data } };
+  const numberNote = numberLabel ? `\n\nAlso report the ${numberLabel} printed on the document in document_number, copied exactly.` : "";
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({
-        model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-5-5",
-        max_tokens: 1200, // room for the quoted line and every field; 300 cut readings short
-        tools: [TOOL],
-        tool_choice: { type: "tool", name: "record_expiry_date" },
-        messages: [{ role: "user", content: [docBlock, { type: "text", text: promptFor(documentLabel) }] }],
-      }),
-    });
-    if (!res.ok) {
-      console.error("expiry read: Claude", res.status, (await res.text()).slice(0, 500));
-      return { ...empty, reason: `ai_error_${res.status}` };
-    }
-    const j = (await res.json()) as { content?: { type: string; input?: Record<string, any> }[] };
-    const input = j.content?.find((b) => b.type === "tool_use")?.input;
-    if (!input) return { ...empty, reason: "ai_error" };
-    return decide(input, fallbackMonths, today, fromIssueOnly);
+    const r = await callTool<Record<string, any>>({ tool: TOOL, content: [docBlock], prompt: promptFor(documentLabel) + numberNote, maxTokens: 1500 });
+    if (!r.ok) return { ...empty, reason: r.reason };
+    return decide(r.input, fallbackMonths, today, fromIssueOnly);
   } catch (e) {
     console.error("expiry read failed", e);
     return { ...empty, reason: "ai_error" };
@@ -118,8 +108,9 @@ export async function readExpiry(bytes: Buffer, mime: string, documentLabel: str
 
 /** The onboarding endpoint's checks, in plain code (no date maths left to the model). */
 export function decide(input: Record<string, any>, fallbackMonths: number | null, today: string, fromIssueOnly = false): ExpiryReading {
-  const { is_expected_document_type, mismatch_reason, expiry_date, issue_date, matched_qualification, document_type, confidence } = input;
-  const base = { ...empty, documentType: document_type ?? null, issueDate: issue_date ?? null, matchedQualification: matched_qualification ?? null, confidence: confidence ?? null };
+  const { is_expected_document_type, mismatch_reason, expiry_date, issue_date, matched_qualification, document_type, confidence, document_number } = input;
+  const num = typeof document_number === "string" && document_number.trim() ? document_number.trim().slice(0, 60) : null;
+  const base = { ...empty, documentNumber: num, documentType: document_type ?? null, issueDate: issue_date ?? null, matchedQualification: matched_qualification ?? null, confidence: confidence ?? null };
   let trusted: string | null = !fromIssueOnly && typeof expiry_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(expiry_date) ? expiry_date : null;
   let warning: string | null = null;
   if (trusted && (!matched_qualification || !String(matched_qualification).includes(trusted.slice(0, 4)))) {

@@ -1,3 +1,4 @@
+import { callTool } from "@/lib/ai/tool";
 // Progress notes carers email to care@knightingale.com.au. A Gmail rule forwards them to Postmark,
 // which posts them to /api/inbound/progress-note. We match the sender to a carer, let Claude pick
 // the shift and pull out the note, then save it like a note written in the app.
@@ -38,8 +39,7 @@ export function htmlToText(html: string) {
 }
 
 async function pickShift(mail: InboundEmail, carerName: string, shifts: CarerShift[]): Promise<Pick | null> {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
+  if (!process.env.ANTHROPIC_API_KEY) return null;
   const files = mail.attachments.flatMap((a) =>
     a.contentType === "application/pdf" ? [{ type: "document", source: { type: "base64", media_type: "application/pdf", data: a.content } }]
     : /^image\/(png|jpeg|gif|webp)$/.test(a.contentType) ? [{ type: "image", source: { type: "base64", media_type: a.contentType, data: a.content } }]
@@ -58,34 +58,26 @@ Decide if this is a progress note for one of those shifts. If it is, pick the sh
 Only pick a shift you are sure of. If the date or participant doesn't clearly match exactly one shift, return shift_id null and say why.
 summary: the progress note itself, word for word as the carer wrote it (from the body or attachments), without greetings, sign-offs, signatures or forwarding headers.
 comms: any communication with family, coordinators or other services mentioned, or "Nothing to report."`;
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({
-      model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-5-5",
-      max_tokens: 8000,
-      tools: [{
-        name: "record_note",
-        description: "Records which shift the emailed progress note is for.",
-        input_schema: {
-          type: "object",
-          properties: {
-            is_progress_note: { type: "boolean" },
-            shift_id: { type: ["string", "null"] },
-            summary: { type: "string" },
-            comms: { type: "string" },
-            reason: { type: "string", description: "One short sentence: why this shift, or why none." },
-          },
-          required: ["is_progress_note", "shift_id", "summary", "comms", "reason"],
+  const r = await callTool<Pick>({
+    tool: {
+      name: "record_note",
+      description: "Records which shift the emailed progress note is for.",
+      input_schema: {
+        type: "object",
+        properties: {
+          is_progress_note: { type: "boolean" },
+          shift_id: { type: ["string", "null"] },
+          summary: { type: "string" },
+          comms: { type: "string" },
+          reason: { type: "string", description: "One short sentence: why this shift, or why none." },
         },
-      }],
-      tool_choice: { type: "tool", name: "record_note" },
-      messages: [{ role: "user", content: [...files, { type: "text", text: prompt }] }],
-    }),
+        required: ["is_progress_note", "shift_id", "summary", "comms", "reason"],
+      },
+    },
+    content: files, prompt, maxTokens: 8000,
   });
-  if (!res.ok) throw new Error(`Claude ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const j = (await res.json()) as { content?: { type: string; input?: Pick }[] };
-  return j.content?.find((b) => b.type === "tool_use")?.input ?? null;
+  if (!r.ok) throw new Error(`Claude: ${r.reason}`);
+  return r.input;
 }
 
 const tell = (subject: string, text: string, to = OFFICE) => sendPlainEmail({ to, subject, text, attachments: [] });

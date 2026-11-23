@@ -10,11 +10,22 @@ import { sql } from "@/lib/db";
 import { env } from "@/lib/env";
 import { sendPlainEmail } from "@/lib/postmark";
 import { readDocTitle } from "@/lib/compliance/docTitle";
+import type { ExpiryReading } from "@/lib/compliance/expiryReader";
 
 export type DocResult = { ok: boolean; message: string };
 
+/** Why an upload with no expiry needs the office, in a sentence. */
+function whyCheck(x: ExpiryReading | null) {
+  if (!x) return "It wasn't read automatically.";
+  if (x.reason?.startsWith("ai_")) return "The document couldn't be read automatically (a reading error, not a problem with the document).";
+  if (x.warning) return x.warning;
+  if (x.expiryDate && x.confidence === "low") return `An expiry of ${auDate(x.expiryDate)} was read, but not clearly.`;
+  if (x.issueDate) return `No expiry date is printed on it (issued ${auDate(x.issueDate)}).`;
+  return "No expiry date was found on it.";
+}
+
 /** Emails the office when a carer uploads a document, with whether it was accepted. Never holds up the upload. */
-async function tellOffice(carer: string, label: string, outcome: string, detail: string) {
+async function tellOffice(carer: string, fileId: string, label: string, outcome: string, detail: string) {
   if (!env.automationsLive) return;
   try {
     const [u] = await sql<{ name: string | null }[]>`select nullif(trim(concat_ws(' ', first_name, last_name)), '') as name from app.users where id = ${carer}`;
@@ -22,7 +33,7 @@ async function tellOffice(carer: string, label: string, outcome: string, detail:
     await sendPlainEmail({
       to: env.complianceAlertTo,
       subject: `${name} uploaded ${label}: ${outcome}`,
-      text: `${name} uploaded their ${label}.\n\nResult: ${outcome}\n${detail}\n\nCheck it: https://knightingale.com.au/compliance/${carer}`,
+      text: `${name} uploaded their ${label}.\n\nResult: ${outcome}\n${detail}\n\nDocument: https://knightingale.com.au/files/${fileId}\nCompliance page: https://knightingale.com.au/compliance/${carer}`,
       attachments: [],
     });
   } catch (e) {
@@ -71,7 +82,7 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
       const title = await readDocTitle(bytes, file.type);
       return title ?? `${label} (${file.name})`;
     };
-    const tell = async (outcome: string, detail: string) => (me.role === "admin" || !renewal ? undefined : tellOffice(carer, await named(), outcome, detail));
+    const tell = async (outcome: string, detail: string) => (me.role === "admin" || !renewal ? undefined : tellOffice(carer, r.fileId, await named(), outcome, detail));
     if (r.reading?.reason === "document_type_mismatch") {
       await tell("Rejected", `Not a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."}`);
       return { ok: false, message: `Saved, but this doesn't look like a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."} The office will check it.` };
@@ -88,7 +99,11 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
       await tell("Accepted", `Expires ${auDate(r.expiry)}${r.reading?.expirySource === "calculated_from_issue_date" ? " (worked out from the issue date)" : ""}.`);
       return { ok: true, message: `Thanks, your ${label} is saved. It expires on ${auDate(r.expiry)}.` };
     }
-    await tell("Needs checking", r.reading ? "The expiry date couldn't be read, so please check it and enter it." : "Please check it.");
+    if (r.status === "ok") {
+      await tell("Accepted", "It looks like the right document.");
+      return { ok: true, message: `Thanks, your ${label} is saved.` };
+    }
+    await tell("Needs checking", `${whyCheck(r.reading)} Please check it and enter the expiry date.`);
     return { ok: true, message: `Thanks, your ${label} is saved. ${r.status === "check" ? STATUS_LABEL.check + "." : ""}`.trim() };
   } catch (e) {
     if (!(e instanceof DocError)) console.error(e);

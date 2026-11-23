@@ -1,3 +1,4 @@
+import { callTool } from "@/lib/ai/tool";
 // Reads a receipt's final total with Claude, using the same prompt as the onboarding repo's extract-receipt-total.
 export type ReceiptReading = { total: number | null; merchant: string | null; needsReview: boolean; reason: string | null };
 
@@ -23,27 +24,15 @@ const TOOL = {
 
 /** Returns null when no API key is set (the receipt is kept and the office checks it). */
 export async function readReceipt(bytes: Buffer, mime: string): Promise<ReceiptReading | null> {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
+  if (!process.env.ANTHROPIC_API_KEY) return null;
   const data = bytes.toString("base64");
   const doc = mime === "application/pdf"
     ? { type: "document", source: { type: "base64", media_type: "application/pdf", data } }
     : { type: "image", source: { type: "base64", media_type: mime, data } };
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({
-        model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-5-5",
-        max_tokens: 300,
-        tools: [TOOL],
-        tool_choice: { type: "tool", name: TOOL.name },
-        messages: [{ role: "user", content: [doc, { type: "text", text: PROMPT }] }],
-      }),
-    });
-    if (!res.ok) return { total: null, merchant: null, needsReview: true, reason: `ai_error_${res.status}` };
-    const j = (await res.json()) as { content?: { type: string; input?: Record<string, unknown> }[] };
-    const r = j.content?.find((b) => b.type === "tool_use")?.input ?? {};
+    const out = await callTool<Record<string, unknown>>({ tool: TOOL, content: [doc], prompt: PROMPT, maxTokens: 600 });
+    if (!out.ok) return { total: null, merchant: null, needsReview: true, reason: out.reason };
+    const r = out.input;
     const total = typeof r.total_amount === "number" && Number.isFinite(r.total_amount) && r.total_amount >= 0 ? Math.round(r.total_amount * 100) / 100 : null;
     const merchant = typeof r.merchant_name === "string" ? r.merchant_name.slice(0, 200) : null;
     if (r.is_receipt === false) return { total: null, merchant, needsReview: true, reason: "not_a_receipt" };

@@ -12,6 +12,7 @@ export type DocDef<K extends string = DocKey | AccountDocKey> = {
   uploadIsArray: boolean;
   fileOptional?: boolean; // details alone count as on file (the picture is extra)
   expiryCol: string | null;
+  expiryOptional?: boolean; // most of these have no expiry (qualifications: only AHPRA expires), so no expiry is fine
   numberCol: string | null;
   numberLabel: string | null;
   ai: { label: string; fallbackMonths: number | null; fromIssueOnly?: boolean } | null; // read the expiry from the upload (fromIssueOnly: always issue date + fallbackMonths)
@@ -43,7 +44,7 @@ export const DOCS: DocDef<DocKey>[] = [
     expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null,
     hint: "Your driver licence or passport." },
   { key: "qualification", label: "Qualification", table: "qualifications", fileCols: ["transcript[]", "ahpra[]"], uploadCol: "transcript", uploadIsArray: true,
-    expiryCol: "expiry", numberCol: "registration_number", numberLabel: "AHPRA registration number",
+    expiryCol: "expiry", expiryOptional: true, numberCol: "registration_number", numberLabel: "AHPRA registration number",
     ai: { label: "Qualification certificate, academic transcript, or AHPRA registration. Only an AHPRA registration has an expiry date", fallbackMonths: null }, roster: null,
     hint: "Your certificate or transcript. Nurses: add your AHPRA number." },
 ];
@@ -84,7 +85,7 @@ export function statusOf(d: DocDef, r: { has_file: boolean; has_record: boolean;
   const onFile = d.uploadCol && !d.fileOptional ? Boolean(r?.has_file) : Boolean(r?.has_file) || typed;
   if (!onFile) return "missing";
   if (!d.expiryCol) return "ok";
-  if (!r?.expiry) return "check";
+  if (!r?.expiry) return d.expiryOptional ? "ok" : "check";
   if (r.expiry < today) return "expired";
   const soon = new Date(`${today}T00:00:00Z`);
   soon.setUTCDate(soon.getUTCDate() + SOON_DAYS);

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { sql } from "@/lib/db";
 import { bearerOk } from "@/lib/texts/auth";
-import { DOCS } from "@/lib/compliance/docs";
+import { ACCOUNT_DOCS, DOCS } from "@/lib/compliance/docs";
 import { readExpiry } from "@/lib/compliance/expiryReader";
 import { copied, fromStorage } from "@/lib/files";
 import { melbMidnight } from "@/lib/forms/fields";
@@ -10,8 +10,9 @@ import { melbMidnight } from "@/lib/forms/fields";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-// One-off (23 Nov 2026): each carer's latest CPR and first aid record that has a file but no expiry is read
-// again. A printed expiry is used, otherwise the issue date + 12 months (CPR) or 3 years (first aid).
+// One-off (23 Nov 2026): each carer's latest CPR, first aid, WWCC and insurance record that has a file but no
+// expiry is read again. A printed expiry is used, otherwise the issue date + 12 months (CPR), 3 years (first aid)
+// or 5 years (WWCC). A WWCC card number is filled in when the record has none.
 // Runs in small batches; each record is noted in app.expiry_backfill so it is only read once.
 const BATCH = 12;
 const OK_MIME = /^(application\/pdf|image\/(png|jpeg|gif|webp))$/;
@@ -35,13 +36,15 @@ export async function GET(req: Request) {
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Melbourne" }).format(new Date());
   const done: string[] = [];
   let left = BATCH;
-  for (const d of DOCS.filter((x) => x.key === "cpr" || x.key === "first_aid")) {
+  const keys = ["cpr", "first_aid", "wwcc", "insurance"];
+  for (const d of [...DOCS, ...ACCOUNT_DOCS].filter((x) => keys.includes(x.key))) {
     if (left <= 0) break;
     const col = d.uploadCol!;
     const recs = await sql<{ id: string; file: string }[]>`
       select x.id, x.file from (
-        select distinct on (t.carer) t.id, t.${sql(col)} as file, t.expiry
-          from ${sql(`app.${d.table}`)} t order by t.carer, t.created_at desc) x
+        select distinct on (t.carer) t.id, t.${sql(col)} as file, t.${sql(d.expiryCol!)} as expiry
+          from ${sql(`app.${d.table}`)} t join app.users u on u.id = t.carer and u.active
+         order by t.carer, t.created_at desc) x
        where x.expiry is null and coalesce(x.file, '') <> ''
          and not exists (select 1 from app.expiry_backfill b where b.record_id = x.id)
        limit ${left}`;
@@ -53,10 +56,13 @@ export async function GET(req: Request) {
         if (!f) result = "no file";
         else if (!OK_MIME.test(f.mime)) result = `unsupported ${f.mime}`;
         else {
-          const reading = await readExpiry(f.bytes, f.mime, d.ai!.label, d.ai!.fallbackMonths, today, d.ai!.fromIssueOnly ?? false);
+          const reading = await readExpiry(f.bytes, f.mime, d.ai!.label, d.ai!.fallbackMonths, today, d.ai!.fromIssueOnly ?? false, d.numberLabel);
+          if (d.numberCol && reading?.documentNumber && reading.reason !== "document_type_mismatch") {
+            await sql`update ${sql(`app.${d.table}`)} set ${sql(d.numberCol)} = ${reading.documentNumber} where id = ${r.id} and coalesce(${sql(d.numberCol)}, '') = ''`;
+          }
           if (reading?.reason === "document_type_mismatch") result = "not this document";
           else if (reading?.expiryDate) {
-            await sql`update ${sql(`app.${d.table}`)} set expiry = ${melbMidnight(reading.expiryDate)}, updated_at = now() where id = ${r.id}`;
+            await sql`update ${sql(`app.${d.table}`)} set ${sql(d.expiryCol!)} = ${melbMidnight(reading.expiryDate)}, updated_at = now() where id = ${r.id}`;
             result = `${reading.expiryDate} (${reading.expirySource})`;
           } else result = reading?.reason ?? "no date found";
         }

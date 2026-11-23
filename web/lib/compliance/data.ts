@@ -69,7 +69,7 @@ async function newRecord(tx: Tx, d: DocDef, carer: string, by: string | null, pr
   return r.id;
 }
 
-export type UploadResult = { status: Status; expiry: string | null; reading: ExpiryReading | null };
+export type UploadResult = { status: Status; expiry: string | null; reading: ExpiryReading | null; fileId: string };
 
 /** Keeps the file, reads its expiry where that can be done, and records it as the carer's current document. */
 export async function uploadDoc(
@@ -81,7 +81,7 @@ export async function uploadDoc(
   if (!DOC_TYPES.includes(file.type)) throw new DocError("Upload a photo or a PDF.");
   if (!file.bytes.length) throw new DocError("That file is empty.");
   if (file.bytes.length > MAX_DOC_BYTES) throw new DocError("That file is too big. Please take a photo instead.");
-  const reading = d.ai ? await read(file.bytes, file.type, d.ai.label, d.ai.fallbackMonths, today, d.ai.fromIssueOnly ?? false) : null;
+  const reading = d.ai ? await read(file.bytes, file.type, d.ai.label, d.ai.fallbackMonths, today, d.ai.fromIssueOnly ?? false, d.numberLabel) : null;
   const name = (file.name || d.label).replace(/[^\w.\- ]+/g, "_").slice(0, 120);
   return sql.begin(async (txx) => {
     const tx = txx as unknown as Tx;
@@ -94,9 +94,11 @@ export async function uploadDoc(
     set[d.uploadCol!] = d.uploadIsArray ? [...(Array.isArray(prev.extra[d.uploadCol!]) ? (prev.extra[d.uploadCol!] as string[]) : []), link] : link;
     // A new file replaces the old expiry: it is either read from the file or left for the office to check.
     if (d.expiryCol) set[d.expiryCol] = reading?.expiryDate && (reading.success || reading.reason === "expired") ? await dayValue(tx, reading.expiryDate) : null;
+    // The number printed on the document (WWCC card number, police check reference, AHPRA number) goes into its field.
+    if (d.numberCol && reading?.documentNumber && reading.reason !== "document_type_mismatch") set[d.numberCol] = reading.documentNumber;
     await newRecord(tx, d, carer, by, prev, set);
     const now = await current(d, carer, tx);
-    return { status: statusOf(d, now, today), expiry: now.expiry, reading };
+    return { status: statusOf(d, now, today), expiry: now.expiry, reading, fileId: f.id };
   });
 }
 
