@@ -33,7 +33,8 @@ export const DOCS: DocDef<DocKey>[] = [
     expiryCol: "expiry", numberCol: "card_number", numberLabel: "Card number", ai: { label: "Working with Children Check card", fallbackMonths: null }, roster: "all",
     hint: "A photo of your WWCC card." },
   { key: "ndis_screening", label: "NDIS worker screening", table: "ndis_screening_checks", fileCols: ["image"], uploadCol: "image", uploadIsArray: false,
-    fileOptional: true, expiryCol: "expiry_date", numberCol: "id_number", numberLabel: "Screening ID", ai: null, roster: "ndis",
+    fileOptional: true, expiryCol: "expiry_date", numberCol: "id_number", numberLabel: "Screening ID",
+    ai: { label: "NDIS Worker Screening Clearance (the clearance notice, email or letter). The expiry is written in the text, e.g. 'expires on DD/MM/YYYY'", fallbackMonths: 60 }, roster: "ndis",
     hint: "Your NDIS Worker Screening ID and its expiry date. A picture of your clearance is helpful too." },
   { key: "flu", label: "Flu vaccination", table: "vaccinations", fileCols: ["flu", "influenza[]"], uploadCol: "influenza", uploadIsArray: true,
     expiryCol: "expiry", numberCol: null, numberLabel: null, ai: { label: "Influenza (flu) vaccination record. Report the date the flu vaccine was given (administered) as issue_date. Ignore any vaccine product or batch expiry date", fallbackMonths: 12, fromIssueOnly: true }, roster: null,
@@ -42,7 +43,8 @@ export const DOCS: DocDef<DocKey>[] = [
     expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null,
     hint: "Your driver licence or passport." },
   { key: "qualification", label: "Qualification", table: "qualifications", fileCols: ["transcript[]", "ahpra[]"], uploadCol: "transcript", uploadIsArray: true,
-    expiryCol: "expiry", numberCol: "registration_number", numberLabel: "AHPRA registration number", ai: null, roster: null,
+    expiryCol: "expiry", numberCol: "registration_number", numberLabel: "AHPRA registration number",
+    ai: { label: "Qualification certificate, academic transcript, or AHPRA registration. Only an AHPRA registration has an expiry date", fallbackMonths: null }, roster: null,
     hint: "Your certificate or transcript. Nurses: add your AHPRA number." },
 ];
 
@@ -59,13 +61,15 @@ export const ACCOUNT_DOCS: DocDef<AccountDocKey>[] = [
   { key: "certificate", label: "Certificate", table: "qualifications", fileCols: ["transcript[]"], uploadCol: "transcript", uploadIsArray: true,
     expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null, hint: "Your qualification certificate or transcript (e.g. Cert III, Cert IV, Diploma, Bachelor of Nursing)." },
   { key: "insurance", label: "Insurance", table: "identity_documents", fileCols: ["insurance"], uploadCol: "insurance", uploadIsArray: false,
-    expiryCol: "insurance_expiry", numberCol: null, numberLabel: null, ai: null, roster: null,
+    expiryCol: "insurance_expiry", numberCol: null, numberLabel: null,
+    ai: { label: "Insurance certificate of currency or policy schedule (e.g. car or public liability insurance). The expiry is the end of the period of cover", fallbackMonths: null }, roster: null,
     hint: "A photo of your insurance certificate of currency, and the date it expires." },
   { key: "covid", label: "COVID-19", table: "vaccinations", fileCols: ["covid19[]"], uploadCol: "covid19", uploadIsArray: true,
     expiryCol: null, numberCol: null, numberLabel: null, ai: null, roster: null,
     hint: "Your COVID-19 digital certificate. One certificate lists every dose, including boosters." },
   { key: "ahpra", label: "AHPRA", table: "qualifications", fileCols: ["ahpra[]"], uploadCol: "ahpra", uploadIsArray: true,
-    expiryCol: "expiry", numberCol: "registration_number", numberLabel: "AHPRA registration number", ai: null, roster: null,
+    expiryCol: "expiry", numberCol: "registration_number", numberLabel: "AHPRA registration number",
+    ai: { label: "AHPRA registration (certificate of registration or a screenshot of the public register). The expiry is the registration expiry date", fallbackMonths: null }, roster: null,
     hint: "Your AHPRA registration (a screenshot of the public register is fine) and your registration number." },
 ];
 
