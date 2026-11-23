@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@/lib/auth";
-import { DocError, setDetails, uploadDoc } from "@/lib/compliance/data";
+import { DocError, isRenewal, setDetails, uploadDoc } from "@/lib/compliance/data";
 import { docDef, STATUS_LABEL, type AccountDocKey, type DocKey } from "@/lib/compliance/docs";
 import { uploadProfileFile, SignupError } from "@/lib/onboarding/data";
 import { auDate, isoDate } from "@/lib/invoicing/rules";
@@ -57,6 +57,8 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
     }
   }
   try {
+    // Only renewals of expired or expiring documents by active carers email the office.
+    const renewal = await isRenewal(carer, key, isoDate(new Date()));
     const r = await uploadDoc(carer, key, { name: file.name, type: file.type, bytes: Buffer.from(await file.arrayBuffer()) }, me.id, isoDate(new Date()));
     revalidatePath(pathFor(me.role, carer));
     revalidatePath("/carer/account", "layout");
@@ -69,7 +71,7 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
       const title = await readDocTitle(bytes, file.type);
       return title ?? `${label} (${file.name})`;
     };
-    const tell = async (outcome: string, detail: string) => (me.role === "admin" ? undefined : tellOffice(carer, await named(), outcome, detail));
+    const tell = async (outcome: string, detail: string) => (me.role === "admin" || !renewal ? undefined : tellOffice(carer, await named(), outcome, detail));
     if (r.reading?.reason === "document_type_mismatch") {
       await tell("Rejected", `Not a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."}`);
       return { ok: false, message: `Saved, but this doesn't look like a ${label} document${r.reading.mismatchReason ? `: ${r.reading.mismatchReason}` : "."} The office will check it.` };

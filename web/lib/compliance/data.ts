@@ -216,3 +216,21 @@ export const expiringSoon = (today: string, days = 7) => expiryAlerts(today, "so
 export async function markAlerted(items: { doc: string; record: string; expiry: string }[], kind: AlertKind = "soon") {
   for (const i of items) await sql`insert into app.compliance_alerts (doc, record, expiry, kind) values (${i.doc}, ${i.record}, ${i.expiry}::date, ${kind}) on conflict do nothing`;
 }
+
+/**
+ * Whether the office should hear about this upload: only an active carer renewing a document that has
+ * expired or expires within 30 days. Uploads while signing up (or for new documents) send nothing.
+ * Call before saving the new upload.
+ */
+export async function isRenewal(carer: string, key: string, today: string, withinDays = 30): Promise<boolean> {
+  const d = DOCS.find((x) => x.key === key);
+  if (!d?.expiryCol) return false;
+  const [r] = await sql<{ active: boolean; expiry: string | null }[]>`
+    select coalesce(u.active, false) as active,
+           (select ${melb(`t.${d.expiryCol}`)} from app.${id(d.table)} t where t.carer = u.id order by t.created_at desc limit 1) as expiry
+      from app.users u where u.id = ${carer}`;
+  if (!r?.active || !r.expiry) return false;
+  const limit = new Date(`${today}T00:00:00Z`);
+  limit.setUTCDate(limit.getUTCDate() + withinDays);
+  return r.expiry <= limit.toISOString().slice(0, 10);
+}
