@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SearchSelect } from "@/components/SearchSelect";
+import { AddressInput } from "@/app/carer/extras";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { availableOn, getShift, rangeShifts, rosterOptions, type RosterFilter, type RosterShift } from "@/lib/roster/queries";
@@ -483,7 +484,7 @@ function EventForm({ opts, close, mode, date, view, who, day, participant, event
               <label>When<input type="date" name="day" defaultValue={day} required /></label>
               <label>Time<input name="time" placeholder="13:00" defaultValue={event?.time ?? ""} required /></label>
             </div>
-            <label>Where<input name="where" placeholder="59 Monroe Street" defaultValue={event?.address ?? ""} /></label>
+            <AddressInput name="where" label="Where" listId="event-where-list" defaultValue={event?.address ?? ""} />
             {!event && (
               <details className="recurring">
                 <summary>Recurring?</summary>
