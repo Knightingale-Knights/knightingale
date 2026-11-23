@@ -108,6 +108,23 @@ export async function uploadDoc(
 
 const dayValue = async (tx: Tx, day: string) => (await tx<{ v: Date }[]>`select ${fromDay(day)} as v`)[0].v;
 
+/** Office only: takes a wrong document off the carer, so it shows as Missing and they're asked to upload it again.
+ *  The old record stays in the history (a new, empty record is added on top). */
+export async function removeDoc(carer: string, key: DocKey | AccountDocKey, by: string) {
+  const d = docDef(key);
+  if (!d || !d.uploadCol || d.table === "users") throw new DocError("That document can't be removed.");
+  await sql.begin(async (txx) => {
+    const tx = txx as unknown as Tx;
+    const prev = await current(d, carer, tx);
+    if (!prev.has_record) return;
+    const set: Record<string, unknown> = {};
+    for (const c of d.fileCols) set[c.replace("[]", "")] = null;
+    if (d.expiryCol) set[d.expiryCol] = null;
+    if (d.numberCol) set[d.numberCol] = null;
+    await newRecord(tx, d, carer, by, prev, set);
+  });
+}
+
 /** Number and (for documents with no file to read) expiry, typed in by the carer or the office. */
 export async function setDetails(carer: string, key: DocKey | AccountDocKey, by: string, v: { number?: string; expiry?: string }, today: string) {
   const d = docDef(key);

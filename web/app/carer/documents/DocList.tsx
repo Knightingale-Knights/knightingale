@@ -1,7 +1,7 @@
 import { fileHref, STATUS_LABEL } from "@/lib/compliance/docs";
 import type { DocState } from "@/lib/compliance/data";
 import { auDate } from "@/lib/invoicing/rules";
-import { detailsAction } from "./actions";
+import { detailsAction, removeDocAction } from "./actions";
 import { DocUpload } from "./DocUpload";
 
 /** The list of documents with status, files, details and upload. Used by carers and by the office. */
@@ -34,6 +34,17 @@ export function DocList({ docs, carer, admin, back }: { docs: DocState[]; carer?
             </form>
           )}
           {def.uploadCol && <DocUpload doc={def.key} carer={carer} label={files.length ? "Upload a new one" : "Upload"} />}
+          {admin && carer && def.uploadCol && files.length > 0 && (
+            <details className="confirm">
+              <summary>Remove</summary>
+              <form action={removeDocAction}>
+                <input type="hidden" name="carer" value={carer} />
+                <input type="hidden" name="doc" value={def.key} />
+                <p className="hint">This shows as Missing and they&apos;ll be asked to upload it again.</p>
+                <button className="link danger">Confirm remove {def.label}</button>
+              </form>
+            </details>
+          )}
         </section>
       ))}
     </div>

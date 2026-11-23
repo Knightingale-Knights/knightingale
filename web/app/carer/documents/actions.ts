@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@/lib/auth";
-import { DocError, isRenewal, setDetails, uploadDoc } from "@/lib/compliance/data";
+import { DocError, isRenewal, removeDoc, setDetails, uploadDoc } from "@/lib/compliance/data";
 import { docDef, STATUS_LABEL, type AccountDocKey, type DocKey } from "@/lib/compliance/docs";
 import { uploadProfileFile, SignupError } from "@/lib/onboarding/data";
 import { auDate, isoDate } from "@/lib/invoicing/rules";
@@ -109,6 +109,22 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
     if (!(e instanceof DocError)) console.error(e);
     return { ok: false, message: e instanceof DocError ? e.message : "Upload failed. Please try again." };
   }
+}
+
+export async function removeDocAction(f: FormData) {
+  const { me, carer } = await who(f.get("carer"));
+  if (me.role !== "admin") redirect("/carer");
+  const key = String(f.get("doc") ?? "") as DocKey | AccountDocKey;
+  let dest = `/compliance/${carer}?removed=${encodeURIComponent(docDef(key)?.label ?? "Document")}#${key}`;
+  try {
+    await removeDoc(carer, key, me.id);
+  } catch (e) {
+    if (!(e instanceof DocError)) console.error(e);
+    dest = `/compliance/${carer}?error=${encodeURIComponent(e instanceof DocError ? e.message : "Something went wrong. Please try again.")}`;
+  }
+  revalidatePath(`/compliance/${carer}`);
+  revalidatePath("/compliance");
+  redirect(dest);
 }
 
 export async function detailsAction(f: FormData) {

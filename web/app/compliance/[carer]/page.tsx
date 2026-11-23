@@ -12,7 +12,7 @@ import { setCarerActiveAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function CarerCompliance({ params, searchParams }: { params: Promise<{ carer: string }>; searchParams: Promise<{ error?: string; saved?: string; status?: string }> }) {
+export default async function CarerCompliance({ params, searchParams }: { params: Promise<{ carer: string }>; searchParams: Promise<{ error?: string; saved?: string; status?: string; removed?: string }> }) {
   const staff = await requireStaff();
   const { carer } = await params;
   const sp = await searchParams;
@@ -36,6 +36,7 @@ export default async function CarerCompliance({ params, searchParams }: { params
         <p className="lede">{[u.phone, u.email].filter(Boolean).join(" · ")}</p>
         {sp.error && <p className="banner error">{sp.error}</p>}
         {sp.saved && <p className="banner ok">Saved.</p>}
+        {sp.removed && <p className="banner ok">{sp.removed} removed. {u.name} will be asked to upload it again.</p>}
         {sp.status === "off" && <p className="banner ok">{u.name} is deactivated.</p>}
         {sp.status === "on" && <p className="banner ok">{u.name} is active again.</p>}
         <div className="row">
@@ -54,7 +55,7 @@ export default async function CarerCompliance({ params, searchParams }: { params
         </div>
         <DocList docs={docs} carer={carer} admin />
         <h2>Other documents</h2>
-        {u.no_insurance && <p className="hint">{u.name} said they don&apos;t have insurance.</p>}
+        {u.no_insurance && <p className="hint">{u.name} said they don&apos;t have car insurance.</p>}
         <DocList docs={other} carer={carer} admin />
       </main>
     </div>

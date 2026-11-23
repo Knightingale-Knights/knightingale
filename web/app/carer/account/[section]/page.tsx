@@ -62,9 +62,9 @@ export default async function AccountSection({ params, searchParams }: { params:
             )}
             {s.key === "insurance" && (noInsurance ? (
               <form action={noInsuranceAction} className="no-ins">
-                <p className="hint">You&apos;ve told us you don&apos;t have insurance, so you won&apos;t be offered shifts where a participant needs to be driven in your car.</p>
+                <p className="hint">You&apos;ve told us you don&apos;t have car insurance, so you won&apos;t be offered shifts where a participant needs to be driven in your car.</p>
                 <input type="hidden" name="none" value="0" />
-                <button className="secondary">I have insurance now</button>
+                <button className="secondary">I have car insurance now</button>
               </form>
             ) : !file && <div className="no-ins"><NoInsurance /></div>)}
             {!(s.key === "insurance" && noInsurance) && <DocList docs={[doc]} back={back} />}

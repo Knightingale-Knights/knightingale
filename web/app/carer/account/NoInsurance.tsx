@@ -13,17 +13,17 @@ export function NoInsurance() {
   };
   return (
     <>
-      <button type="button" className="secondary" onClick={() => setOpen(true)}>I don&apos;t have insurance</button>
+      <button type="button" className="secondary" onClick={() => setOpen(true)}>I don&apos;t have car insurance</button>
       {open && (
         <div className="nag-backdrop" role="dialog" aria-modal="true" aria-labelledby="noins-title">
           <div className="nag">
-            <p className="label">Insurance</p>
+            <p className="label">Car Insurance</p>
             <h2 id="noins-title">Before you continue</h2>
-            <p>Without insurance, you won&apos;t be able to accept shifts where a participant needs to be driven around in your car.</p>
-            <p className="hint">You can add your insurance any time from your Account, and those shifts open up again.</p>
+            <p>Without car insurance, you won&apos;t be able to accept shifts where a participant needs to be driven around in your car.</p>
+            <p className="hint">You can add your car insurance any time from your Account, and those shifts open up again.</p>
             <form action={noInsuranceAction} className="nag-actions">
               <input type="hidden" name="none" value="1" />
-              <button type="button" className="big" onClick={upload}>Add my insurance</button>
+              <button type="button" className="big" onClick={upload}>Add my car insurance</button>
               <button className="secondary">I understand, continue without</button>
             </form>
           </div>
