@@ -82,6 +82,9 @@ export async function uploadDoc(
   if (!file.bytes.length) throw new DocError("That file is empty.");
   if (file.bytes.length > MAX_DOC_BYTES) throw new DocError("That file is too big. Please take a photo instead.");
   const reading = d.ai ? await read(file.bytes, file.type, d.ai.label, d.ai.fallbackMonths, today, d.ai.fromIssueOnly ?? false, d.numberLabel) : null;
+  if (d.mustMatch && reading?.reason === "document_type_mismatch") {
+    throw new DocError(`This doesn't look like the right document${reading.mismatchReason ? ` (${reading.mismatchReason.replace(/\.$/, "")})` : ""}. Please upload ${d.mustMatch}.`);
+  }
   const name = (file.name || d.label).replace(/[^\w.\- ]+/g, "_").slice(0, 120);
   return sql.begin(async (txx) => {
     const tx = txx as unknown as Tx;

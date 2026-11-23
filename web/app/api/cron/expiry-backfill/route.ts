@@ -62,7 +62,14 @@ export async function GET(req: Request) {
           if (d.numberCol && reading?.documentNumber && reading.reason !== "document_type_mismatch") {
             await sql`update ${sql(`app.${d.table}`)} set ${sql(d.numberCol)} = ${reading.documentNumber} where id = ${r.id} and coalesce(${sql(d.numberCol)}, '') = ''`;
           }
-          if (reading?.reason === "document_type_mismatch") result = "not this document";
+          if (reading?.reason === "document_type_mismatch") {
+            result = "not this document";
+            // Wrong CPR / first aid documents are taken off, so the carer is asked to upload the right one (Paul, 23 Nov).
+            if (d.key === "cpr" || d.key === "first_aid") {
+              await sql`insert into ${sql(`app.${d.table}`)} (carer) select carer from ${sql(`app.${d.table}`)} where id = ${r.id}`;
+              result = "not this document (removed)";
+            }
+          }
           else if (reading?.expiryDate) {
             await sql`update ${sql(`app.${d.table}`)} set ${sql(d.expiryCol!)} = ${melbMidnight(reading.expiryDate)}, updated_at = now() where id = ${r.id}`;
             result = `${reading.expiryDate} (${reading.expirySource})`;
