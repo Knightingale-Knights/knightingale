@@ -237,10 +237,10 @@ a.button.big { display: flex; align-items: center; justify-content: center; marg
 .avail-row { display: grid; grid-template-columns: 84px repeat(3, 1fr); gap: 6px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .avail-row .d { font-size: 11px; letter-spacing: 0.04em; }
 .avail-row form { display: contents; }
-.slot { width: 100%; min-height: 34px; padding: 0 4px; font-size: 9px; background: transparent; color: var(--ink-2); border: 1px solid var(--line-2); }
+/* Carer availability: not chosen = outline (border and text in ink, see-through); chosen = filled in ink, text in the page colour. */
+.slot { width: 100%; min-height: 34px; padding: 0 4px; font-size: 9px; background: transparent; color: var(--ink); border: 1px solid var(--ink); }
 .slot:hover { background: transparent; color: var(--ink); border-color: var(--ink); }
-.slot.on { color: var(--ink); border-color: var(--ink); }
-.slot.booked { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.slot.on, .slot.on:hover, .slot.booked, .slot.booked:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
 /* Check in / out popup */
 .popup-back { position: fixed; inset: 0; background: rgba(26, 25, 23, 0.45); display: flex; align-items: flex-end; justify-content: center; z-index: 50; padding: 12px; }
