@@ -7,7 +7,10 @@ describe("times", () => {
     expect(parseClock("09:30")).toBe(930);
     expect(parseClock("930")).toBe(930);
     expect(parseClock("1430")).toBe(1430);
-    expect(parseClock("24:00")).toBeNull();
+    expect(parseClock("2230")).toBe(2230);
+    expect(parseClock("24:00")).toBe(0);
+    expect(parseClock("2430")).toBe(30);
+    expect(parseClock("25:00")).toBeNull();
     expect(parseClock("9:75")).toBeNull();
     expect(parseClock("")).toBeNull();
     expect(clockLabel(930)).toBe("09:30");

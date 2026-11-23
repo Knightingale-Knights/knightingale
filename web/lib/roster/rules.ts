@@ -13,8 +13,9 @@ export function parseClock(v: string | number | null | undefined): number | null
   if (!m) return null;
   const h = Number(m[1]);
   const min = Number(m[2]);
-  if (h > 23 || min > 59) return null;
-  return h * 100 + min;
+  // 24:xx is the same clock time as 00:xx (e.g. an overnight end of 24:30 is 00:30).
+  if (h > 24 || min > 59) return null;
+  return (h % 24) * 100 + min;
 }
 
 export const toMinutes = (c: number) => Math.floor(c / 100) * 60 + (c % 100);

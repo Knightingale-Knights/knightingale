@@ -29,7 +29,7 @@ function validate(i: ShiftInput) {
   const start = parseClock(i.start);
   const end = parseClock(i.end);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(i.day)) throw new Error("Choose a date.");
-  if (start == null || end == null) throw new Error("Enter start and end times like 09:30.");
+  if (start == null || end == null) throw new Error("Enter start and end times like 0930 or 09:30.");
   if (i.kind === "ndis" && !i.participant) throw new Error("Choose a participant.");
   if (i.kind === "residential" && !i.location) throw new Error("Choose a location.");
   if (!i.priceItem) throw new Error(i.kind === "ndis" ? "Choose an NDIS item." : "Choose a rate.");
@@ -224,7 +224,7 @@ export async function copyShift(id: string, days: string[], createdBy: string | 
 export async function markAttended(id: string, start: string, end: string) {
   const s = parseClock(start);
   const e = parseClock(end);
-  if (s == null || e == null) throw new Error("Enter attendance times like 09:30.");
+  if (s == null || e == null) throw new Error("Enter attendance times like 0930 or 09:30.");
   await sql`
     update app.shifts x set attended = true,
       attend_start = ((to_char(x.date at time zone 'Australia/Melbourne', 'YYYY-MM-DD') || ' ' || ${String(s).padStart(4, "0")})::timestamp at time zone 'Australia/Melbourne'),
