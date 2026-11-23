@@ -14,6 +14,7 @@ import { ShiftDetails } from "./ShiftDetails";
 import { Birthday } from "./Birthday";
 import { birthdayName } from "@/lib/carer/birthday";
 import { chatList } from "@/lib/chats/data";
+import { dayEvents, type DayEvent } from "@/lib/roster/events";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // the support summary takes a while to draft
@@ -31,7 +32,7 @@ function status(s: CarerShift) {
 }
 const needsNote = (s: CarerShift) => status(s) === "Progress note needed";
 
-export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; friends?: string; sent?: string; summary_error?: string; details?: string; tab?: string; note?: string; view?: string; done?: string; saved?: string; error?: string; travel?: string; xerror?: string; bday?: string }> }) {
+export default async function MyShifts({ searchParams }: { searchParams: Promise<{ date?: string; month?: string; summary?: string; logins?: string; friends?: string; sent?: string; summary_error?: string; details?: string; tab?: string; note?: string; view?: string; done?: string; saved?: string; error?: string; travel?: string; xerror?: string; bday?: string; appts?: string }> }) {
   const me = await requireCarer();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -40,6 +41,14 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
   const [from, to] = monthGrid(`${month}-01`);
   const [near, shifts, bday, chats] = await Promise.all([myShifts(me.id, today), myShiftsBetween(me.id, day ?? from, day ? addDays(day, 1) : to), birthdayName(me.id), chatList(me).catch(() => [])]);
   const unread = new Map(chats.map((c) => [c.participant, c.unread]));
+  // Appointments (events) for the participants on this day's shifts.
+  const mine = new Set(shifts.filter((s) => s.participant && !s.cancelled).map((s) => s.participant as string));
+  const events = new Map<string, DayEvent[]>();
+  if (day && mine.size) {
+    for (const e of await dayEvents(day).catch(() => [] as DayEvent[])) {
+      if (e.participant && mine.has(e.participant)) events.set(e.participant, [...(events.get(e.participant) ?? []), e]);
+    }
+  }
   const now = Date.now();
   const logins = day && sp.logins ? await myLeecareLogins(me.id, sp.logins) : null;
   const friends = day && sp.friends ? await shiftFriends(me.id, sp.friends) : null;
@@ -54,9 +63,10 @@ export default async function MyShifts({ searchParams }: { searchParams: Promise
       )}
       <main className="carer-main">
         <div className="pay-top"><Link href="/carer/payslips" className="button secondary">Payslips</Link></div>
-        {day ? <DayList day={day} today={today} shifts={shifts} now={now} unread={unread} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
+        {day ? <DayList day={day} today={today} shifts={shifts} now={now} unread={unread} events={events} /> : <MonthCal month={month} from={from} to={to} today={today} shifts={shifts} />}
       </main>
       {day && sp.details && <ShiftDetails s={shifts.find((s) => s.id === sp.details)} day={day} tab={sp.tab} email={me.email} msgs={sp} />}
+      {day && sp.appts && <AppointmentsPopup s={shifts.find((s) => s.id === sp.appts)} events={events} day={day} today={today} close={`/carer?date=${day}`} />}
       {day && friends && <FriendsPopup s={shifts.find((s) => s.id === sp.friends)} friends={friends} close={`/carer?date=${day}`} />}
       {day && logins && <LoginsPopup s={shifts.find((s) => s.id === sp.logins)} logins={logins} close={`/carer?date=${day}`} />}
       {day && sp.summary && <SummaryRequest s={shifts.find((s) => s.id === sp.summary && s.kind === "ndis")} email={me.email} close={`/carer?date=${day}`} day={day} sent={sp.sent} error={sp.summary_error} />}
@@ -92,7 +102,7 @@ function MonthCal({ month, from, to, today, shifts }: { month: string; from: str
   );
 }
 
-function DayList({ day, today, shifts, now, unread }: { day: string; today: string; shifts: CarerShift[]; now: number; unread: Map<string, number> }) {
+function DayList({ day, today, shifts, now, unread, events }: { day: string; today: string; shifts: CarerShift[]; now: number; unread: Map<string, number>; events: Map<string, DayEvent[]> }) {
   return (
     <>
       <div className="cal-nav">
@@ -102,7 +112,7 @@ function DayList({ day, today, shifts, now, unread }: { day: string; today: stri
       </div>
       <p className="lede"><Link href={`/carer?month=${day.slice(0, 7)}`}>← Back to the month</Link></p>
       {shifts.length === 0 && <p className="empty">No shifts on this day.</p>}
-      {shifts.map((s) => <ShiftCard key={s.id} s={s} day={day} now={now} unread={s.participant ? unread.get(s.participant) ?? 0 : 0} />)}
+      {shifts.map((s) => <ShiftCard key={s.id} s={s} day={day} now={now} unread={s.participant ? unread.get(s.participant) ?? 0 : 0} appts={s.participant ? events.get(s.participant)?.length ?? 0 : 0} />)}
     </>
   );
 }
@@ -110,7 +120,7 @@ function DayList({ day, today, shifts, now, unread }: { day: string; today: stri
 const money = (n: number) => `$${n.toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 /** One shift on the carer's day, laid out like the Bubble card. */
-function ShiftCard({ s, day, now, unread = 0 }: { s: CarerShift; day: string; now: number; unread?: number }) {
+function ShiftCard({ s, day, now, unread = 0, appts = 0 }: { s: CarerShift; day: string; now: number; unread?: number; appts?: number }) {
   const ndis = s.kind === "ndis";
   const check = checkButton(s, now);
   const name = ndis ? s.participant_name ?? s.place : s.place;
@@ -143,9 +153,42 @@ function ShiftCard({ s, day, now, unread = 0 }: { s: CarerShift; day: string; no
       {!s.cancelled && (
         <div className="shift-card-actions">
           <Link href={`/carer?date=${day}&friends=${s.id}`} className="button secondary">Friends</Link>
+          {ndis && appts > 0 && <Link href={`/carer?date=${day}&appts=${s.id}`} className="button secondary appt-btn">Appointment{appts > 1 ? `s (${appts})` : ""}</Link>}
           {ndis && <Link href={`/carer?date=${day}&details=${s.id}`} className="button">Details</Link>}
         </div>
       )}
+    </div>
+  );
+}
+
+/** The participant's appointments (events) on this day. Ones already past are greyed out. */
+function AppointmentsPopup({ s, events, day, today, close }: { s?: CarerShift; events: Map<string, DayEvent[]>; day: string; today: string; close: string }) {
+  if (!s?.participant) return null;
+  const list = events.get(s.participant) ?? [];
+  const nowClock = Number(new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Australia/Melbourne" }).format(new Date()).replace(":", ""));
+  const past = (e: DayEvent) => day < today || (day === today && e.time != null && e.time < nowClock);
+  const who = (s.participant_name ?? "").split(" ")[0];
+  return (
+    <div className="popup-back">
+      <Link href={close} className="modal-shade" aria-label="Close" />
+      <div className="popup details-popup">
+        <h2>Appointments</h2>
+        <p className="hint">{who ? `${who}'s` : "The participant's"} appointments on {day.slice(8)}/{day.slice(5, 7)}/{day.slice(2, 4)}.</p>
+        {list.length === 0 ? <p className="empty">No appointments this day.</p> : (
+          <ul className="appts">
+            {list.map((e) => (
+              <li key={e.id} className={past(e) ? "past" : ""}>
+                <span className="appt-time">{e.time != null ? clockLabel(e.time) : "Any time"}</span>
+                <span className="appt-info">
+                  <b>{e.details || "Appointment"}</b>
+                  {e.address && <small>{e.address}</small>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <Link href={close} className="button secondary popup-later">Close</Link>
+      </div>
     </div>
   );
 }
