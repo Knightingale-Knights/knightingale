@@ -92,8 +92,12 @@ export async function uploadDoc(
     const link = `/files/${f.id}`;
     const set: Record<string, unknown> = {};
     set[d.uploadCol!] = d.uploadIsArray ? [...(Array.isArray(prev.extra[d.uploadCol!]) ? (prev.extra[d.uploadCol!] as string[]) : []), link] : link;
-    // A new file replaces the old expiry: it is either read from the file or left for the office to check.
-    if (d.expiryCol) set[d.expiryCol] = reading?.expiryDate && (reading.success || reading.reason === "expired") ? await dayValue(tx, reading.expiryDate) : null;
+    // A new file's expiry is read from it. If it can't be read, a still-current expiry already on file is kept
+    // (e.g. the carer typed it in just before uploading); an expired one is cleared for the office to check.
+    if (d.expiryCol) {
+      const read = reading?.expiryDate && (reading.success || reading.reason === "expired") ? reading.expiryDate : null;
+      set[d.expiryCol] = read ? await dayValue(tx, read) : prev.expiry && prev.expiry >= today ? prev.extra[d.expiryCol] : null;
+    }
     // The number printed on the document (WWCC card number, police check reference, AHPRA number) goes into its field.
     if (d.numberCol && reading?.documentNumber && reading.reason !== "document_type_mismatch") set[d.numberCol] = reading.documentNumber;
     await newRecord(tx, d, carer, by, prev, set);

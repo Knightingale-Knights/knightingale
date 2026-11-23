@@ -12,7 +12,7 @@ export const maxDuration = 300;
 
 // One-off (23 Nov 2026): each carer's latest CPR, first aid, WWCC and insurance record that has a file but no
 // expiry is read again. A printed expiry is used, otherwise the issue date + 12 months (CPR), 3 years (first aid)
-// or 5 years (WWCC). A WWCC card number is filled in when the record has none.
+// or 5 years (WWCC). A WWCC card number is filled in when the record has none. AHPRA and NDIS screening too.
 // Runs in small batches; each record is noted in app.expiry_backfill so it is only read once.
 const BATCH = 12;
 const OK_MIME = /^(application\/pdf|image\/(png|jpeg|gif|webp))$/;
@@ -36,13 +36,15 @@ export async function GET(req: Request) {
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Melbourne" }).format(new Date());
   const done: string[] = [];
   let left = BATCH;
-  const keys = ["cpr", "first_aid", "wwcc", "insurance"];
-  for (const d of [...DOCS, ...ACCOUNT_DOCS].filter((x) => keys.includes(x.key))) {
+  const keys = ["ahpra", "wwcc", "insurance", "ndis_screening", "cpr", "first_aid"];
+  const defs = [...DOCS, ...ACCOUNT_DOCS].filter((x) => keys.includes(x.key)).sort((a, b) => keys.indexOf(a.key) - keys.indexOf(b.key));
+  for (const d of defs) {
     if (left <= 0) break;
     const col = d.uploadCol!;
     const recs = await sql<{ id: string; file: string }[]>`
       select x.id, x.file from (
-        select distinct on (t.carer) t.id, t.${sql(col)} as file, t.${sql(d.expiryCol!)} as expiry
+        select distinct on (t.carer) t.id,
+               ${d.uploadIsArray ? sql`(t.${sql(col)})[array_length(t.${sql(col)}, 1)]` : sql`t.${sql(col)}`} as file, t.${sql(d.expiryCol!)} as expiry
           from ${sql(`app.${d.table}`)} t join app.users u on u.id = t.carer and u.active
          order by t.carer, t.created_at desc) x
        where x.expiry is null and coalesce(x.file, '') <> ''
