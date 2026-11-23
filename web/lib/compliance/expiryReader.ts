@@ -102,7 +102,10 @@ export async function readExpiry(bytes: Buffer, mime: string, documentLabel: str
         messages: [{ role: "user", content: [docBlock, { type: "text", text: promptFor(documentLabel) }] }],
       }),
     });
-    if (!res.ok) return { ...empty, reason: `ai_error_${res.status}` };
+    if (!res.ok) {
+      console.error("expiry read: Claude", res.status, (await res.text()).slice(0, 500));
+      return { ...empty, reason: `ai_error_${res.status}` };
+    }
     const j = (await res.json()) as { content?: { type: string; input?: Record<string, any> }[] };
     const input = j.content?.find((b) => b.type === "tool_use")?.input;
     if (!input) return { ...empty, reason: "ai_error" };

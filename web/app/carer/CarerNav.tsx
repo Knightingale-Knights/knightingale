@@ -27,7 +27,8 @@ export async function CarerNav({ on, name, shiftsHref = "/carer" }: { on: On; na
   const [unread, nag, notices] = me
     ? await Promise.all([
         unreadTotal(me),
-        me.role === "carer" ? accountNag(me.id, today, !me.viewAs) : null,
+        // Not approved yet: only the "wrong page" popup, never the account checklist.
+        me.role === "carer" && !pending ? accountNag(me.id, today, !me.viewAs) : null,
         me.role === "carer" && !pending ? noticesFor(me.id) : [],
       ])
     : [0, null, []];

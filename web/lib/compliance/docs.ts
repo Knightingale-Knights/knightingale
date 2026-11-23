@@ -30,7 +30,7 @@ export const DOCS: DocDef<DocKey>[] = [
     expiryCol: null, numberCol: "reference_number", numberLabel: "Reference number", ai: { label: "National Police Check certificate", fallbackMonths: null }, roster: "all",
     hint: "Your National Police Check certificate." },
   { key: "wwcc", label: "Working with Children Check", table: "wwcc_checks", fileCols: ["image"], uploadCol: "image", uploadIsArray: false,
-    expiryCol: "expiry", numberCol: "card_number", numberLabel: "Card number", ai: { label: "Working with Children Check card", fallbackMonths: null }, roster: "all",
+    expiryCol: "expiry", numberCol: "card_number", numberLabel: "Card number", ai: { label: "Working with Children Check card", fallbackMonths: 60 }, roster: "all",
     hint: "A photo of your WWCC card." },
   { key: "ndis_screening", label: "NDIS worker screening", table: "ndis_screening_checks", fileCols: ["image"], uploadCol: "image", uploadIsArray: false,
     fileOptional: true, expiryCol: "expiry_date", numberCol: "id_number", numberLabel: "Screening ID",
