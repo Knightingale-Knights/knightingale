@@ -5,7 +5,7 @@ import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { CarerTabs } from "@/components/CarerTabs";
 import { sql } from "@/lib/db";
-import { carerDocs } from "@/lib/compliance/data";
+import { accountDocs, carerDocs } from "@/lib/compliance/data";
 import { isoDate } from "@/lib/invoicing/rules";
 import { DocList } from "@/app/carer/documents/DocList";
 import { setCarerActiveAction } from "./actions";
@@ -17,13 +17,16 @@ export default async function CarerCompliance({ params, searchParams }: { params
   const { carer } = await params;
   const sp = await searchParams;
   if (!/^[0-9a-f-]{36}$/i.test(carer)) notFound();
-  const [u] = await sql<{ name: string; phone: string | null; email: string | null; active: boolean; upcoming: number }[]>`
-    select trim(concat_ws(' ', first_name, last_name)) as name, phone_number as phone, email, coalesce(active, false) as active,
+  const [u] = await sql<{ name: string; phone: string | null; email: string | null; active: boolean; no_insurance: boolean; upcoming: number }[]>`
+    select trim(concat_ws(' ', first_name, last_name)) as name, phone_number as phone, email, coalesce(active, false) as active, coalesce(no_insurance, false) as no_insurance,
            (select count(*)::int from app.shifts s
              where s.carer = u.id and not coalesce(s.cancelled, false) and s.date >= date_trunc('day', now() at time zone 'Australia/Melbourne') at time zone 'Australia/Melbourne') as upcoming
       from app.users u where id = ${carer} and account_type = 'carer'`;
   if (!u) notFound();
-  const docs = await carerDocs(carer, isoDate(new Date()));
+  const [docs, other] = await Promise.all([
+    carerDocs(carer, isoDate(new Date())),
+    accountDocs(carer, ["insurance", "licence", "passport", "certificate", "ahpra", "covid", "resume"], isoDate(new Date())),
+  ]);
   return (
     <div className="shell">
       <TopBar section="/carers" email={staff.email}><CarerTabs on="/compliance" /></TopBar>
@@ -50,6 +53,9 @@ export default async function CarerCompliance({ params, searchParams }: { params
           </details>
         </div>
         <DocList docs={docs} carer={carer} admin />
+        <h2>Other documents</h2>
+        {u.no_insurance && <p className="hint">{u.name} said they don&apos;t have insurance.</p>}
+        <DocList docs={other} carer={carer} admin />
       </main>
     </div>
   );
