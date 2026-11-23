@@ -124,3 +124,11 @@ export function noteOpen(s: { day: string; end_at: Date | null }, now = new Date
   return today >= s.day && today <= nextDay(last);
 }
 export const NOTE_CLOSED = "Progress notes can only be written on the day of the shift or the day after.";
+
+const hhmm = (d: Date) => new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Australia/Melbourne" }).format(d);
+
+/** "C/I: 12:31 - C/O: 16:29" on the carer's shift card, so they can see their check in and out were recorded. */
+export function checkTimes(s: { attend_start: Date | null; attend_end: Date | null; cancelled: boolean }) {
+  if (s.cancelled || !s.attend_start) return null;
+  return `C/I: ${hhmm(new Date(s.attend_start))}${s.attend_end ? ` - C/O: ${hhmm(new Date(s.attend_end))}` : ""}`;
+}

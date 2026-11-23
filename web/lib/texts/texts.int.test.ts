@@ -70,6 +70,9 @@ describe.skipIf(!url)("carer texts (scratch database)", () => {
     expect((await t.linkReply("0412345678", "checkin", at("2026-12-16T06:00:00Z"))).message).toBe(t.ALREADY_IN);
 
     await t.runTexts(at("2026-12-16T09:01:00Z"), send); // 8:01pm, check out text
+    await sql`update app.shifts set attend_end = ${at("2026-12-16T09:29:00Z")} where id = ${ndis}`;
+    expect((await t.linkReply("0412345678", "checkout", at("2026-12-16T09:40:00Z"))).message).toBe("Hi Ann, you checked out at 8:29pm.");
+    expect((await t.linkReply("0412345678", "auto", at("2026-12-16T09:40:00Z"))).message).toBe("Hi Ann, you checked out at 8:29pm.");
     await t.runTexts(at("2026-12-16T11:01:00Z"), send); // 10:01pm, first note reminder
     await sql`insert into app.progress_notes (id, shift, submit) values (gen_random_uuid(), ${ndis}, true)`;
     await t.runTexts(at("2026-12-17T09:01:00Z"), send); // 8:01pm next day: note is in, so nothing

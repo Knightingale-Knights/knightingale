@@ -5,11 +5,14 @@ import { linkCheckAction } from "@/app/c/[token]/actions";
 
 type Props = { kind: "in" | "out"; shiftId: string; token?: string };
 
-/** Gets a fresh, precise location from the phone, then asks the server to check in or out. */
+/** Gets a fresh, precise location from the phone, then asks the server to check in or out.
+ *  A check-out is only recorded after the carer answers Yes to "Check out now?". */
 function useCheck({ kind, shiftId, token }: Props) {
   const [busy, setBusy] = useState(false);
+  const [asking, setAsking] = useState(false);
   const [result, setResult] = useState<CheckResult | null>(null);
   const go = () => {
+    setAsking(false);
     if (!navigator.geolocation) return setResult({ ok: false, message: "This phone can't share its location." });
     setBusy(true);
     setResult(null);
@@ -28,15 +31,39 @@ function useCheck({ kind, shiftId, token }: Props) {
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
     );
   };
+  const tap = () => {
+    if (kind === "out") {
+      setResult(null);
+      setAsking(true);
+    } else go();
+  };
   const label = busy ? "Finding your location…" : kind === "in" ? "Check in" : "Check out";
-  return { go, busy, result, label };
+  return { tap, go, busy, asking, cancel: () => setAsking(false), result, label };
+}
+
+type Check = ReturnType<typeof useCheck>;
+
+/** The main button, or the "Check out now?" question in its place. */
+function CheckControls({ c, done }: { c: Check; done?: boolean }) {
+  if (c.asking) {
+    return (
+      <div className="check-confirm">
+        <p className="check-confirm-q">Check out now?</p>
+        <div className="shift-card-actions">
+          <button className="secondary" onClick={c.cancel}>No</button>
+          <button onClick={c.go}>Yes</button>
+        </div>
+      </div>
+    );
+  }
+  return <button onClick={c.tap} disabled={c.busy || done} className="big">{c.label}</button>;
 }
 
 export function CheckButton(p: Props) {
   const c = useCheck(p);
   return (
     <div className="check">
-      <button onClick={c.go} disabled={c.busy} className="big">{c.label}</button>
+      <CheckControls c={c} />
       {c.result && <p className={`banner ${c.result.ok ? "ok" : "error"}`}>{c.result.message}</p>}
     </div>
   );
@@ -64,9 +91,9 @@ export function CheckPopup(p: Props & { title: string; detail: string; force?: b
         <h2 id="check-title">{p.kind === "in" ? "Ready to check in?" : "Ready to check out?"}</h2>
         <p className="popup-shift">{p.title}</p>
         <p className="hint">{p.detail}</p>
-        <button onClick={c.go} disabled={c.busy || c.result?.ok} className="big">{c.label}</button>
+        <CheckControls c={c} done={c.result?.ok} />
         {c.result && <p className={`banner ${c.result.ok ? "ok" : "error"}`}>{c.result.message}</p>}
-        {!c.result?.ok && <button className="link popup-later" onClick={close}>Not now</button>}
+        {!c.result?.ok && !c.asking && <button className="link popup-later" onClick={close}>Not now</button>}
         <p className="hint">You need to be within 500 m of the address, with location turned on.</p>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { addDays, addMonths, clockLabel, monthGrid } from "@/lib/roster/rules";
 import { isoDate } from "@/lib/invoicing/rules";
 import { CarerNav } from "./CarerNav";
 import { CheckButton, CheckPopup } from "./check";
-import { checkButton, dueCheck, onShiftDay } from "@/lib/carer/rules";
+import { checkButton, checkTimes, dueCheck, onShiftDay } from "@/lib/carer/rules";
 import { requestSummaryAction } from "./actions";
 import { shiftFriends, type Friend } from "@/lib/carer/friends";
 import { Portrait } from "@/components/CarerCells";
@@ -127,6 +127,7 @@ function ShiftCard({ s, day, now }: { s: CarerShift; day: string; now: number })
         {s.address_text && <div className="wide"><dt>Address</dt><dd>{s.address_text}</dd></div>}
       </dl>
       {status(s) && <p className={`status ${needsNote(s) ? "todo" : ""}`}>{status(s)}</p>}
+      {checkTimes(s) && <p className="shift-card-times">{checkTimes(s)}</p>}
       {s.wage != null && <p className="shift-card-pay">{money(s.wage)}</p>}
       {check && <CheckButton kind={check} shiftId={s.id} />}
       {!ndis && !s.cancelled && s.has_logins && onShiftDay(s, new Date(now)) && (

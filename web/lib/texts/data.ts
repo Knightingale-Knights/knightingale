@@ -110,6 +110,18 @@ function upcomingShift(list: TextShift[], now: number) {
     .sort((a, b) => Math.abs(a.start_at.getTime() - now) - Math.abs(b.start_at.getTime() - now))[0];
 }
 
+/** The shift the carer most recently checked out of, if that was in the last 6 hours. */
+function doneShift(list: TextShift[], now: number) {
+  return list
+    .filter((s) => s.attend_end && now - new Date(s.attend_end).getTime() <= 6 * HOUR && now >= new Date(s.attend_end).getTime())
+    .sort((a, b) => new Date(b.attend_end!).getTime() - new Date(a.attend_end!).getTime())[0];
+}
+
+/** "4:29pm" in Melbourne time. */
+export const smsTime = (d: Date) =>
+  new Intl.DateTimeFormat("en-AU", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Australia/Melbourne" })
+    .format(d).replace(/\s+/g, "").toLowerCase();
+
 export type Reply = { found: boolean; shiftId?: string; message: string };
 const hi = (s: TextShift) => (firstWord(s.first_name) ? `Hi ${firstWord(s.first_name)}` : "Hi");
 const firstWord = (n: string | null) => String(n ?? "").trim().split(/\s+/)[0] ?? "";
@@ -122,7 +134,9 @@ export async function linkReply(phone: string, intent: "checkin" | "checkout" | 
   const inReply = (s: TextShift): Reply => ({ found: true, shiftId: s.id, message: `${hi(s)}, here is your check in link: ${link(s.id, "in")}` });
   const o = openShift(list, t);
   const u = upcomingShift(list, t);
-  if (intent === "checkout") return o ? outReply(o) : { found: false, message: NOT_FOUND };
+  const d = doneShift(list, t);
+  const doneReply = (s: TextShift): Reply => ({ found: true, shiftId: s.id, message: `${hi(s)}, you checked out at ${smsTime(new Date(s.attend_end!))}.` });
+  if (intent === "checkout") return o ? outReply(o) : d ? doneReply(d) : { found: false, message: NOT_FOUND };
   if (intent === "checkin") {
     if (u) return inReply(u);
     if (o?.attend_start) return { found: true, shiftId: o.id, message: ALREADY_IN };
@@ -131,6 +145,7 @@ export async function linkReply(phone: string, intent: "checkin" | "checkout" | 
   if (o?.attend_start) return outReply(o);
   if (u) return inReply(u);
   if (o) return outReply(o);
+  if (d) return doneReply(d);
   return { found: false, message: NOT_FOUND };
 }
 

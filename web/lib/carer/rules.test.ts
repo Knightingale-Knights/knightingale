@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CheckError, assertCanCheck, checkButton, onShiftDay, dueCheck, formatNoteField, haversineM, parseModelJson } from "./rules";
+import { CheckError, assertCanCheck, checkButton, checkTimes, onShiftDay, dueCheck, formatNoteField, haversineM, parseModelJson } from "./rules";
 
 const home = { lat: -37.8548796, lng: 144.8790851 }; // 2 Wintringham Rd, Williamstown
 const start = new Date("2026-11-16T20:00:00Z"); // 7am Melbourne
@@ -95,5 +95,19 @@ describe("onShiftDay", () => {
     expect(onShiftDay(night, new Date("2026-11-17T19:00:00Z"))).toBe(true); // 06:00 on the 18th, still on shift
     expect(onShiftDay(night, new Date("2026-11-17T21:00:00Z"))).toBe(false);
     expect(onShiftDay(night, new Date("2026-11-16T12:30:00Z"))).toBe(false); // 23:30 on the 16th
+  });
+});
+
+describe("checkTimes", () => {
+  const at = (iso: string) => new Date(iso);
+  it("shows the check in and check out times in Melbourne time", () => {
+    expect(checkTimes({ attend_start: at("2026-11-23T01:31:00Z"), attend_end: at("2026-11-23T05:29:00Z"), cancelled: false })).toBe("C/I: 12:31 - C/O: 16:29");
+  });
+  it("shows only the check in time until they check out", () => {
+    expect(checkTimes({ attend_start: at("2026-11-23T01:31:00Z"), attend_end: null, cancelled: false })).toBe("C/I: 12:31");
+  });
+  it("shows nothing before check in or on a cancelled shift", () => {
+    expect(checkTimes({ attend_start: null, attend_end: null, cancelled: false })).toBeNull();
+    expect(checkTimes({ attend_start: at("2026-11-23T01:31:00Z"), attend_end: null, cancelled: true })).toBeNull();
   });
 });
