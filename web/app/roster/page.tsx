@@ -8,7 +8,7 @@ import { addDays, addMonths, clockLabel, monthGrid, periodOf, weekStart, type Pe
 import { isoDate } from "@/lib/invoicing/rules";
 import { shiftReceipts, shiftTravel } from "@/lib/carer/travel";
 import { fileHref } from "@/lib/files";
-import { adminNoteAction, attendedAction, cancelShiftAction, copyShiftAction, deleteEventAction, deleteShiftAction, removeTravelAction, saveEventAction, saveShiftAction, sendRosterAction } from "./actions";
+import { adminNoteAction, cancelShiftAction, deleteEventAction, deleteShiftAction, removeTravelAction, saveEventAction, saveShiftAction, sendRosterAction } from "./actions";
 import { NoteSteps } from "@/app/carer/NoteSteps";
 import { sql } from "@/lib/db";
 import { dayEvents, getEvent, participantDayEvents, type DayEvent, type EventDetail } from "@/lib/roster/events";
@@ -416,7 +416,6 @@ async function EditPanel({ id, error, eventHref, noteHref, ...ctx }: Ctx & { id:
     availableOn(shift.day), shiftTravel(id), shiftReceipts(id),
     shift.participant ? participantDayEvents(shift.participant, shift.day) : Promise.resolve([] as DayEvent[]),
   ]);
-  const nextWeek = Array.from({ length: 7 }, (_, i) => addDays(shift.day, i + 1));
   return (
     <ShiftForm {...ctx} kind={shift.kind} day={shift.day} shift={shift} free={free} error={error}>
       <div className="shift-extras">
@@ -432,7 +431,6 @@ async function EditPanel({ id, error, eventHref, noteHref, ...ctx }: Ctx & { id:
             ))}
           </div>
         )}
-        {shift.kind === "ndis" && <Link href={noteHref} className="button secondary note-btn">Create prog note</Link>}
         <p className="figures">
           Fee ${Number(shift.fee ?? 0).toFixed(2)} · Wage ${Number(shift.wage ?? 0).toFixed(2)} · Revenue ${Number(shift.revenue ?? 0).toFixed(2)}
         </p>
@@ -465,24 +463,7 @@ async function EditPanel({ id, error, eventHref, noteHref, ...ctx }: Ctx & { id:
         )}
         {(
           <>
-            <form action={attendedAction} className="pair end">
-              <Keep {...ctx} />
-              <input type="hidden" name="id" value={id} />
-              <label>Attended from<input name="attend_start" defaultValue={clockLabel(shift.start_time)} /></label>
-              <label>to<input name="attend_end" defaultValue={clockLabel(shift.end_time)} /></label>
-              <button className="secondary">{shift.attended ? "Update" : "Mark attended"}</button>
-            </form>
-            <form action={copyShiftAction}>
-              <Keep {...ctx} />
-              <input type="hidden" name="id" value={id} />
-              <p className="label">Copy to</p>
-              <div className="chips">
-                {nextWeek.map((d) => (
-                  <label key={d} className="chip"><input type="checkbox" name="copy_day" value={d} />{dayLabel(d)}</label>
-                ))}
-              </div>
-              <button className="secondary">Copy shift</button>
-            </form>
+            {shift.kind === "ndis" && <Link href={noteHref} className="button secondary note-btn">Create prog note</Link>}
             <div className="row tight">
               <form action={cancelShiftAction}>
                 <Keep {...ctx} />

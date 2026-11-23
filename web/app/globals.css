@@ -1044,3 +1044,4 @@ a.erow:hover { background: var(--desk); }
 .popup .location-help { max-height: 45vh; overflow-y: auto; }
 
 .note-btn { display: inline-grid; place-items: center; text-align: center; text-decoration: none; }
+.shift-extras .note-btn { min-height: 44px; width: 100%; }
