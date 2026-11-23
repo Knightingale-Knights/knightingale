@@ -11,8 +11,10 @@ function useCheck({ kind, shiftId, token }: Props) {
   const [busy, setBusy] = useState(false);
   const [asking, setAsking] = useState(false);
   const [result, setResult] = useState<CheckResult | null>(null);
+  const [help, setHelp] = useState(false);
   const go = () => {
     setAsking(false);
+    setHelp(false);
     if (!navigator.geolocation) return setResult({ ok: false, message: "This phone can't share its location." });
     setBusy(true);
     setResult(null);
@@ -26,6 +28,7 @@ function useCheck({ kind, shiftId, token }: Props) {
       },
       () => {
         setResult({ ok: false, message: "Please allow location access for this site, then try again." });
+        setHelp(true);
         setBusy(false);
       },
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
@@ -38,10 +41,35 @@ function useCheck({ kind, shiftId, token }: Props) {
     } else go();
   };
   const label = busy ? "Finding your location…" : kind === "in" ? "Check in" : "Check out";
-  return { tap, go, busy, asking, cancel: () => setAsking(false), result, label };
+  return { tap, go, busy, asking, cancel: () => setAsking(false), result, help, label };
 }
 
 type Check = ReturnType<typeof useCheck>;
+
+const HELP_STEPS = [
+  "In location services in settings",
+  "Go to your browser and turn it to on to allow location services while using the app",
+  "In settings, go to Apps and in apps, scroll to find your browser",
+  "Scroll to the bottom and find Location",
+  "Allow location",
+];
+
+/** Shown when the phone blocks location: how to turn it on, with screenshots. */
+function LocationHelp() {
+  return (
+    <section className="location-help" aria-labelledby="location-help-title">
+      <h3 id="location-help-title">Instructions to turn on location</h3>
+      <ol>
+        {HELP_STEPS.map((step, i) => (
+          <li key={i}>
+            <p>{step}</p>
+            <img src={`/location-help/${i + 1}.jpg`} alt={`Step ${i + 1}: ${step}`} loading="lazy" />
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
 
 /** The main button, or the "Check out now?" question in its place. */
 function CheckControls({ c, done }: { c: Check; done?: boolean }) {
@@ -65,6 +93,7 @@ export function CheckButton(p: Props) {
     <div className="check">
       <CheckControls c={c} />
       {c.result && <p className={`banner ${c.result.ok ? "ok" : "error"}`}>{c.result.message}</p>}
+      {c.help && <LocationHelp />}
     </div>
   );
 }
@@ -93,6 +122,7 @@ export function CheckPopup(p: Props & { title: string; detail: string; force?: b
         <p className="hint">{p.detail}</p>
         <CheckControls c={c} done={c.result?.ok} />
         {c.result && <p className={`banner ${c.result.ok ? "ok" : "error"}`}>{c.result.message}</p>}
+        {c.help && <LocationHelp />}
         {!c.result?.ok && !c.asking && <button className="link popup-later" onClick={close}>Not now</button>}
         <p className="hint">You need to be within 500 m of the address, with location turned on.</p>
       </div>
