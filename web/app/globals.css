@@ -1063,4 +1063,4 @@ a.erow:hover { background: var(--desk); }
 .status-toggle button[disabled] { opacity: 1; cursor: default; background: var(--ink); border-color: var(--ink); color: var(--paper); }
 .compliance-head { align-items: center; gap: 16px; }
 .compliance-head .portrait { width: 72px; height: 72px; flex: none; }
-.compliance-head h1 { margin: 0; }
+.compliance-head h1 { margin: 0; flex: 1; }
