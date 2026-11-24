@@ -3,7 +3,7 @@
 // on the note; an "alert" emails Paul's copy (care@) with the note attached as a PDF.
 import { sql } from "@/lib/db";
 import { env } from "@/lib/env";
-import { sendPlainEmail, sendTemplateWith, templateVariables } from "@/lib/postmark";
+import { sendPlainEmail, sendTemplateWith, templateInfo } from "@/lib/postmark";
 import { notePdf } from "@/lib/pdf";
 
 const ENDPOINT = process.env.PROGRESS_NOTE_AI_URL ?? "https://progress-notes.vercel.app/api/analyze-progress-note";
@@ -29,8 +29,20 @@ export function noteText(n: { summary: string | null; comms: string | null }) {
  * Fills the template's own variables by name: participant, carer, date, the shift summary (with
  * WHY THE ALERT WAS SENT and CARER'S WORDS, as Bubble sent it), subject, preheader and the alert reasons.
  */
-export function templateModel(vars: string[], n: { participant: string; carer: string; date: string; summary: string }, reasons: string[], mail: { subject: string; text: string }) {
-  const body = [`WHY THE ALERT WAS SENT: ${reasons.join(" ")}`, `CARER'S WORDS: ${n.summary}`].join("\n\n");
+const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/** The Shift Summary block. As HTML (for a {{{summary}}} slot) each reason and paragraph gets its own line. */
+export function summaryBlock(summary: string, reasons: string[], html: boolean) {
+  if (!html) return [`WHY THE ALERT WAS SENT: ${reasons.join(" ")}`, `CARER'S WORDS: ${summary}`].join("\n\n");
+  const lines = (t: string) => esc(t.trim()).replace(/\r?\n/g, "<br>");
+  return [
+    "WHY THE ALERT WAS SENT:<br>" + reasons.map((r) => `- ${esc(r)}`).join("<br>"),
+    "CARER'S WORDS:<br>" + lines(summary),
+  ].join("<br><br>");
+}
+
+export function templateModel(vars: string[], n: { participant: string; carer: string; date: string; summary: string }, reasons: string[], mail: { subject: string; text: string }, raw: string[] = []) {
+  const bodyFor = (v: string) => summaryBlock(n.summary, reasons, raw.includes(v));
   const pick = (v: string): unknown => {
     const k = v.toLowerCase();
     if (/subject|title|heading/.test(k)) return mail.subject;
@@ -39,7 +51,7 @@ export function templateModel(vars: string[], n: { participant: string; carer: s
     if (/participant|client|resident/.test(k)) return n.participant;
     if (/carer|worker|staff|author|from|sender/.test(k)) return n.carer;
     if (/date|day/.test(k)) return n.date;
-    if (/summary|note|body|content|words|message|text|details/.test(k)) return body;
+    if (/summary|note|body|content|words|message|text|details/.test(k)) return bodyFor(v);
     if (/company_name/.test(k)) return "Knightingale";
     if (/url|link/.test(k)) return "https://knightingale.com.au";
     return undefined;
@@ -105,9 +117,9 @@ export async function analyseNote(id: string): Promise<AiResult["status"] | null
     const pdf = await notePdf({ ...info, comms: n.comms, bestDay: n.best_day, reasons: bullets });
     const attachments = [{ Name: `Progress Note - ${participant} - ${info.date.replace(/\//g, "-")}.pdf`, Content: pdf, ContentType: "application/pdf" }];
     try {
-      const vars = await templateVariables(NOTE_TEMPLATE);
-      const model = templateModel(vars, info, bullets, mail);
-      console.log("progress note alert template", NOTE_TEMPLATE, { vars, filled: Object.keys(model) });
+      const t = await templateInfo(NOTE_TEMPLATE);
+      const model = templateModel(t.names, info, bullets, mail, t.raw);
+      console.log("progress note alert template", NOTE_TEMPLATE, { vars: t.names, raw: t.raw, filled: Object.keys(model) });
       await sendTemplateWith({ templateId: NOTE_TEMPLATE, to: ALERT_TO, model, attachments });
     } catch (e) {
       // The template couldn't be used: send the same alert as plain text so it is never lost.
