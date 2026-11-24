@@ -3,11 +3,13 @@
 // on the note; an "alert" emails Paul's copy (care@) with the note attached as a PDF.
 import { sql } from "@/lib/db";
 import { env } from "@/lib/env";
-import { sendPlainEmail } from "@/lib/postmark";
+import { sendPlainEmail, sendTemplateWith, templateVariables } from "@/lib/postmark";
 import { notePdf } from "@/lib/pdf";
 
 const ENDPOINT = process.env.PROGRESS_NOTE_AI_URL ?? "https://progress-notes.vercel.app/api/analyze-progress-note";
 const ALERT_TO = process.env.NOTE_ALERT_EMAIL ?? "care@knightingale.com.au";
+/** Bubble's "Progress Notes" Postmark template. */
+const NOTE_TEMPLATE = Number(process.env.POSTMARK_NOTE_TEMPLATE_ID ?? 41115884);
 
 export type AiResult = { status: "alert" | "routine" | "no_contact"; summary_bullets: string[]; reasoning?: string };
 
@@ -21,6 +23,33 @@ export function noteText(n: { summary: string | null; comms: string | null }) {
   const comms = (n.comms ?? "").trim();
   const quiet = !comms || /^nothing to report\.?$/i.test(comms);
   return [(n.summary ?? "").trim(), quiet ? "" : `Communication book: ${comms}`].filter(Boolean).join("\n\n");
+}
+
+/**
+ * Fills the template's own variables by name: participant, carer, date, the shift summary (with
+ * WHY THE ALERT WAS SENT and CARER'S WORDS, as Bubble sent it), subject, preheader and the alert reasons.
+ */
+export function templateModel(vars: string[], n: { participant: string; carer: string; date: string; summary: string }, reasons: string[], mail: { subject: string; text: string }) {
+  const body = [`WHY THE ALERT WAS SENT: ${reasons.join(" ")}`, `CARER'S WORDS: ${n.summary}`].join("\n\n");
+  const pick = (v: string): unknown => {
+    const k = v.toLowerCase();
+    if (/subject|title|heading/.test(k)) return mail.subject;
+    if (/preheader|preview|intro/.test(k)) return `Progress note for ${n.participant}, shift on ${n.date} with ${n.carer}.`;
+    if (/reason|why|alert|bullet/.test(k)) return reasons.join(" ");
+    if (/participant|client|resident/.test(k)) return n.participant;
+    if (/carer|worker|staff|author|from|sender/.test(k)) return n.carer;
+    if (/date|day/.test(k)) return n.date;
+    if (/summary|note|body|content|words|message|text|details/.test(k)) return body;
+    if (/company_name/.test(k)) return "Knightingale";
+    if (/url|link/.test(k)) return "https://knightingale.com.au";
+    return undefined;
+  };
+  const model: Record<string, unknown> = {};
+  for (const v of vars) {
+    const val = pick(v.split(".").pop() ?? v);
+    if (val !== undefined) model[v.split(".")[0]] = val;
+  }
+  return model;
 }
 
 /** "🚨🚨 IMPORTANT: LUCIA ROMEO PROGRESS NOTE 🚨🚨" plus the plain-text body, as Bubble sent it. */
@@ -74,10 +103,17 @@ export async function analyseNote(id: string): Promise<AiResult["status"] | null
   const mail = alertEmail(info, bullets);
   try {
     const pdf = await notePdf({ ...info, comms: n.comms, bestDay: n.best_day, reasons: bullets });
-    await sendPlainEmail({
-      to: ALERT_TO, from: env.fromEmail, subject: mail.subject, text: mail.text,
-      attachments: [{ Name: `Progress Note - ${participant} - ${info.date.replace(/\//g, "-")}.pdf`, Content: pdf, ContentType: "application/pdf" }],
-    });
+    const attachments = [{ Name: `Progress Note - ${participant} - ${info.date.replace(/\//g, "-")}.pdf`, Content: pdf, ContentType: "application/pdf" }];
+    try {
+      const vars = await templateVariables(NOTE_TEMPLATE);
+      const model = templateModel(vars, info, bullets, mail);
+      console.log("progress note alert template", NOTE_TEMPLATE, { vars, filled: Object.keys(model) });
+      await sendTemplateWith({ templateId: NOTE_TEMPLATE, to: ALERT_TO, model, attachments });
+    } catch (e) {
+      // The template couldn't be used: send the same alert as plain text so it is never lost.
+      console.error("progress note template failed, sending plain", e);
+      await sendPlainEmail({ to: ALERT_TO, from: env.fromEmail, subject: mail.subject, text: mail.text, attachments });
+    }
   } catch (e) {
     // Not sent: unmark it so the catch-up cron tries again.
     await sql`update app.progress_notes set ai_analysed = false where id = ${id}`;

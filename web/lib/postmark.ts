@@ -51,3 +51,26 @@ export function sendPlainEmail(o: { to: string; subject: string; text: string; a
 export function sendTemplateEmail(templateId: number, to: string, model: Record<string, unknown>, from = env.fromEmail) {
   return post("email/withTemplate", { TemplateId: templateId, From: from, To: to, TemplateModel: model, MessageStream: "outbound" });
 }
+
+/** The {{variables}} a Postmark template uses (from its subject, HTML and text), e.g. ["participant", "carer"]. */
+export async function templateVariables(templateId: number): Promise<string[]> {
+  if (!env.postmarkToken) throw new Error("POSTMARK_TOKEN is not set");
+  const res = await fetch(`https://api.postmarkapp.com/templates/${templateId}`, {
+    headers: { Accept: "application/json", "X-Postmark-Server-Token": env.postmarkToken },
+  });
+  const t = (await res.json().catch(() => ({}))) as { Subject?: string; HtmlBody?: string; TextBody?: string; Message?: string };
+  if (!res.ok) throw new Error(`Postmark template ${templateId}: ${t.Message ?? res.status}`);
+  const names = new Set<string>();
+  for (const m of `${t.Subject ?? ""} ${t.HtmlBody ?? ""} ${t.TextBody ?? ""}`.matchAll(/\{\{\{?\s*[#^/]?\s*([A-Za-z_][\w.]*)\s*\}?\}\}/g)) {
+    if (!["each", "if", "unless", "else", "this"].includes(m[1])) names.add(m[1]);
+  }
+  return [...names];
+}
+
+/** Sends a Postmark template with attachments and an optional cc. */
+export function sendTemplateWith(o: { templateId: number; to: string; model: Record<string, unknown>; attachments?: Attachment[]; cc?: string; from?: string }) {
+  return post("email/withTemplate", {
+    TemplateId: o.templateId, From: o.from ?? env.fromEmail, To: o.to, ...(o.cc ? { Cc: o.cc } : {}),
+    TemplateModel: o.model, Attachments: o.attachments ?? [], MessageStream: "outbound",
+  });
+}
