@@ -1066,3 +1066,5 @@ a.erow:hover { background: var(--desk); }
 .compliance-head h1 { margin: 0; }
 .compliance-name { flex: 1; }
 .compliance-role { margin: 4px 0 0; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); }
+.compliance-contact { margin: 18px 0 20px; display: grid; gap: 8px; }
+.compliance-contact .lede { margin: 0; }
