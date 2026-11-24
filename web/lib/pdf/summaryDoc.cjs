@@ -114,7 +114,7 @@ async function buildSupportSummaryPdf({ participantName, reportPeriod, content }
   add("Summary of Work", (c.summaryOfWork || []).flatMap((s) => [subhead(s.heading), ...paras(s.body), { text: "", margin: [0, 0, 0, 8] }]));
   add("Observations and Recommendations", [
     ...((c.keyObservations || []).length ? [subhead("Key observations"), dashList(c.keyObservations), { text: "", margin: [0, 0, 0, 14] }] : []),
-    ...((c.recommendations || []).length ? [subhead("Recommendations"), dashList(c.recommendations)] : [])
+    ...((c.recommendations || []).length ? [subhead("What's Next..."), dashList(c.recommendations)] : [])
   ]);
 
   const body = [
