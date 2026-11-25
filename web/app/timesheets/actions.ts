@@ -49,7 +49,7 @@ export async function payAction(f: FormData) {
       gross: num("gross"), tax: num("tax"), hours: num("hours"), reimbursements: num("reimbursements"),
       super: Math.round(num("gross") * 12) / 100, net: Math.round((num("gross") - num("tax") + num("reimbursements")) * 100) / 100, start: day("start"), end: day("end"), paid: day("paid"),
     });
-    p.set("msg", `Payslip saved for ${String(f.get("name") ?? "the carer")}.`);
+    p.set("paid", String(f.get("name") ?? "the carer"));
   } catch (e) {
     if (!(e instanceof PayError)) console.error("pay failed", e);
     p.set("error", e instanceof PayError ? e.message : "The payslip could not be saved. Please try again.");

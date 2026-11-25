@@ -18,7 +18,7 @@ const dayLabel = (day: string) =>
 const clock = (d: Date | null) =>
   d ? new Intl.DateTimeFormat("en-AU", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Australia/Melbourne" }).format(new Date(d)) : "";
 
-export default async function Timesheets({ searchParams }: { searchParams: Promise<{ from?: string; to?: string; q?: string; msg?: string; warn?: string; error?: string; pay?: string }> }) {
+export default async function Timesheets({ searchParams }: { searchParams: Promise<{ from?: string; to?: string; q?: string; msg?: string; warn?: string; error?: string; pay?: string; paid?: string }> }) {
   const staff = await requireStaff();
   const sp = await searchParams;
   const today = isoDate(new Date());
@@ -40,6 +40,16 @@ export default async function Timesheets({ searchParams }: { searchParams: Promi
       <main className="page wide">
         <h1>Timesheets</h1>
         {sp.msg && <p className="banner ok">{sp.msg}</p>}
+        {sp.paid && (
+          <div className="popup-back clear" role="dialog" aria-modal="true">
+            <Link href={span(from, to)} className="modal-shade clear" aria-label="Close" scroll={false} />
+            <div className="popup">
+              <h2>Payslip saved</h2>
+              <p>{sp.paid}&apos;s payslip has been saved. They can see it in their Payslips.</p>
+              <Link href={span(from, to)} className="big button" scroll={false}>Done</Link>
+            </div>
+          </div>
+        )}
         {sp.warn && <p className="banner warn">{sp.warn}</p>}
         {sp.error && <p className="banner error">{sp.error}</p>}
         <form className="row filters">
