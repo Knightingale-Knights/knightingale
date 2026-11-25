@@ -260,8 +260,11 @@ export async function expiryAlerts(today: string, kind: AlertKind, days = kind =
     : sql`x.e >= ${fromDay(today)} and x.e < ${fromDay(end.toISOString().slice(0, 10))}`;
   for (const d of DOCS) {
     if (!d.expiryCol) continue;
-    const col = d.uploadCol ? id(d.uploadCol) : null;
-    const file = !col ? sql`null::text` : d.uploadIsArray ? sql`t.${col}[array_length(t.${col}, 1)]` : sql`nullif(t.${col}, '')`;
+    // The document itself: the newest upload, from whichever of the document's file columns has one.
+    const cols = [...new Set([d.uploadCol ? (d.uploadIsArray ? `${d.uploadCol}[]` : d.uploadCol) : null, ...d.fileCols].filter(Boolean) as string[])];
+    const file = cols.length
+      ? sql.unsafe(`coalesce(${cols.map((c) => c.endsWith("[]") ? `t.${c.slice(0, -2)}[array_length(t.${c.slice(0, -2)}, 1)]` : `nullif(t.${c}, '')`).join(", ")})`)
+      : sql`null::text`;
     const rows = await sql<{ record: string; carer: string; carer_id: string; email: string | null; first: string | null; expiry: string; file: string | null }[]>`
       select x.id as record, trim(concat_ws(' ', u.first_name, u.last_name)) as carer, u.id as carer_id,
              nullif(trim(u.email), '') as email, nullif(trim(u.first_name), '') as first, ${melb("x.e")} as expiry, x.file
