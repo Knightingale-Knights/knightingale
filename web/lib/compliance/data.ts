@@ -245,7 +245,7 @@ export async function rosterProblems(carer: string, day: string, ndis: boolean, 
   return out;
 }
 
-export type ExpiryAlert = { doc: DocKey; label: string; record: string; carer: string; carer_id: string; email: string | null; first: string | null; expiry: string };
+export type ExpiryAlert = { doc: DocKey; label: string; record: string; carer: string; carer_id: string; email: string | null; first: string | null; expiry: string; file: string | null };
 
 export type AlertKind = "soon" | "expired" | "carer" | "carer_expired";
 
@@ -260,10 +260,13 @@ export async function expiryAlerts(today: string, kind: AlertKind, days = kind =
     : sql`x.e >= ${fromDay(today)} and x.e < ${fromDay(end.toISOString().slice(0, 10))}`;
   for (const d of DOCS) {
     if (!d.expiryCol) continue;
-    const rows = await sql<{ record: string; carer: string; carer_id: string; email: string | null; first: string | null; expiry: string }[]>`
+    const col = d.uploadCol ? id(d.uploadCol) : null;
+    const file = !col ? sql`null::text` : d.uploadIsArray ? sql`t.${col}[array_length(t.${col}, 1)]` : sql`nullif(t.${col}, '')`;
+    const rows = await sql<{ record: string; carer: string; carer_id: string; email: string | null; first: string | null; expiry: string; file: string | null }[]>`
       select x.id as record, trim(concat_ws(' ', u.first_name, u.last_name)) as carer, u.id as carer_id,
-             nullif(trim(u.email), '') as email, nullif(trim(u.first_name), '') as first, ${melb("x.e")} as expiry
-        from (select distinct on (t.carer) t.id, t.carer, t.${id(d.expiryCol)} as e from app.${id(d.table)} t order by t.carer, t.created_at desc) x
+             nullif(trim(u.email), '') as email, nullif(trim(u.first_name), '') as first, ${melb("x.e")} as expiry, x.file
+        from (select distinct on (t.carer) t.id, t.carer, t.${id(d.expiryCol)} as e, ${file} as file
+                from app.${id(d.table)} t order by t.carer, t.created_at desc) x
         join app.users u on u.id = x.carer and u.account_type = 'carer'
          and coalesce(u.active, false) and coalesce(u.account_status, false)
        where ${range}
