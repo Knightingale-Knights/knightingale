@@ -81,8 +81,8 @@ async function PayPopup({ sheet, from, to, q, close, error }: { sheet: Sheet; fr
   const d = await payDraft(sheet.carer, from, to, { gross, hours: sheet.hours, reimbursements: sheet.receipts + sheet.travel });
   const first = sheet.name.split(" ")[0].toUpperCase();
   return (
-    <div className="popup-back">
-      <Link href={close} className="modal-shade" aria-label="Close" scroll={false} />
+    <div className="popup-back clear">
+      <Link href={close} className="modal-shade clear" aria-label="Close" scroll={false} />
       <form action={payAction} className="popup pay-popup">
         <h2>{first}&apos;s pay</h2>
         {error && <p className="banner error">{error}</p>}
