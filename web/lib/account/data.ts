@@ -17,7 +17,9 @@ export async function accountOverview(carer: string, today: string) {
              u.availability_set as avail,
              exists (select 1 from app.bank_details b where b.carer = u.id and b.acc_no is not null and b.bsb_no is not null) as bank,
              exists (select 1 from app.superannuation s where s.carer = u.id and s.fund_name is not null and s.member_no is not null) as super,
-             exists (select 1 from app.tfn_declarations t where t.carer = u.id and t.tax_file_number is not null and nullif(t.signature, '') is not null) as tfn,
+             coalesce((select nullif(t.tax_file_number, '') is not null and nullif(t.working_rights, '') is not null and t.tax_free_threshold is not null
+                       and t.student_loan_debt is not null and nullif(t.signature, '') is not null
+                  from app.tfn_declarations t where t.carer = u.id order by t.updated_at desc nulls last limit 1), false) as tfn,
              exists (select 1 from app.identity_documents i where i.carer = u.id and i.insurance is not null) as insurance,
              u.no_insurance
         from app.users u where u.id = ${carer}`;

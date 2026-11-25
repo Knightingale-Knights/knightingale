@@ -42,6 +42,8 @@ export async function ownsFile(userId: string, url: string) {
       union all select 1 from app.qualifications where carer = ${userId} and (${url} = any(transcript) or ${url} = any(ahpra))
       union all select 1 from app.identity_documents where carer = ${userId} and ${url} in (license, passport, citizenship, insurance)
       union all select 1 from app.shifts where carer = ${userId} and ${url} = any(receipts)
+      union all select 1 from app.tfn_declarations where carer = ${userId} and signature = ${url}
+      union all select 1 from app.superannuation where carer = ${userId} and signature = ${url}
     ) as ok`;
   return r.ok;
 }

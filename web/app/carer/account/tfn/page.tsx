@@ -33,6 +33,16 @@ export default async function TaxFileNumber({ searchParams }: { searchParams: Pr
         <form action={tfnAction} className="details-form" autoComplete="off">
           <label>Tax file number<input name="tfn" defaultValue={v.tfn} required inputMode="numeric" maxLength={11} /></label>
           <label>Residency
+            <span className="tfn-residency">
+              Generally, you are an Australian resident for tax purposes if you:
+              <ul>
+                <li>have always lived in Australia or you have come to Australia and live here permanently</li>
+                <li>have been in Australia continuously for 6 months or more, and for most of that time you worked in the one job and lived at the same place</li>
+                <li>have been in Australia for more than 6 months of the year, unless your usual home is overseas and you do not intend to live in Australia</li>
+                <li>go overseas temporarily and you do not set up a permanent home in another country</li>
+                <li>are an overseas student who has come to Australia to study and are enrolled in a course that is more than 6 months long.</li>
+              </ul>
+            </span>
             <select name="residency" defaultValue={residency} required>
               <option value="" disabled>Choose one</option>
               {RESIDENCY.map((r) => <option key={r}>{r}</option>)}

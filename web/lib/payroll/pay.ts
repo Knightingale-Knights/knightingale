@@ -23,7 +23,8 @@ export type PayDraft = {
 async function taxProfile(carer: string, days: number): Promise<{ profile: TaxProfile; note: string }> {
   const [d] = await sql<{ tfn: string | null; residency: string | null; threshold: boolean | null; loan: boolean | null }[]>`
     select tax_file_number as tfn, working_rights as residency, tax_free_threshold as threshold, student_loan_debt as loan
-      from app.tfn_declarations where carer = ${carer} order by updated_at desc limit 1`;
+      from app.tfn_declarations where carer = ${carer} and nullif(tax_file_number, '') is not null
+     order by updated_at desc limit 1`; // a cleared declaration (waiting to be redone) leaves the last one in force
   const kind = residencyKind(d?.residency ?? null, d?.tfn ?? null);
   const studyLoan = Boolean(d?.loan);
   const loanNote = studyLoan ? ", with a study loan" : "";
