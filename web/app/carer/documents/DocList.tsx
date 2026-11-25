@@ -8,7 +8,7 @@ import { DocUpload } from "./DocUpload";
 export function DocList({ docs, carer, admin, back }: { docs: DocState[]; carer?: string; admin?: boolean; back?: string }) {
   return (
     <div className="docs">
-      {docs.map(({ def, status, files, expiry, number }) => (
+      {[...docs].sort((x, y) => x.def.label.localeCompare(y.def.label)).map(({ def, status, files, expiry, number }) => (
         <section key={def.key} id={def.key} className={`block doc ${status}`}>
           <div className="doc-head">
             <h2>{def.label}</h2>
