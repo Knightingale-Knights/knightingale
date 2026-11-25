@@ -2,6 +2,7 @@
 import { sql } from "@/lib/db";
 import { accountDocs } from "@/lib/compliance/data";
 import { sectionsFor } from "./sections";
+import { CONTRACT_VERSION_FROM } from "@/lib/contract/data";
 
 export type Done = boolean | null; // null: no tick (nothing to complete)
 
@@ -13,7 +14,7 @@ export async function accountOverview(carer: string, today: string) {
       select trim(concat_ws(' ', u.first_name, u.last_name)) as name, u.profile_photo as photo, u.roles,
              (nullif(trim(u.first_name), '') is not null and nullif(trim(u.last_name), '') is not null and u.phone_number is not null
                and u.date_of_birth is not null and u.address is not null and u.email is not null) as personal,
-             u.contract_signature is not null as signed,
+             (u.contract_signature is not null and u.contract_date >= ${CONTRACT_VERSION_FROM}) as signed,
              u.availability_set as avail,
              exists (select 1 from app.bank_details b where b.carer = u.id and b.acc_no is not null and b.bsb_no is not null) as bank,
              exists (select 1 from app.superannuation s where s.carer = u.id and s.fund_name is not null and s.member_no is not null) as super,

@@ -420,7 +420,7 @@ export type Support = { id: string; no: number | null; ndis_pricing: string | nu
 
 /** NDIS price items for the Schedule of Supports. */
 export function priceItems() {
-  return sql<PriceItem[]>`select id, item_no, item_name, item_price::float as item_price from app.ndis_price_items order by item_name`;
+  return sql<PriceItem[]>`select id, item_no, item_name, item_price::float as item_price from app.ndis_price_items where not archived order by item_name`;
 }
 
 /** The Service Agreement's supports (Bubble's Support Arrangements), in order. */

@@ -96,10 +96,10 @@ export async function rosterOptions() {
     sql<PriceOption[]>`
       select id, coalesce(item_name, item_no, '(unnamed)') as name, item_no as extra,
              item_price as rate, hourly_revenue, carer_pay
-        from app.ndis_price_items order by item_name`,
+        from app.ndis_price_items where not archived order by item_name`,
     sql<PriceOption[]>`
       select id, coalesce(name, '(unnamed)') as name, null as extra, rate, hourly_revenue, carer_pay
-        from app.residential_prices order by name`,
+        from app.residential_prices where not archived order by name`,
   ]);
   return { carers, participants, locations, ndisItems, resPrices };
 }

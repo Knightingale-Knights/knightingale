@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requireCarer } from "@/lib/auth";
 import { fileHref } from "@/lib/files";
 import { contractState } from "@/lib/contract/data";
-import { CONTRACT, EMPLOYER, PAY_COLUMNS, PAY_ROWS, positionOf } from "@/lib/contract/text";
+import { CONTRACT, EMPLOYER, PAY_COLUMNS, PAY_NOTES, PAY_ROWS, positionOf } from "@/lib/contract/text";
 import { auDate } from "@/lib/invoicing/rules";
 import { ViewAsBar } from "@/components/ViewAsBar";
 import { signContractAction } from "./actions";
@@ -25,7 +25,7 @@ export default async function Contract({ searchParams }: { searchParams: Promise
       <main className="contract">
         <p className="wordmark small">Knightingale</p>
         <h1>Casual Employment Contract</h1>
-        {!signed && <p className="lede">Before you start, please read and sign your employment contract.</p>}
+        {!signed && <p className="lede">{state.outdated ? "Our pay rates have changed. Please read and sign your updated employment contract." : "Before you start, please read and sign your employment contract."}</p>}
         <div className="contract-parties">
           <p className="label">An employment agreement between</p>
           <p>{EMPLOYER}</p>
@@ -42,9 +42,10 @@ export default async function Contract({ searchParams }: { searchParams: Promise
             {b.table && (
               <table className="pay-table">
                 <thead><tr><th></th>{PAY_COLUMNS.map((c) => <th key={c}>{c}</th>)}</tr></thead>
-                <tbody>{PAY_ROWS.map(([k, ...v]) => <tr key={k}><th>{k}</th>{v.map((n, j) => <td key={j}>${n}</td>)}</tr>)}</tbody>
+                <tbody>{PAY_ROWS.map(([k, ...v]) => <tr key={k}><th>{k}</th>{v.map((n, j) => <td key={j}>{n == null ? "n/a" : `$${n}`}</td>)}</tr>)}</tbody>
               </table>
             )}
+            {b.table && PAY_NOTES.map((t, j) => <p key={`n${j}`} className="hint">{t}</p>)}
           </section>
         ))}
         <section className="contract-sign">

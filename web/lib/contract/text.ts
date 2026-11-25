@@ -7,16 +7,20 @@ export const ROLE_LABEL: Record<string, string> = { rn: "RN", en: "EN", dsw: "DS
 export const positionOf = (roles: string[] | null) =>
   (roles ?? []).map((r) => ROLE_LABEL[r]).filter(Boolean).join(" / ") || "carer";
 
-/** Hourly rates by shift type, inclusive of casual loading. Columns: EN, PCA/DSW, RN. */
-export const PAY_COLUMNS = ["EN", "PCA / DSW", "RN"] as const;
-export const PAY_ROWS: [string, number, number, number][] = [
-  ["AM", 50, 40, 80],
-  ["PM", 55, 45, 90],
-  ["NS", 60, 50, 95],
-  ["SAT", 70, 55, 100],
-  ["SUN", 80, 65, 110],
-  ["P/H", 110, 90, 140],
-  ["O/T", 60, 50, 95],
+/** Hourly rates by shift type, inclusive of casual loading. null = not offered. */
+export const PAY_COLUMNS = ["EN", "PCA", "DSW (Home)", "DSW (Community)", "RN"] as const;
+export const PAY_ROWS: [string, ...(number | null)[]][] = [
+  ["AM", 51, 46, 45, 46, 60],
+  ["PM", 56, 50, 45, 50, 65],
+  ["NS", 60, 51, 50, null, 70],
+  ["SAT", 77, 64, 55, 64, 90],
+  ["SUN", 89, 73, 65, 82, 110],
+  ["P/H", 110, 100, 100, 100, 120],
+  ["O/T", 77, 68, 51, 64, 78],
+];
+export const PAY_NOTES = [
+  "PCA rates apply to aged care shifts. DSW (Home) rates apply to NDIS personal care in a participant's home. DSW (Community) rates apply to NDIS community access.",
+  "These rates apply from 25 November 2026.",
 ];
 
 export type Block = { h?: string; p?: string[]; list?: string[]; sub?: string[]; bullets?: string[]; after?: string[]; table?: true };
