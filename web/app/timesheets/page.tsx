@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AutoClose } from "@/components/AutoClose";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { timesheets, type PayLine, type Sheet, type SheetShift } from "@/lib/timesheets/data";
@@ -47,6 +48,7 @@ export default async function Timesheets({ searchParams }: { searchParams: Promi
               <h2>Payslip saved</h2>
               <p>{sp.paid}&apos;s payslip has been saved. They can see it in their Payslips.</p>
               <Link href={span(from, to)} className="big button" scroll={false}>Done</Link>
+              <AutoClose href={span(from, to)} />
             </div>
           </div>
         )}
