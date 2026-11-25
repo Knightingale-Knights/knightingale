@@ -12,8 +12,11 @@ export function PayFields({ d, notes }: {
   const [gross, setGross] = useState(f2(d.gross));
   const [tax, setTax] = useState(f2(d.tax));
   const [reimb, setReimb] = useState(f2(d.reimbursements));
-  const sup = f2(n(gross) * 0.12);
-  const net = f2(n(gross) - n(tax) + n(reimb));
+  // Super and net follow the other boxes until Paul types his own figure into them.
+  const [supOwn, setSup] = useState<string | null>(null);
+  const [netOwn, setNet] = useState<string | null>(null);
+  const sup = supOwn ?? f2(n(gross) * 0.12);
+  const net = netOwn ?? f2(n(gross) - n(tax) + n(reimb));
   const box = (name: string, label: string, value: string, set: ((v: string) => void) | null, note?: string) => (
     <label>{label}
       <input name={name} value={value} inputMode="decimal" required readOnly={!set} onChange={set ? (e) => set(e.target.value) : undefined} />
@@ -24,9 +27,9 @@ export function PayFields({ d, notes }: {
     <>
       {box("gross", "Gross pay", gross, setGross, notes.gross)}
       {box("tax", "Tax", tax, setTax, notes.tax)}
-      {box("super", "Super", sup, null, "12% of gross pay")}
+      {box("super", "Super", sup, setSup, supOwn == null ? "12% of gross pay" : "Your figure")}
       {box("reimbursements", "Reimbursements", reimb, setReimb, notes.reimbursements)}
-      {box("net", "Net pay", net, null, "Gross - tax + reimbursements")}
+      {box("net", "Net pay", net, setNet, netOwn == null ? "Gross - tax + reimbursements" : "Your figure")}
       <label>Hours<input name="hours" defaultValue={f2(d.hours)} inputMode="decimal" required /></label>
     </>
   );

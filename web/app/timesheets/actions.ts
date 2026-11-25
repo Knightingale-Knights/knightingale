@@ -47,7 +47,7 @@ export async function payAction(f: FormData) {
   try {
     await createPayslip(String(f.get("carer") ?? ""), staff.id, {
       gross: num("gross"), tax: num("tax"), hours: num("hours"), reimbursements: num("reimbursements"),
-      super: Math.round(num("gross") * 12) / 100, net: Math.round((num("gross") - num("tax") + num("reimbursements")) * 100) / 100, start: day("start"), end: day("end"), paid: day("paid"),
+      super: Math.round(num("super") * 100) / 100, net: Math.round(num("net") * 100) / 100, start: day("start"), end: day("end"), paid: day("paid"),
     });
     p.set("paid", String(f.get("name") ?? "the carer"));
   } catch (e) {
