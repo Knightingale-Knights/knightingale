@@ -217,7 +217,7 @@ export async function replacementInfo(a: { phone: string; id: string }) {
     .map((r) => ({ id: r.id, name: `${r.first_name ?? ""} ${r.last_name ?? ""}`.trim(), first: (r.first_name ?? "").trim() || "there", phone: r.phone }));
   return {
     shift: { id: s.id, day: s.day, start: clock(start), end: clock(end), role, participant: s.participant_name || null, location: s.location_name || null },
-    carer: c.name, carer_first: c.first, minutes_until: minutesUntil(s.day, start), candidates,
+    carer: c.name, carer_id: c.id, carer_first: c.first, minutes_until: minutesUntil(s.day, start), candidates,
   };
 }
 
