@@ -1075,3 +1075,10 @@ a.erow:hover { background: var(--desk); }
 .compliance-role { margin: 4px 0 0; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); }
 .compliance-contact { margin: 18px 0 20px; display: grid; gap: 8px; }
 .compliance-contact .lede { margin: 0; }
+
+/* Tabs on a carer's Compliance page */
+.record-tabs { display: flex; flex-wrap: wrap; gap: 0; margin: 18px 0 26px; border-bottom: 1px solid var(--line-2); }
+.record-tabs a { padding: 12px 18px; margin-bottom: -1px; border: 1px solid transparent; border-bottom: 0; color: var(--ink-2); text-decoration: none; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+.record-tabs a:hover { color: var(--ink); }
+.record-tabs a.on { color: var(--ink); background: var(--paper); border-color: var(--line-2); border-bottom: 1px solid var(--paper); }
+.record-tabs + .slip-page, .record-tabs ~ .slip-page { min-height: 0; padding-top: 0; background: none; }

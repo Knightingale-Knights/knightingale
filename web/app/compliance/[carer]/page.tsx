@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ViewAsButton } from "@/components/ViewAsButton";
 import { Portrait, roleList } from "@/components/CarerCells";
+import { TabBar, TabBody, tabOf } from "./CarerTabs";
 import { notFound } from "next/navigation";
 import { requireStaff } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
@@ -13,7 +14,7 @@ import { approveCarerAction, setCarerActiveAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function CarerCompliance({ params, searchParams }: { params: Promise<{ carer: string }>; searchParams: Promise<{ error?: string; saved?: string; status?: string; removed?: string }> }) {
+export default async function CarerCompliance({ params, searchParams }: { params: Promise<{ carer: string }>; searchParams: Promise<{ error?: string; saved?: string; status?: string; removed?: string; tab?: string; slip?: string }> }) {
   const staff = await requireStaff();
   const { carer } = await params;
   const sp = await searchParams;
@@ -26,6 +27,7 @@ export default async function CarerCompliance({ params, searchParams }: { params
       from app.users u where id = ${carer} and account_type = 'carer'`;
   if (!u) notFound();
   const on = u.approved && u.active;
+  const tab = tabOf(sp.tab);
   const [docs, other] = await Promise.all([
     carerDocs(carer, isoDate(new Date())),
     accountDocs(carer, ["insurance", "licence", "passport", "certificate", "ahpra", "covid", "resume"], isoDate(new Date())),
@@ -40,6 +42,8 @@ export default async function CarerCompliance({ params, searchParams }: { params
           {(u.phone || u.email) && <p className="lede">{[u.phone, u.email].filter(Boolean).join(" · ")}</p>}
           {u.address && <p className="lede">{u.address}</p>}
         </div>
+        <TabBar carer={carer} on={tab} />
+        {tab !== "docs" ? <TabBody carer={carer} tab={tab} slip={sp.slip} /> : (<>
         {sp.error && <p className="banner error">{sp.error}</p>}
         {sp.saved && <p className="banner ok">Saved.</p>}
         {sp.removed && <p className="banner ok">{sp.removed} removed. {u.name} will be asked to upload it again.</p>}
@@ -63,6 +67,7 @@ export default async function CarerCompliance({ params, searchParams }: { params
         <h2>Other documents</h2>
         {u.no_insurance && <p className="hint">{u.name} said they don&apos;t have car insurance.</p>}
         <DocList docs={other} carer={carer} admin />
+        </>)}
       </main>
     </div>
   );
