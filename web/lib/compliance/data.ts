@@ -94,7 +94,11 @@ export async function uploadDoc(
       values (${carer}, ${key}, ${name}, ${file.type}, ${file.bytes}, ${reading ? sql.json(reading as never) : null}, ${by}) returning id`;
     const link = `/files/${f.id}`;
     const set: Record<string, unknown> = {};
-    set[d.uploadCol!] = d.uploadIsArray ? [...(Array.isArray(prev.extra[d.uploadCol!]) ? (prev.extra[d.uploadCol!] as string[]) : []), link] : link;
+    // A new upload replaces what came before (only the latest flu, COVID or AHPRA record counts). Qualification
+    // certificates are the exception: a carer can have several, so they add up.
+    const keepOld = d.uploadCol === "transcript";
+    set[d.uploadCol!] = d.uploadIsArray ? [...(keepOld && Array.isArray(prev.extra[d.uploadCol!]) ? (prev.extra[d.uploadCol!] as string[]) : []), link] : link;
+    if (d.uploadIsArray && !keepOld) for (const c of d.fileCols) { const col = c.replace("[]", ""); if (col !== d.uploadCol) set[col] = null; }
     // A new file's expiry is read from it. If it can't be read, a still-current expiry already on file is kept
     // (e.g. the carer typed it in just before uploading); an expired one is cleared for the office to check.
     if (d.expiryCol) {
