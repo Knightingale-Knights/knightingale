@@ -4,6 +4,9 @@ import { sql } from "@/lib/db";
 import { dbValues, fieldsFrom, melbMidnight, readForm, type Section } from "@/lib/forms/fields";
 import { saveIntakePart } from "./intake";
 
+/** Knightingale's signature on every participant document (Paul, 25 Nov 2026). */
+export const KN_SIGNATURE = "/knightingale-signature.png";
+
 export type DocDef = { key: string; title: string; table: string; link: string; sections: Section[] };
 
 export const CONSENT: DocDef = {
@@ -206,7 +209,7 @@ export async function riskShowValues(participant: string): Promise<Record<string
            i.contact2address->>'address' as ro_c2addr, i.contact2phone as ro_c2phone, i.contact2email as ro_c2email, i.contact2advocacyform as ro_c2adv,
            (select string_agg(o.display, ', ') from opt o where o.set_key = 'participation_consent' and o.value = any(i.consent)) as ro_consent,
            (select nullif(sa.representative_signature, '') from app.service_agreements sa where sa.id = u.service_agreement) as ro_rep_sig,
-           nullif(i.knightingale_signature, '') as ro_kn_sig,
+           ${KN_SIGNATURE}::text as ro_kn_sig,
            to_char(i.signature_date at time zone 'Australia/Melbourne', 'DD/MM/YYYY') as ro_kn_date
       from app.users u left join i on true where u.id = ${participant}`;
   if (!r) return {};
@@ -349,7 +352,7 @@ export const SUPPORT: DocDef = {
         { col: "ro_name", label: "Participant", kind: "show" },
         { col: "signed_date", label: "Date", kind: "date" },
         { col: "representative_signature", label: "Representative Signature (if applicable)", kind: "signature", src: "intake" },
-        { col: "knightingale_signature", label: "Knightingale Signature", kind: "signature", src: "intake" },
+        { col: "ro_kn_sig", label: "Knightingale Signature", kind: "show", img: true },
         { col: "signature_date", label: "Date", kind: "date", src: "intake" },
       ],
     },
