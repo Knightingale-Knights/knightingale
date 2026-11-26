@@ -19,7 +19,7 @@ export default async function Notices({ searchParams }: { searchParams: Promise<
     sp.edit && sp.edit !== "new" ? notice(sp.edit) : Promise.resolve(null),
   ]);
   const names = new Map(carers.map((c) => [c.id, c.name]));
-  const form = sp.edit ? (editing ?? { id: "", title: "", body: "", active: false, roles: [] as string[], carers: [] as string[] }) : null;
+  const form = sp.edit ? (editing ?? { id: "", title: "", body: "", active: true, roles: [] as string[], carers: [] as string[] }) : null;
   return (
     <div className="shell">
       <TopBar section="/carers" email={staff.email}><CarerTabs on="/notices" /></TopBar>
