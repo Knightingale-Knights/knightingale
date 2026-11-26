@@ -76,10 +76,17 @@ async function clashWarnings(tx: Tx, carer: string | null, day: string, start: n
 /** Marks the carer's matching availability slots as taken. */
 async function takeSlots(tx: Tx, carer: string | null, day: string, start: number, end: number) {
   if (!carer) return;
-  await tx`
+  const taken = await tx`
     update app.availability set accepted = 'YES', available = false
      where carer = ${carer} and date >= ${fromDay(day)} and date < ${fromDay(addDays(day, 1))}
-       and shift = any(${slotsFor(start, end)}::text[])`;
+       and shift = any(${slotsFor(start, end)}::text[])
+     returning id`;
+  // They offered that day and got a shift: marked Accepted on the Availability screen (where they no longer show).
+  if (taken.length) {
+    await tx`
+      insert into app.carer_misses (carer, day, reason) values (${carer}, ${day}::date, 'accepted')
+      on conflict (carer, day) do update set reason = 'accepted', updated_at = now()`;
+  }
 }
 
 /** Frees slots this carer no longer needs on that day (no other live shift covers them). */
