@@ -7,16 +7,22 @@ export const CONTRACT_GATE = true;
 
 /** Signatures before this moment are for an older version of the contract, so carers sign again. */
 export const CONTRACT_VERSION_FROM = new Date("2026-11-26T00:00:00+11:00");
+/** ENs sign again after the EN AM rate changed to $55. */
+export const EN_CONTRACT_VERSION_FROM = new Date("2026-11-26T12:35:00+11:00");
+
+export const contractVersionFrom = (roles: string[] | null) =>
+  (roles ?? []).includes("en") ? EN_CONTRACT_VERSION_FROM : CONTRACT_VERSION_FROM;
 
 export type ContractState = { signature: string | null; date: Date | null; outdated: boolean };
 
-const current = (date: Date | null) => Boolean(date && new Date(date) >= CONTRACT_VERSION_FROM);
+const current = (date: Date | null, roles: string[] | null) =>
+  Boolean(date && new Date(date) >= contractVersionFrom(roles));
 
 export async function contractState(userId: string): Promise<ContractState> {
-  const [r] = await sql<{ signature: string | null; date: Date | null }[]>`
-    select contract_signature as signature, contract_date as date from app.users where id = ${userId}`;
+  const [r] = await sql<{ signature: string | null; date: Date | null; roles: string[] | null }[]>`
+    select contract_signature as signature, contract_date as date, roles from app.users where id = ${userId}`;
   if (!r) return { signature: null, date: null, outdated: false };
-  if (r.signature && !current(r.date)) return { signature: null, date: null, outdated: true };
+  if (r.signature && !current(r.date, r.roles)) return { signature: null, date: null, outdated: true };
   return { signature: r.signature, date: r.date, outdated: false };
 }
 
@@ -30,10 +36,10 @@ export async function signContract(userId: string, dataUrl: string) {
   if (bytes.length > MAX_SIG_BYTES) throw new Error("That signature is too large. Please clear it and sign again.");
   await sql.begin(async (txx) => {
     const tx = txx as unknown as typeof sql;
-    const [u] = await tx<{ signature: string | null; date: Date | null }[]>`
-      select contract_signature as signature, contract_date as date from app.users where id = ${userId} for update`;
+    const [u] = await tx<{ signature: string | null; date: Date | null; roles: string[] | null }[]>`
+      select contract_signature as signature, contract_date as date, roles from app.users where id = ${userId} for update`;
     if (!u) throw new Error("We couldn't find your account.");
-    if (u.signature && current(u.date)) return; // already signed this version (double tap)
+    if (u.signature && current(u.date, u.roles)) return; // already signed this version (double tap)
     const [f] = await tx<{ id: string }[]>`
       insert into app.compliance_files (carer, doc, file_name, mime, bytes, uploaded_by)
       values (${userId}, 'contract_signature', 'contract-signature.png', 'image/png', ${bytes}, ${userId}) returning id`;
