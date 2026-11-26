@@ -55,6 +55,7 @@ export async function profileUploadAction(f: FormData): Promise<UploadResult> {
     return { ok: true, message: "Uploaded. Thank you!" };
   } catch (e) {
     if (!(e instanceof SignupError)) console.error(e);
+    else console.warn("profile upload refused", me.id, kind, file.type, file.size, e.message);
     return { ok: false, message: e instanceof SignupError ? e.message : "Upload failed. Please try again." };
   }
 }

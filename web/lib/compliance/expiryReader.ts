@@ -92,6 +92,10 @@ const empty: ExpiryReading = {
 export async function readExpiry(bytes: Buffer, mime: string, documentLabel: string, fallbackMonths: number | null, today: string, fromIssueOnly = false, numberLabel: string | null = null): Promise<ExpiryReading | null> {
   if (!process.env.ANTHROPIC_API_KEY) return null;
   const data = bytes.toString("base64");
+  // Trust the file's own bytes over its label (a PNG named .jpg is refused by Claude).
+  const sniff = bytes.subarray(0, 4).toString("hex");
+  if (mime !== "application/pdf") mime = sniff.startsWith("89504e47") ? "image/png" : sniff.startsWith("ffd8ff") ? "image/jpeg"
+    : sniff.startsWith("47494638") ? "image/gif" : bytes.subarray(8, 12).toString("ascii") === "WEBP" ? "image/webp" : mime;
   const docBlock = mime === "application/pdf"
     ? { type: "document", source: { type: "base64", media_type: "application/pdf", data } }
     : { type: "image", source: { type: "base64", media_type: mime, data } };

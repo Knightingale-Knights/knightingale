@@ -107,6 +107,7 @@ export async function uploadDocAction(f: FormData): Promise<DocResult> {
     return { ok: true, message: `Thanks, your ${label} is saved. ${r.status === "check" ? STATUS_LABEL.check + "." : ""}`.trim() };
   } catch (e) {
     if (!(e instanceof DocError)) console.error(e);
+    else console.warn("upload refused", carer, key, e.message); // what the carer was told, for when they ask
     return { ok: false, message: e instanceof DocError ? e.message : "Upload failed. Please try again." };
   }
 }
