@@ -69,12 +69,12 @@ export default async function Notices({ searchParams }: { searchParams: Promise<
                     </td>
                     <td className="num">{n.reads} / {n.audience}</td>
                     <td>{n.active ? <span className="tick">ON</span> : <span className="dash">Off</span>}</td>
-                    <td className="row tight">
-                      <form action={noticeOpAction}><input type="hidden" name="id" value={n.id} /><button name="op" value={n.active ? "off" : "on"} className={n.active ? "secondary" : ""}>{n.active ? "Turn off" : "Turn on"}</button></form>
+                    <td><div className="row tight">
+                      <form action={noticeOpAction}><input type="hidden" name="id" value={n.id} /><input type="hidden" name="op" value={n.active ? "off" : "on"} /><button className={n.active ? "secondary" : ""}>{n.active ? "Turn off" : "Turn on"}</button></form>
                       <Link href={`/notices?edit=${n.id}`} className="button secondary">Edit</Link>
-                      <form action={noticeOpAction}><input type="hidden" name="id" value={n.id} /><button name="op" value="reset" className="secondary" title="Show it again to everyone who already tapped Got it">Show again</button></form>
-                      <form action={noticeOpAction}><input type="hidden" name="id" value={n.id} /><button name="op" value="delete" className="secondary">Delete</button></form>
-                    </td>
+                      <form action={noticeOpAction}><input type="hidden" name="id" value={n.id} /><input type="hidden" name="op" value="reset" /><button className="secondary" title="Show it again to everyone who already tapped Got it">Show again</button></form>
+                      <form action={noticeOpAction}><input type="hidden" name="id" value={n.id} /><input type="hidden" name="op" value="delete" /><button className="secondary">Delete</button></form>
+                    </div></td>
                   </tr>
                 ))}
               </tbody>
