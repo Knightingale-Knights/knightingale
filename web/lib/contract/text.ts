@@ -10,7 +10,7 @@ export const positionOf = (roles: string[] | null) =>
 /** Hourly rates by shift type, inclusive of casual loading. null = not offered. */
 export const PAY_COLUMNS = ["EN", "PCA", "DSW (Home)", "DSW (Community)", "RN"] as const;
 export const PAY_ROWS: [string, ...(number | null)[]][] = [
-  ["AM", 51, 46, 45, 46, 60],
+  ["AM", 55, 46, 45, 46, 60],
   ["PM", 56, 50, 45, 50, 65],
   ["NS", 60, 51, 50, null, 70],
   ["SAT", 77, 64, 55, 64, 90],
