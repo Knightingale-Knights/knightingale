@@ -9,6 +9,7 @@ import { auDate, isoDate } from "@/lib/invoicing/rules";
 import { sql } from "@/lib/db";
 import { env } from "@/lib/env";
 import { sendPlainEmail } from "@/lib/postmark";
+import { brandedHtml } from "@/lib/email/branded";
 import { readDocTitle } from "@/lib/compliance/docTitle";
 import type { ExpiryReading } from "@/lib/compliance/expiryReader";
 
@@ -24,16 +25,27 @@ function whyCheck(x: ExpiryReading | null) {
   return "No expiry date was found on it.";
 }
 
-/** Emails the office when a carer uploads a document, with whether it was accepted. Never holds up the upload. */
+/** Emails the office (cc the carer) when a carer uploads a document, with whether it was accepted. Never holds up the upload. */
 async function tellOffice(carer: string, fileId: string, label: string, outcome: string, detail: string) {
   if (!env.automationsLive) return;
   try {
-    const [u] = await sql<{ name: string | null }[]>`select nullif(trim(concat_ws(' ', first_name, last_name)), '') as name from app.users where id = ${carer}`;
+    const [u] = await sql<{ name: string | null; email: string | null }[]>`
+      select nullif(trim(concat_ws(' ', trim(first_name), trim(last_name))), '') as name, nullif(trim(email), '') as email from app.users where id = ${carer}`;
     const name = u?.name ?? "A carer";
+    const doc = `https://knightingale.com.au/files/${fileId}`;
+    const page = `https://knightingale.com.au/compliance/${carer}`;
     await sendPlainEmail({
       to: env.complianceAlertTo,
+      ...(u?.email ? { cc: u.email } : {}),
       subject: `${name} uploaded ${label}: ${outcome}`,
-      text: `${name} uploaded their ${label}.\n\nResult: ${outcome}\n${detail}\n\nDocument: https://knightingale.com.au/files/${fileId}\nCompliance page: https://knightingale.com.au/compliance/${carer}`,
+      text: `${name} uploaded their ${label}.\n\nResult: ${outcome}\n${detail}\n\nDocument: ${doc}\nCompliance page: ${page}`,
+      html: brandedHtml({
+        kind: "Compliance",
+        preview: `${name} uploaded their ${label}: ${outcome}.`,
+        rows: [["Carer", name], ["Document", label], ["Result", outcome]],
+        section: { heading: "Details", text: detail },
+        buttons: [{ label: "View document", href: doc }, { label: "Compliance page", href: page }],
+      }),
       attachments: [],
     });
   } catch (e) {

@@ -40,9 +40,9 @@ export function sendInvoiceEmail(o: {
   });
 }
 
-export function sendPlainEmail(o: { to: string; subject: string; text: string; attachments: Attachment[]; cc?: string; from?: string }) {
+export function sendPlainEmail(o: { to: string; subject: string; text: string; html?: string; attachments: Attachment[]; cc?: string; from?: string }) {
   return post("email", {
-    From: o.from ?? env.fromEmail, To: o.to, ...(o.cc ? { Cc: o.cc } : {}), Subject: o.subject, TextBody: o.text,
+    From: o.from ?? env.fromEmail, To: o.to, ...(o.cc ? { Cc: o.cc } : {}), Subject: o.subject, TextBody: o.text, ...(o.html ? { HtmlBody: o.html } : {}),
     Attachments: o.attachments, MessageStream: "outbound",
   });
 }
