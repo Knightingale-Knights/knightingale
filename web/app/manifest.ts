@@ -5,7 +5,9 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Knightingale",
     short_name: "Knightingale",
-    start_url: "/",
+    id: "/",
+    start_url: "/start",
+    scope: "/",
     display: "standalone",
     background_color: "#f0e2f7",
     theme_color: "#5f1b35",

@@ -1,15 +1,18 @@
 import { redirect } from "next/navigation";
 import { currentUser, homePath } from "@/lib/auth";
 import { sendMagicLink } from "./actions";
+import { CodeForm } from "./CodeForm";
 
-export default async function Login({ searchParams }: { searchParams: Promise<{ sent?: string; error?: string }> }) {
+export default async function Login({ searchParams }: { searchParams: Promise<{ sent?: string; email?: string; error?: string }> }) {
   const me = await currentUser();
   if (me) redirect(homePath(me.role));
   const sp = await searchParams;
   return (
     <main className="login">
       <h1 className="wordmark">knightingale</h1>
-      {sp.sent ? (
+      {sp.sent && sp.email ? (
+        <CodeForm email={sp.email} error={sp.error} />
+      ) : sp.sent ? (
         <p className="note">Check your email for a sign-in link.</p>
       ) : (
         <form action={sendMagicLink} className="stack">
@@ -17,7 +20,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
             Work email
             <input name="email" type="email" required autoComplete="email" />
           </label>
-          <button type="submit">Email me a sign-in link</button>
+          <button type="submit">Email me a sign-in code</button>
           {sp.error && <p className="error">{sp.error}</p>}
           <p className="hint">New to Knightingale? <a href="/join">Join us</a></p>
         </form>

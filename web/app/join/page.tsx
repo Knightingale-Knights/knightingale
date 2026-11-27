@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { currentUser, homePath } from "@/lib/auth";
 import { sendJoinLink } from "@/app/login/actions";
+import { CodeForm } from "@/app/login/CodeForm";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +17,8 @@ const DOCS = [
   "A Friendly Profile Pic",
 ];
 
-// Carer sign-up starts here: an email sign-in link, then the steps.
-export default async function Join({ searchParams }: { searchParams: Promise<{ sent?: string; error?: string }> }) {
+// Carer sign-up starts here: an emailed sign-in code (or link), then the steps.
+export default async function Join({ searchParams }: { searchParams: Promise<{ sent?: string; email?: string; error?: string }> }) {
   const me = await currentUser();
   if (me) redirect(me.role === "carer" && !me.approved ? "/join/details" : homePath(me.role));
   const sp = await searchParams;
@@ -25,7 +26,9 @@ export default async function Join({ searchParams }: { searchParams: Promise<{ s
     <main className="login">
       <h1 className="wordmark">knightingale</h1>
       <h2>Join our team of carers</h2>
-      {sp.sent ? (
+      {sp.sent && sp.email ? (
+        <CodeForm email={sp.email} join error={sp.error} />
+      ) : sp.sent ? (
         <p className="note">Check your email for a link to start your application.</p>
       ) : (
         <form action={sendJoinLink} className="stack">
