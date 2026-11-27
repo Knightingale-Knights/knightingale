@@ -28,10 +28,12 @@ export default async function CarerCompliance({ params, searchParams }: { params
   if (!u) notFound();
   const on = u.approved && u.active;
   const tab = tabOf(sp.tab);
-  const [docs, other] = await Promise.all([
+  const [main, other] = await Promise.all([
     carerDocs(carer, isoDate(new Date())),
     accountDocs(carer, ["insurance", "licence", "passport", "certificate", "ahpra", "covid", "resume"], isoDate(new Date())),
   ]);
+  // Every document in one list, A to Z.
+  const docs = [...main, ...other].sort((a, b) => a.def.label.localeCompare(b.def.label, "en", { sensitivity: "base" }));
   return (
     <div className="shell">
       <TopBar section="/carers" email={staff.email}><CarerTabs on="/compliance" /></TopBar>
@@ -63,10 +65,8 @@ export default async function CarerCompliance({ params, searchParams }: { params
           </form>
         </div>
         {on && u.upcoming > 0 && <p className="hint">{u.name} has {u.upcoming} upcoming shift{u.upcoming === 1 ? "" : "s"}. Reassign them in the roster before deactivating.</p>}
-        <DocList docs={docs} carer={carer} admin />
-        <h2>Other documents</h2>
         {u.no_insurance && <p className="hint">{u.name} said they don&apos;t have car insurance.</p>}
-        <DocList docs={other} carer={carer} admin />
+        <DocList docs={docs} carer={carer} admin />
         </>)}
       </main>
     </div>
